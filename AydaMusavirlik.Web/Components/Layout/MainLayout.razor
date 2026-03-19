@@ -1,5 +1,4 @@
 ﻿@inherits LayoutComponentBase
-@rendermode InteractiveServer
 @inject AuthService AuthService
 @inject NavigationManager Navigation
 
@@ -109,10 +108,10 @@ else
         }
     };
 
-    private async Task HandleLogout()
+    private void HandleLogout()
     {
-        await AuthService.LogoutAsync();
-        Navigation.NavigateTo("/login", forceLoad: true);
+        AuthService.LogoutAsync();
+        Navigation.NavigateTo("/login");
     }
 
     private string GetRoleText()

@@ -1,6 +1,5 @@
 @page "/login"
 @layout EmptyLayout
-@rendermode InteractiveServer
 @inject AuthService AuthService
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
@@ -152,6 +151,7 @@
         Username = username;
         Password = password;
         ErrorMessage = null;
+        StateHasChanged();
     }
 
     private async Task HandleLogin()
@@ -165,17 +165,18 @@
         IsLoading = true;
         ErrorMessage = null;
         LoginSuccess = false;
+        StateHasChanged();
 
         try
         {
-            await Task.Delay(200);
+            await Task.Delay(300);
             
             var result = await AuthService.LoginAsync(Username, Password);
 
             if (result.Success)
             {
                 LoginSuccess = true;
-                Snackbar.Add(result.Message ?? "Giriþ baþarýlý!", Severity.Success);
+                StateHasChanged();
                 await Task.Delay(500);
                 Navigation.NavigateTo("/");
             }
@@ -191,6 +192,7 @@
         finally
         {
             IsLoading = false;
+            StateHasChanged();
         }
     }
 }
