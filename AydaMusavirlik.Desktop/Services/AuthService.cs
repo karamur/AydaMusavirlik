@@ -3,61 +3,61 @@ namespace AydaMusavirlik.Desktop.Services;
 public interface IAuthService
 {
     Task<LoginResult> LoginAsync(string username, string password);
-    Task<bool> RegisterAsync(string username, string email, string fullName, string password);
     void Logout();
     bool IsAuthenticated { get; }
     string? CurrentUser { get; }
     string? CurrentUserFullName { get; }
+    string? CurrentUserRole { get; }
 }
 
 public class AuthService : IAuthService
 {
-    private readonly ApiClient _apiClient;
     private readonly AuthTokenStore _tokenStore;
 
-    public AuthService(ApiClient apiClient, AuthTokenStore tokenStore)
+    // Offline test kullanýcýlarý
+    private static readonly Dictionary<string, (string Password, string FullName, string Role)> _users = new()
     {
-        _apiClient = apiClient;
+        ["admin"] = ("admin", "Sistem Yöneticisi", "Admin"),
+        ["muhasebe"] = ("muhasebe123", "Ayþe Muhasebeci", "Accountant"),
+        ["yonetici"] = ("yonetici123", "Mehmet Yönetici", "Manager")
+    };
+
+    public AuthService(AuthTokenStore tokenStore)
+    {
         _tokenStore = tokenStore;
     }
 
     public bool IsAuthenticated => _tokenStore.IsAuthenticated;
     public string? CurrentUser => _tokenStore.Username;
     public string? CurrentUserFullName => _tokenStore.FullName;
+    public string? CurrentUserRole => _tokenStore.Role;
 
-    public async Task<LoginResult> LoginAsync(string username, string password)
+    public Task<LoginResult> LoginAsync(string username, string password)
     {
-        var response = await _apiClient.PostAsync<LoginResponse>("api/auth/login", new
+        // Offline doðrulama
+        if (_users.TryGetValue(username.ToLower(), out var user))
         {
-            Username = username,
-            Password = password
-        });
+            if (user.Password == password)
+            {
+                _tokenStore.Username = username;
+                _tokenStore.FullName = user.FullName;
+                _tokenStore.Role = user.Role;
+                _tokenStore.Token = Guid.NewGuid().ToString();
+                _tokenStore.ExpiresAt = DateTime.UtcNow.AddHours(8);
 
-        if (response.Success && response.Data != null)
-        {
-            _tokenStore.Token = response.Data.Token;
-            _tokenStore.Username = response.Data.Username;
-            _tokenStore.FullName = response.Data.FullName;
-            _tokenStore.Role = response.Data.Role;
-            _tokenStore.ExpiresAt = response.Data.ExpiresAt;
-
-            return new LoginResult { Success = true, FullName = response.Data.FullName };
+                return Task.FromResult(new LoginResult
+                {
+                    Success = true,
+                    FullName = user.FullName
+                });
+            }
         }
 
-        return new LoginResult { Success = false, Error = response.Error ?? "Giris basarisiz" };
-    }
-
-    public async Task<bool> RegisterAsync(string username, string email, string fullName, string password)
-    {
-        var response = await _apiClient.PostAsync<object>("api/auth/register", new
+        return Task.FromResult(new LoginResult
         {
-            Username = username,
-            Email = email,
-            FullName = fullName,
-            Password = password
+            Success = false,
+            Error = "Kullanýcý adý veya þifre hatalý!"
         });
-
-        return response.Success;
     }
 
     public void Logout()
@@ -71,13 +71,4 @@ public class LoginResult
     public bool Success { get; set; }
     public string? FullName { get; set; }
     public string? Error { get; set; }
-}
-
-public class LoginResponse
-{
-    public string Token { get; set; } = string.Empty;
-    public string Username { get; set; } = string.Empty;
-    public string FullName { get; set; } = string.Empty;
-    public string Role { get; set; } = string.Empty;
-    public DateTime ExpiresAt { get; set; }
 }

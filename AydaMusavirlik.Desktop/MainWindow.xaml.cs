@@ -1,13 +1,6 @@
-﻿using System.Text;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using AydaMusavirlik.Desktop.Services;
 using AydaMusavirlik.Desktop.Views;
 using AydaMusavirlik.Desktop.Views.Accounting;
@@ -35,35 +28,11 @@ public partial class MainWindow : Window
         Loaded += MainWindow_Loaded;
     }
 
-    private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
-        await CheckApiStatus();
-    }
-
-    private async Task CheckApiStatus()
-    {
-        try
-        {
-            using var client = new System.Net.Http.HttpClient();
-            client.Timeout = TimeSpan.FromSeconds(3);
-            var response = await client.GetAsync("http://localhost:5000/api/companies");
-            
-            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized || response.IsSuccessStatusCode)
-            {
-                apiStatusIndicator.Fill = new SolidColorBrush(Colors.LimeGreen);
-                txtApiStatus.Text = "API Bağlı";
-            }
-            else
-            {
-                apiStatusIndicator.Fill = new SolidColorBrush(Colors.Orange);
-                txtApiStatus.Text = "API Yanıt Yok";
-            }
-        }
-        catch
-        {
-            apiStatusIndicator.Fill = new SolidColorBrush(Colors.Red);
-            txtApiStatus.Text = "API Bağlantısı Yok";
-        }
+        // Offline mod - her zaman hazır
+        apiStatusIndicator.Fill = new SolidColorBrush(Colors.LimeGreen);
+        txtApiStatus.Text = "Hazır (Offline)";
     }
 
     private void Logout_Click(object sender, RoutedEventArgs e)

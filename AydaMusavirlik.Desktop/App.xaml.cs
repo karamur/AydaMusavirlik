@@ -1,5 +1,4 @@
-﻿using System.Net.Http;
-using System.Windows;
+﻿using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using AydaMusavirlik.Desktop.Services;
 using AydaMusavirlik.Desktop.Views;
@@ -18,38 +17,18 @@ public partial class App : Application
         ConfigureServices(services);
         Services = services.BuildServiceProvider();
 
-        // Önce Login penceresi aç
+        // Login penceresi aç
         var loginWindow = new LoginWindow();
         loginWindow.Show();
     }
 
     private void ConfigureServices(IServiceCollection services)
     {
-        // API Settings
-        var apiSettings = new ApiSettings
-        {
-            BaseUrl = "http://localhost:5000",
-            TimeoutSeconds = 30
-        };
-        services.AddSingleton(apiSettings);
-
         // Auth Token Store (Singleton - uygulamada tek instance)
         services.AddSingleton<AuthTokenStore>();
-
-        // HttpClient
-        services.AddHttpClient<ApiClient>(client =>
-        {
-            client.BaseAddress = new Uri(apiSettings.BaseUrl);
-            client.Timeout = TimeSpan.FromSeconds(apiSettings.TimeoutSeconds);
-            client.DefaultRequestHeaders.Add("Accept", "application/json");
-        });
-
-        // Services
+        
+        // Auth Service (Offline çalışır)
         services.AddSingleton<IAuthService, AuthService>();
-        services.AddTransient<ICompanyService, CompanyService>();
-        services.AddTransient<IEmployeeService, EmployeeService>();
-        services.AddTransient<IPayrollService, PayrollService>();
-        services.AddTransient<IAccountService, AccountService>();
     }
 
     public static T GetService<T>() where T : class

@@ -1,4 +1,3 @@
-using System.Net.Http;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -18,35 +17,12 @@ public partial class LoginWindow : Window
         Loaded += LoginWindow_Loaded;
     }
 
-    private async void LoginWindow_Loaded(object sender, RoutedEventArgs e)
+    private void LoginWindow_Loaded(object sender, RoutedEventArgs e)
     {
-        await CheckApiStatus();
-    }
-
-    private async Task CheckApiStatus()
-    {
-        try
-        {
-            using var client = new HttpClient();
-            client.Timeout = TimeSpan.FromSeconds(5);
-            var response = await client.GetAsync("http://localhost:5000/swagger/index.html");
-
-            if (response.IsSuccessStatusCode)
-            {
-                statusIndicator.Fill = new SolidColorBrush(Colors.Green);
-                txtStatus.Text = "Baðlý";
-            }
-            else
-            {
-                statusIndicator.Fill = new SolidColorBrush(Colors.Orange);
-                txtStatus.Text = "Yanýt alýnamadý";
-            }
-        }
-        catch
-        {
-            statusIndicator.Fill = new SolidColorBrush(Colors.Red);
-            txtStatus.Text = "Baðlantý yok";
-        }
+        // Offline mod - her zaman hazýr
+        statusIndicator.Fill = new SolidColorBrush(Colors.Green);
+        txtStatus.Text = "Hazýr (Offline Mod)";
+        txtUsername.Focus();
     }
 
     private async void BtnLogin_Click(object sender, RoutedEventArgs e)
@@ -93,7 +69,7 @@ public partial class LoginWindow : Window
         }
         catch (Exception ex)
         {
-            ShowError($"Baðlantý hatasý: {ex.Message}");
+            ShowError($"Hata: {ex.Message}");
         }
         finally
         {
