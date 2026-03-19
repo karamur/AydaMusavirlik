@@ -1,5 +1,6 @@
 @page "/login"
 @layout EmptyLayout
+@rendermode InteractiveServer
 @inject AuthService AuthService
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
@@ -17,30 +18,37 @@
         </MudCardHeader>
 
         <MudCardContent>
-            <MudTextField @bind-Value="_username"
+            <MudTextField @bind-Value="Username"
                           Label="Kullanýcý Adý"
                           Variant="Variant.Outlined"
                           Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Filled.Person"
                           Class="mb-4"
                           Immediate="true"
-                          Disabled="@_isLoading" />
+                          Disabled="@IsLoading" />
 
-            <MudTextField @bind-Value="_password"
+            <MudTextField @bind-Value="Password"
                           Label="Þifre"
                           Variant="Variant.Outlined"
-                          InputType="@_passwordInputType"
+                          InputType="@PasswordInputType"
                           Adornment="Adornment.End"
-                          AdornmentIcon="@_passwordIcon"
+                          AdornmentIcon="@PasswordIcon"
                           OnAdornmentClick="TogglePasswordVisibility"
                           Class="mb-4"
                           Immediate="true"
-                          Disabled="@_isLoading" />
+                          Disabled="@IsLoading" />
 
-            @if (!string.IsNullOrEmpty(_errorMessage))
+            @if (!string.IsNullOrEmpty(ErrorMessage))
             {
                 <MudAlert Severity="Severity.Error" Class="mb-4" Dense="true">
-                    @_errorMessage
+                    @ErrorMessage
+                </MudAlert>
+            }
+            
+            @if (LoginSuccess)
+            {
+                <MudAlert Severity="Severity.Success" Class="mb-4" Dense="true">
+                    Giriþ baþarýlý! Yönlendiriliyorsunuz...
                 </MudAlert>
             }
 
@@ -49,8 +57,8 @@
                        FullWidth="true"
                        Size="Size.Large"
                        OnClick="HandleLogin"
-                       Disabled="@(string.IsNullOrWhiteSpace(_username) || string.IsNullOrWhiteSpace(_password) || _isLoading)">
-                @if (_isLoading)
+                       Disabled="@(string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password) || IsLoading)">
+                @if (IsLoading)
                 {
                     <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
                     <span>Giriþ yapýlýyor...</span>
@@ -67,25 +75,25 @@
             <MudDivider Class="mb-4" />
             
             <MudText Typo="Typo.caption" Color="Color.Secondary" Align="Align.Center" Class="mb-2">
-                <strong>Test Kullanýcýlarý (týklayýn):</strong>
+                <strong>Test Kullanýcýlarý:</strong>
             </MudText>
             
-            <MudButtonGroup OverrideStyles="false" Class="d-flex justify-center flex-wrap gap-2 mb-2">
+            <MudStack Row="true" Justify="Justify.Center" Spacing="2" Class="mb-3">
                 <MudButton Variant="Variant.Outlined" Color="Color.Error" Size="Size.Small"
-                           OnClick='() => FillCredentials("admin", "admin")'>
+                           OnClick="@(() => SetCredentials("admin", "admin"))">
                     Admin
                 </MudButton>
                 <MudButton Variant="Variant.Outlined" Color="Color.Info" Size="Size.Small"
-                           OnClick='() => FillCredentials("muhasebe", "muhasebe123")'>
+                           OnClick="@(() => SetCredentials("muhasebe", "muhasebe123"))">
                     Muhasebeci
                 </MudButton>
                 <MudButton Variant="Variant.Outlined" Color="Color.Warning" Size="Size.Small"
-                           OnClick='() => FillCredentials("yonetici", "yonetici123")'>
+                           OnClick="@(() => SetCredentials("yonetici", "yonetici123"))">
                     Yönetici
                 </MudButton>
-            </MudButtonGroup>
+            </MudStack>
 
-            <MudSimpleTable Dense="true" Hover="true" Class="mb-2" Style="font-size: 0.8rem;">
+            <MudSimpleTable Dense="true" Hover="true" Style="font-size: 0.75rem;">
                 <thead>
                     <tr>
                         <th>Kullanýcý</th>
@@ -116,14 +124,15 @@
 </MudContainer>
 
 @code {
-    private bool _isLoading;
-    private string _username = string.Empty;
-    private string _password = string.Empty;
-    private string? _errorMessage;
-
-    private bool _passwordVisible;
-    private InputType _passwordInputType = InputType.Password;
-    private string _passwordIcon = Icons.Material.Filled.VisibilityOff;
+    private string Username { get; set; } = string.Empty;
+    private string Password { get; set; } = string.Empty;
+    private string? ErrorMessage { get; set; }
+    private bool IsLoading { get; set; }
+    private bool LoginSuccess { get; set; }
+    
+    private bool PasswordVisible { get; set; }
+    private InputType PasswordInputType => PasswordVisible ? InputType.Text : InputType.Password;
+    private string PasswordIcon => PasswordVisible ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff;
 
     protected override void OnInitialized()
     {
@@ -135,50 +144,53 @@
 
     private void TogglePasswordVisibility()
     {
-        _passwordVisible = !_passwordVisible;
-        _passwordInputType = _passwordVisible ? InputType.Text : InputType.Password;
-        _passwordIcon = _passwordVisible ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff;
+        PasswordVisible = !PasswordVisible;
     }
 
-    private void FillCredentials(string username, string password)
+    private void SetCredentials(string username, string password)
     {
-        _username = username;
-        _password = password;
-        _errorMessage = null;
+        Username = username;
+        Password = password;
+        ErrorMessage = null;
     }
 
     private async Task HandleLogin()
     {
-        if (string.IsNullOrWhiteSpace(_username) || string.IsNullOrWhiteSpace(_password))
+        if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
         {
-            _errorMessage = "Kullanýcý adý ve þifre gerekli";
+            ErrorMessage = "Kullanýcý adý ve þifre gerekli";
             return;
         }
 
-        _isLoading = true;
-        _errorMessage = null;
+        IsLoading = true;
+        ErrorMessage = null;
+        LoginSuccess = false;
 
         try
         {
-            var result = await AuthService.LoginAsync(_username, _password);
+            await Task.Delay(200);
+            
+            var result = await AuthService.LoginAsync(Username, Password);
 
             if (result.Success)
             {
+                LoginSuccess = true;
                 Snackbar.Add(result.Message ?? "Giriþ baþarýlý!", Severity.Success);
-                Navigation.NavigateTo("/", forceLoad: true);
+                await Task.Delay(500);
+                Navigation.NavigateTo("/");
             }
             else
             {
-                _errorMessage = result.ErrorMessage;
+                ErrorMessage = result.ErrorMessage;
             }
         }
-        catch
+        catch (Exception ex)
         {
-            _errorMessage = "Beklenmeyen bir hata oluþtu";
+            ErrorMessage = "Giriþ hatasý: " + ex.Message;
         }
         finally
         {
-            _isLoading = false;
+            IsLoading = false;
         }
     }
 }

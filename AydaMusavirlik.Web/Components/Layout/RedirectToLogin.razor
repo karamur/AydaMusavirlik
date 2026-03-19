@@ -1,8 +1,18 @@
 @inject NavigationManager Navigation
 
+<MudContainer Class="d-flex align-center justify-center" Style="height: 100vh;">
+    <MudStack AlignItems="AlignItems.Center" Spacing="4">
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" />
+        <MudText>Giriþ sayfasýna yönlendiriliyorsunuz...</MudText>
+    </MudStack>
+</MudContainer>
+
 @code {
-    protected override void OnInitialized()
+    protected override void OnAfterRender(bool firstRender)
     {
-        Navigation.NavigateTo("/login", forceLoad: true);
+        if (firstRender)
+        {
+            Navigation.NavigateTo("/login");
+        }
     }
 }
