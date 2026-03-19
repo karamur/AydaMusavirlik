@@ -79,14 +79,15 @@ else
                     <MudNavLink Href="/kullanicilar" Icon="@Icons.Material.Filled.People">
                         Kullanıcı Yönetimi
                     </MudNavLink>
+                    
+                    <MudNavGroup Title="Ayarlar" Icon="@Icons.Material.Filled.Settings" Expanded="false">
+                        <MudNavLink Href="/ayarlar/veritabani" Icon="@Icons.Material.Filled.Storage">Veritabanı</MudNavLink>
+                        <MudNavLink Href="/ayarlar/genel" Icon="@Icons.Material.Filled.Tune">Genel Ayarlar</MudNavLink>
+                    </MudNavGroup>
                 }
                 
                 <MudNavLink Href="/raporlar" Icon="@Icons.Material.Filled.Assessment">
                     Raporlar
-                </MudNavLink>
-                
-                <MudNavLink Href="/ayarlar" Icon="@Icons.Material.Filled.Settings">
-                    Ayarlar
                 </MudNavLink>
             </MudNavMenu>
         </MudDrawer>

@@ -1,0 +1,243 @@
+@page "/ayarlar/veritabani"
+@inject DatabaseService DatabaseService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<PageTitle>Veritabaný Yönetimi - AYDA Müþavirlik</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">
+    <MudIcon Icon="@Icons.Material.Filled.Storage" Class="mr-2" />
+    Veritabaný Yönetimi
+</MudText>
+
+<MudAlert Severity="Severity.Info" Class="mb-4">
+    <strong>Aktif Veritabaný:</strong> @(_activeConnection?.DisplayName ?? "Yükleniyor...")
+    <br/>
+    <small>Baðlantý: @(_activeConnection?.ServerDisplay ?? "-")</small>
+</MudAlert>
+
+<MudGrid>
+    <MudItem xs="12" md="8">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Veritabaný Baðlantýlarý</MudText>
+                </CardHeaderContent>
+                <CardHeaderActions>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" 
+                               StartIcon="@Icons.Material.Filled.Add"
+                               OnClick="OpenAddDialog">
+                        Yeni Baðlantý
+                    </MudButton>
+                </CardHeaderActions>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTable Items="_connections" Hover="true" Striped="true" Dense="true">
+                    <HeaderContent>
+                        <MudTh>Durum</MudTh>
+                        <MudTh>Ad</MudTh>
+                        <MudTh>Tür</MudTh>
+                        <MudTh>Sunucu</MudTh>
+                        <MudTh>Son Test</MudTh>
+                        <MudTh>Ýþlemler</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>
+                            @if (context.IsActive)
+                            {
+                                <MudChip T="string" Color="Color.Success" Size="Size.Small">Aktif</MudChip>
+                            }
+                            else
+                            {
+                                <MudChip T="string" Color="Color.Default" Size="Size.Small">Pasif</MudChip>
+                            }
+                        </MudTd>
+                        <MudTd>
+                            <MudText Typo="Typo.body2"><strong>@context.Name</strong></MudText>
+                        </MudTd>
+                        <MudTd>
+                            <MudChip T="string" Size="Size.Small" Color="@GetTypeColor(context.Type)">
+                                @context.Type
+                            </MudChip>
+                        </MudTd>
+                        <MudTd>
+                            <MudText Typo="Typo.caption">@context.ServerDisplay</MudText>
+                        </MudTd>
+                        <MudTd>
+                            @if (context.LastTestedAt.HasValue)
+                            {
+                                <MudTooltip Text="@context.LastTestMessage">
+                                    <MudIcon Icon="@(context.LastTestResult == true ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.Error)"
+                                             Color="@(context.LastTestResult == true ? Color.Success : Color.Error)"
+                                             Size="Size.Small" />
+                                </MudTooltip>
+                                <MudText Typo="Typo.caption" Class="ml-1">
+                                    @context.LastTestedAt.Value.ToString("dd.MM HH:mm")
+                                </MudText>
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">Test edilmedi</MudText>
+                            }
+                        </MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Filled.PlayArrow" 
+                                           Color="Color.Info" Size="Size.Small"
+                                           OnClick="@(() => TestConnection(context))"
+                                           Title="Test Et" />
+                            @if (!context.IsActive)
+                            {
+                                <MudIconButton Icon="@Icons.Material.Filled.CheckCircle" 
+                                               Color="Color.Success" Size="Size.Small"
+                                               OnClick="@(() => ActivateConnection(context.Id))"
+                                               Title="Aktif Et" />
+                            }
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" 
+                                           Color="Color.Warning" Size="Size.Small"
+                                           OnClick="@(() => EditConnection(context))"
+                                           Title="Düzenle" />
+                            @if (!context.IsActive && !context.IsDefault)
+                            {
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                                               Color="Color.Error" Size="Size.Small"
+                                               OnClick="@(() => DeleteConnection(context.Id))"
+                                               Title="Sil" />
+                            }
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" md="4">
+        <MudCard Class="mb-4">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Hýzlý Bilgi</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudList T="string" Dense="true">
+                    <MudListItem Icon="@Icons.Material.Filled.Info">
+                        <MudText Typo="Typo.body2">
+                            <strong>SQLite:</strong> Kurulum gerektirmez, dosya tabanlý
+                        </MudText>
+                    </MudListItem>
+                    <MudListItem Icon="@Icons.Material.Filled.Info">
+                        <MudText Typo="Typo.body2">
+                            <strong>PostgreSQL:</strong> Önerilen, yüksek performans
+                        </MudText>
+                    </MudListItem>
+                    <MudListItem Icon="@Icons.Material.Filled.Info">
+                        <MudText Typo="Typo.body2">
+                            <strong>SQL Server:</strong> Kurumsal ortamlar için
+                        </MudText>
+                    </MudListItem>
+                </MudList>
+            </MudCardContent>
+        </MudCard>
+
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Yedekleme</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary" 
+                           StartIcon="@Icons.Material.Filled.Backup" FullWidth="true" Class="mb-2">
+                    Veritabanýný Yedekle
+                </MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" 
+                           StartIcon="@Icons.Material.Filled.Restore" FullWidth="true">
+                    Yedekten Geri Yükle
+                </MudButton>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private List<DatabaseConnection> _connections = new();
+    private DatabaseConnection? _activeConnection;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        _connections = await DatabaseService.GetAllConnectionsAsync();
+        _activeConnection = await DatabaseService.GetActiveConnectionAsync();
+    }
+
+    private Color GetTypeColor(DatabaseType type) => type switch
+    {
+        DatabaseType.SQLite => Color.Info,
+        DatabaseType.PostgreSQL => Color.Primary,
+        DatabaseType.SqlServer => Color.Secondary,
+        DatabaseType.MySQL => Color.Warning,
+        _ => Color.Default
+    };
+
+    private async Task TestConnection(DatabaseConnection connection)
+    {
+        Snackbar.Add($"'{connection.Name}' test ediliyor...", Severity.Info);
+
+        var (success, message) = await DatabaseService.TestConnectionAsync(connection);
+
+        if (success)
+        {
+            Snackbar.Add(message, Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add(message, Severity.Error);
+        }
+
+        await LoadData();
+    }
+
+    private async Task ActivateConnection(int id)
+    {
+        var success = await DatabaseService.SetActiveConnectionAsync(id);
+
+        if (success)
+        {
+            Snackbar.Add("Veritabaný baðlantýsý aktif edildi. Uygulama yeniden baþlatýlmalý!", Severity.Warning);
+            await LoadData();
+        }
+        else
+        {
+            Snackbar.Add("Baðlantý aktif edilemedi. Önce baðlantýyý test edin.", Severity.Error);
+        }
+    }
+
+    private void OpenAddDialog()
+    {
+        Snackbar.Add("Yeni baðlantý ekleme dialog'u açýlacak", Severity.Info);
+    }
+
+    private void EditConnection(DatabaseConnection connection)
+    {
+        Snackbar.Add($"'{connection.Name}' düzenleniyor", Severity.Info);
+    }
+
+    private async Task DeleteConnection(int id)
+    {
+        var result = await DialogService.ShowMessageBox(
+            "Onay",
+            "Bu veritabaný baðlantýsýný silmek istediðinize emin misiniz?",
+            yesText: "Evet, Sil",
+            cancelText: "Ýptal");
+
+        if (result == true)
+        {
+            await DatabaseService.DeleteConnectionAsync(id);
+            Snackbar.Add("Baðlantý silindi", Severity.Success);
+            await LoadData();
+        }
+    }
+}

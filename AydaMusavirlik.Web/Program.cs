@@ -29,6 +29,7 @@ builder.Services.AddSingleton<CompanyService>();
 builder.Services.AddSingleton<AccountingService>();
 builder.Services.AddSingleton<FinancialAnalysisService>();
 builder.Services.AddSingleton<AppointmentService>();
+builder.Services.AddSingleton<DatabaseService>();
 
 var app = builder.Build();
 
