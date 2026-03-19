@@ -11,9 +11,9 @@ false
 TRACE;DEBUG;NET;NET9_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NET9_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WİNDOWS7_0_OR_GREATER
 D:\calisma\Claude-Code\AydaMusavirlik\AydaMusavirlik.Desktop\App.xaml
 10138589863
-22-2078937735
+
 2260088327
-233-853995471
+230-648608363
 MainWindow.xaml;Views\Accounting\AccountPlanView.xaml;Views\Accounting\TrialBalanceView.xaml;Views\Accounting\VoucherEntryView.xaml;Views\ArGe\ArGeProjectListView.xaml;Views\Companies\CompanyEditWindow.xaml;Views\Companies\CompanyListView.xaml;Views\LoginWindow.xaml;Views\Payroll\EmployeeListView.xaml;Views\Payroll\PayrollCalculationView.xaml;
 
 False
