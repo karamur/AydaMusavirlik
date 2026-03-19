@@ -1,0 +1,180 @@
+@page "/login"
+@layout EmptyLayout
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="d-flex align-center" Style="height: 100vh;">
+    <MudCard Elevation="4" Class="pa-4" Style="width: 100%;">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <div class="d-flex flex-column align-center mb-4">
+                    <MudIcon Icon="@Icons.Material.Filled.AccountBalance" Size="Size.Large" Color="Color.Primary" Class="mb-2" />
+                    <MudText Typo="Typo.h4" Color="Color.Primary">AYDA Müþavirlik</MudText>
+                    <MudText Typo="Typo.subtitle1" Color="Color.Secondary">Profesyonel Mali Müþavirlik Sistemi</MudText>
+                </div>
+            </CardHeaderContent>
+        </MudCardHeader>
+
+        <MudCardContent>
+            <MudForm @ref="_form" @bind-IsValid="@_formIsValid">
+                <MudTextField @bind-Value="_username"
+                              Label="Kullanýcý Adý"
+                              Variant="Variant.Outlined"
+                              Required="true"
+                              RequiredError="Kullanýcý adý gerekli"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Person"
+                              Class="mb-4"
+                              Disabled="@_isLoading" />
+
+                <MudTextField @bind-Value="_password"
+                              Label="Þifre"
+                              Variant="Variant.Outlined"
+                              InputType="@_passwordInputType"
+                              Required="true"
+                              RequiredError="Þifre gerekli"
+                              Adornment="Adornment.End"
+                              AdornmentIcon="@_passwordIcon"
+                              OnAdornmentClick="TogglePasswordVisibility"
+                              Class="mb-4"
+                              Disabled="@_isLoading" />
+
+                @if (!string.IsNullOrEmpty(_errorMessage))
+                {
+                    <MudAlert Severity="Severity.Error" Class="mb-4" Dense="true">
+                        @_errorMessage
+                    </MudAlert>
+                }
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           FullWidth="true"
+                           Size="Size.Large"
+                           OnClick="HandleLogin"
+                           Disabled="@(!_formIsValid || _isLoading)">
+                    @if (_isLoading)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                        <span>Giriþ yapýlýyor...</span>
+                    }
+                    else
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Login" Class="mr-2" />
+                        <span>Giriþ Yap</span>
+                    }
+                </MudButton>
+            </MudForm>
+        </MudCardContent>
+
+        <MudCardActions Class="d-flex flex-column pa-4">
+            <MudDivider Class="mb-4" />
+
+            <MudText Typo="Typo.caption" Color="Color.Secondary" Align="Align.Center" Class="mb-2">
+                <strong>Test Kullanýcýlarý:</strong>
+            </MudText>
+
+            <MudSimpleTable Dense="true" Hover="true" Class="mb-2">
+                <thead>
+                    <tr>
+                        <th>Kullanýcý</th>
+                        <th>Þifre</th>
+                        <th>Rol</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr @onclick='() => FillCredentials("admin", "admin")' style="cursor: pointer;">
+                        <td><code>admin</code></td>
+                        <td><code>admin</code></td>
+                        <td><MudChip T="string" Size="Size.Small" Color="Color.Error">Admin</MudChip></td>
+                    </tr>
+                    <tr @onclick='() => FillCredentials("muhasebe", "muhasebe123")' style="cursor: pointer;">
+                        <td><code>muhasebe</code></td>
+                        <td><code>muhasebe123</code></td>
+                        <td><MudChip T="string" Size="Size.Small" Color="Color.Info">Muhasebeci</MudChip></td>
+                    </tr>
+                    <tr @onclick='() => FillCredentials("yonetici", "yonetici123")' style="cursor: pointer;">
+                        <td><code>yonetici</code></td>
+                        <td><code>yonetici123</code></td>
+                        <td><MudChip T="string" Size="Size.Small" Color="Color.Warning">Yönetici</MudChip></td>
+                    </tr>
+                </tbody>
+            </MudSimpleTable>
+
+            <MudText Typo="Typo.caption" Color="Color.Tertiary" Align="Align.Center">
+                <em>Satýra týklayarak bilgileri otomatik doldurun</em>
+            </MudText>
+        </MudCardActions>
+    </MudCard>
+</MudContainer>
+
+@code {
+    private MudForm? _form;
+    private bool _formIsValid;
+    private bool _isLoading;
+    private string _username = string.Empty;
+    private string _password = string.Empty;
+    private string? _errorMessage;
+
+    private bool _passwordVisible;
+    private InputType _passwordInputType = InputType.Password;
+    private string _passwordIcon = Icons.Material.Filled.VisibilityOff;
+
+    protected override void OnInitialized()
+    {
+        if (AuthService.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/");
+        }
+    }
+
+    private void TogglePasswordVisibility()
+    {
+        _passwordVisible = !_passwordVisible;
+        _passwordInputType = _passwordVisible ? InputType.Text : InputType.Password;
+        _passwordIcon = _passwordVisible ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff;
+    }
+
+    private void FillCredentials(string username, string password)
+    {
+        _username = username;
+        _password = password;
+        _errorMessage = null;
+        StateHasChanged();
+    }
+
+    private async Task HandleLogin()
+    {
+        if (string.IsNullOrWhiteSpace(_username) || string.IsNullOrWhiteSpace(_password))
+        {
+            _errorMessage = "Kullanýcý adý ve þifre gerekli";
+            return;
+        }
+
+        _isLoading = true;
+        _errorMessage = null;
+
+        try
+        {
+            var result = await AuthService.LoginAsync(_username, _password);
+
+            if (result.Success)
+            {
+                Snackbar.Add(result.Message ?? "Giriþ baþarýlý!", Severity.Success);
+                Navigation.NavigateTo("/", forceLoad: true);
+            }
+            else
+            {
+                _errorMessage = result.ErrorMessage;
+            }
+        }
+        catch
+        {
+            _errorMessage = "Beklenmeyen bir hata oluþtu";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}

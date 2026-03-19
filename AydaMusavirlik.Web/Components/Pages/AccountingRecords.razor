@@ -1,0 +1,206 @@
+@page "/muhasebe/fisler"
+@inject AccountingService AccountingService
+@inject ISnackbar Snackbar
+
+<PageTitle>Muhasebe Fiþleri - AYDA Müþavirlik</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">
+    <MudIcon Icon="@Icons.Material.Filled.Receipt" Class="mr-2" />
+    Muhasebe Fiþleri
+</MudText>
+
+<MudCard Class="mb-4">
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudStack Row="true" Spacing="2">
+                <MudDatePicker @bind-Date="_startDate" Label="Baþlangýç" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                <MudDatePicker @bind-Date="_endDate" Label="Bitiþ" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="LoadRecords">Filtrele</MudButton>
+            </MudStack>
+        </CardHeaderContent>
+        <CardHeaderActions>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="OpenNewRecordDialog">
+                Yeni Fiþ
+            </MudButton>
+        </CardHeaderActions>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudTable Items="@_records" Hover="true" Dense="true" Loading="@_loading">
+            <HeaderContent>
+                <MudTh>Fiþ No</MudTh>
+                <MudTh>Tarih</MudTh>
+                <MudTh>Tür</MudTh>
+                <MudTh>Açýklama</MudTh>
+                <MudTh Style="text-align: right;">Borç</MudTh>
+                <MudTh Style="text-align: right;">Alacak</MudTh>
+                <MudTh>Durum</MudTh>
+                <MudTh>Ýþlemler</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>
+                    <MudText Typo="Typo.body2"><strong>@context.DocumentNumber</strong></MudText>
+                </MudTd>
+                <MudTd>@context.DocumentDate.ToString("dd.MM.yyyy")</MudTd>
+                <MudTd>
+                    <MudChip T="string" Size="Size.Small" Color="@GetRecordTypeColor(context.RecordType)">
+                        @GetRecordTypeName(context.RecordType)
+                    </MudChip>
+                </MudTd>
+                <MudTd>@context.Description</MudTd>
+                <MudTd Style="text-align: right;">
+                    <MudText Typo="Typo.body2" Color="Color.Info">@context.TotalDebit.ToString("N2") ?</MudText>
+                </MudTd>
+                <MudTd Style="text-align: right;">
+                    <MudText Typo="Typo.body2" Color="Color.Success">@context.TotalCredit.ToString("N2") ?</MudText>
+                </MudTd>
+                <MudTd>
+                    <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(context.Status)">
+                        @GetStatusName(context.Status)
+                    </MudChip>
+                </MudTd>
+                <MudTd>
+                    <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Title="Görüntüle" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Title="Düzenle" 
+                                   Disabled="@(context.Status == RecordStatus.Posted)" />
+                    @if (context.Status == RecordStatus.Draft)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Check" Size="Size.Small" Color="Color.Success" 
+                                       Title="Onayla" OnClick="@(() => ApproveRecord(context))" />
+                    }
+                </MudTd>
+            </RowTemplate>
+            <NoRecordsContent>
+                <MudText>Fiþ bulunamadý</MudText>
+            </NoRecordsContent>
+        </MudTable>
+    </MudCardContent>
+</MudCard>
+
+@* Özet Kartlarý *@
+<MudGrid>
+    <MudItem xs="12" sm="4">
+        <MudCard>
+            <MudCardContent Class="d-flex justify-space-between align-center">
+                <div>
+                    <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Toplam Borç</MudText>
+                    <MudText Typo="Typo.h5" Color="Color.Info">@_totalDebit.ToString("N2") ?</MudText>
+                </div>
+                <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Size="Size.Large" Color="Color.Info" />
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    <MudItem xs="12" sm="4">
+        <MudCard>
+            <MudCardContent Class="d-flex justify-space-between align-center">
+                <div>
+                    <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Toplam Alacak</MudText>
+                    <MudText Typo="Typo.h5" Color="Color.Success">@_totalCredit.ToString("N2") ?</MudText>
+                </div>
+                <MudIcon Icon="@Icons.Material.Filled.TrendingDown" Size="Size.Large" Color="Color.Success" />
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    <MudItem xs="12" sm="4">
+        <MudCard>
+            <MudCardContent Class="d-flex justify-space-between align-center">
+                <div>
+                    <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Fark</MudText>
+                    <MudText Typo="Typo.h5" Color="@(_totalDebit == _totalCredit ? Color.Success : Color.Error)">
+                        @((_totalDebit - _totalCredit).ToString("N2")) ?
+                    </MudText>
+                </div>
+                <MudIcon Icon="@Icons.Material.Filled.Balance" Size="Size.Large" 
+                         Color="@(_totalDebit == _totalCredit ? Color.Success : Color.Error)" />
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private List<AccountingRecord> _records = new();
+    private bool _loading = true;
+    private DateTime? _startDate = DateTime.Today.AddMonths(-1);
+    private DateTime? _endDate = DateTime.Today;
+    private decimal _totalDebit;
+    private decimal _totalCredit;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRecords();
+    }
+
+    private async Task LoadRecords()
+    {
+        _loading = true;
+        _records = await AccountingService.GetRecordsAsync(1, _startDate, _endDate);
+        _totalDebit = _records.Sum(r => r.TotalDebit);
+        _totalCredit = _records.Sum(r => r.TotalCredit);
+        _loading = false;
+    }
+
+    private void OpenNewRecordDialog()
+    {
+        Snackbar.Add("Yeni fiþ oluþturma ekraný açýlacak", Severity.Info);
+    }
+
+    private async Task ApproveRecord(AccountingRecord record)
+    {
+        record.Status = RecordStatus.Approved;
+        Snackbar.Add($"{record.DocumentNumber} numaralý fiþ onaylandý", Severity.Success);
+        await LoadRecords();
+    }
+
+    private Color GetRecordTypeColor(RecordType type)
+    {
+        return type switch
+        {
+            RecordType.MahsupFisi => Color.Primary,
+            RecordType.TahsilatFisi => Color.Success,
+            RecordType.OdemeFisi => Color.Warning,
+            RecordType.SatisFaturasi => Color.Info,
+            RecordType.AlisFaturasi => Color.Secondary,
+            _ => Color.Default
+        };
+    }
+
+    private string GetRecordTypeName(RecordType type)
+    {
+        return type switch
+        {
+            RecordType.MahsupFisi => "Mahsup",
+            RecordType.TahsilatFisi => "Tahsilat",
+            RecordType.OdemeFisi => "Ödeme",
+            RecordType.AcilisFisi => "Açýlýþ",
+            RecordType.KapanisFisi => "Kapanýþ",
+            RecordType.SatisFaturasi => "Satýþ Faturasý",
+            RecordType.AlisFaturasi => "Alýþ Faturasý",
+            RecordType.DekontFisi => "Dekont",
+            _ => "Diðer"
+        };
+    }
+
+    private Color GetStatusColor(RecordStatus status)
+    {
+        return status switch
+        {
+            RecordStatus.Draft => Color.Warning,
+            RecordStatus.Approved => Color.Info,
+            RecordStatus.Posted => Color.Success,
+            RecordStatus.Cancelled => Color.Error,
+            _ => Color.Default
+        };
+    }
+
+    private string GetStatusName(RecordStatus status)
+    {
+        return status switch
+        {
+            RecordStatus.Draft => "Taslak",
+            RecordStatus.Approved => "Onaylandý",
+            RecordStatus.Posted => "Ýþlendi",
+            RecordStatus.Cancelled => "Ýptal",
+            _ => "Bilinmiyor"
+        };
+    }
+}

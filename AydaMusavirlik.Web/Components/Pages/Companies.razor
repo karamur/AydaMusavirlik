@@ -1,0 +1,136 @@
+@page "/firmalar"
+@inject CompanyService CompanyService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<PageTitle>Firmalar - AYDA Müþavirlik</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">
+    <MudIcon Icon="@Icons.Material.Filled.Business" Class="mr-2" />
+    Firmalar
+</MudText>
+
+<MudCard Class="mb-4">
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudTextField @bind-Value="_searchText" Placeholder="Firma ara..." 
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
+                          Variant="Variant.Outlined" Margin="Margin.Dense" Class="mt-0"
+                          Immediate="true" OnKeyUp="HandleSearch" />
+        </CardHeaderContent>
+        <CardHeaderActions>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
+                       Href="/firmalar/yeni">
+                Yeni Firma
+            </MudButton>
+        </CardHeaderActions>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudTable Items="@_companies" Hover="true" Dense="true" Loading="@_loading">
+            <HeaderContent>
+                <MudTh>ID</MudTh>
+                <MudTh>Firma Adý</MudTh>
+                <MudTh>Vergi No</MudTh>
+                <MudTh>Vergi Dairesi</MudTh>
+                <MudTh>Þehir</MudTh>
+                <MudTh>Tür</MudTh>
+                <MudTh>Ýþlemler</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>@context.Id</MudTd>
+                <MudTd>
+                    <MudText Typo="Typo.body2"><strong>@context.Name</strong></MudText>
+                </MudTd>
+                <MudTd>@context.TaxNumber</MudTd>
+                <MudTd>@context.TaxOffice</MudTd>
+                <MudTd>@context.City</MudTd>
+                <MudTd>
+                    <MudChip T="string" Size="Size.Small" Color="@GetCompanyTypeColor(context.CompanyType)">
+                        @GetCompanyTypeName(context.CompanyType)
+                    </MudChip>
+                </MudTd>
+                <MudTd>
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" 
+                                   Href="@($"/firmalar/{context.Id}")" Title="Düzenle" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                                   OnClick="@(() => DeleteCompany(context))" Title="Sil" />
+                </MudTd>
+            </RowTemplate>
+            <NoRecordsContent>
+                <MudText>Firma bulunamadý</MudText>
+            </NoRecordsContent>
+        </MudTable>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    private List<Company> _companies = new();
+    private bool _loading = true;
+    private string _searchText = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCompanies();
+    }
+
+    private async Task LoadCompanies()
+    {
+        _loading = true;
+        _companies = await CompanyService.GetAllAsync();
+        _loading = false;
+    }
+
+    private async Task HandleSearch(KeyboardEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(_searchText))
+        {
+            await LoadCompanies();
+        }
+        else
+        {
+            _companies = await CompanyService.SearchAsync(_searchText);
+        }
+    }
+
+    private Color GetCompanyTypeColor(CompanyType type)
+    {
+        return type switch
+        {
+            CompanyType.AnonimSirket => Color.Primary,
+            CompanyType.LimitedSirketi => Color.Info,
+            CompanyType.SahisFirmasi => Color.Success,
+            _ => Color.Default
+        };
+    }
+
+    private string GetCompanyTypeName(CompanyType type)
+    {
+        return type switch
+        {
+            CompanyType.AnonimSirket => "A.Þ.",
+            CompanyType.LimitedSirketi => "Ltd. Þti.",
+            CompanyType.SahisFirmasi => "Þahýs",
+            CompanyType.KollektifSirket => "Kollektif",
+            CompanyType.KomanditSirket => "Komandit",
+            CompanyType.Kooperatif => "Kooperatif",
+            CompanyType.Dernek => "Dernek",
+            CompanyType.Vakif => "Vakýf",
+            _ => "Diðer"
+        };
+    }
+
+    private async Task DeleteCompany(Company company)
+    {
+        var confirmed = await DialogService.ShowMessageBox(
+            "Firma Sil",
+            $"{company.Name} firmasýný silmek istediðinizden emin misiniz?",
+            yesText: "Sil", cancelText: "Ýptal");
+
+        if (confirmed == true)
+        {
+            await CompanyService.DeleteAsync(company.Id);
+            await LoadCompanies();
+            Snackbar.Add("Firma silindi", Severity.Success);
+        }
+    }
+}

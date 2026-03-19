@@ -1,21 +1,42 @@
-using AydaMusavirlik.Web.Components;
+using AydaMusavirlik.Components;
+using AydaMusavirlik.Services;
+using MudBlazor.Services;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Serilog
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/ayda-.log", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
+// Add services
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// MudBlazor
+builder.Services.AddMudServices();
+
+// Application Services
+builder.Services.AddSingleton<UserService>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddSingleton<CompanyService>();
+builder.Services.AddSingleton<AccountingService>();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
 }
-app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
-app.UseAntiforgery();
 
+app.UseAntiforgery();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

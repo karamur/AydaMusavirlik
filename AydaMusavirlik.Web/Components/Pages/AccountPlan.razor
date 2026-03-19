@@ -1,0 +1,78 @@
+@page "/muhasebe/hesap-plani"
+@inject AccountingService AccountingService
+
+<PageTitle>Hesap Planý - AYDA Müþavirlik</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">
+    <MudIcon Icon="@Icons.Material.Filled.AccountTree" Class="mr-2" />
+    Hesap Planý
+</MudText>
+
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">Tek Düzen Hesap Planý</MudText>
+        </CardHeaderContent>
+        <CardHeaderActions>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add">
+                Yeni Hesap
+            </MudButton>
+        </CardHeaderActions>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudTable Items="@_accounts" Hover="true" Dense="true" Loading="@_loading">
+            <HeaderContent>
+                <MudTh>Hesap Kodu</MudTh>
+                <MudTh>Hesap Adý</MudTh>
+                <MudTh>Hesap Türü</MudTh>
+                <MudTh>Borç/Alacak</MudTh>
+                <MudTh Style="text-align: right;">Bakiye</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>
+                    <MudText Typo="Typo.body2"><strong>@context.Code</strong></MudText>
+                </MudTd>
+                <MudTd>@context.Name</MudTd>
+                <MudTd>
+                    <MudChip T="string" Size="Size.Small" Color="@GetAccountTypeColor(context.AccountType)">
+                        @context.AccountType
+                    </MudChip>
+                </MudTd>
+                <MudTd>
+                    <MudChip T="string" Size="Size.Small" Color="@(context.Nature == AccountNature.Debit ? Color.Info : Color.Success)">
+                        @(context.Nature == AccountNature.Debit ? "Borç" : "Alacak")
+                    </MudChip>
+                </MudTd>
+                <MudTd Style="text-align: right;">
+                    <MudText Typo="Typo.body2">@context.CurrentBalance.ToString("N2") ?</MudText>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    private List<Account> _accounts = new();
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _loading = true;
+        _accounts = await AccountingService.GetAccountsAsync(1);
+        _loading = false;
+    }
+
+    private Color GetAccountTypeColor(AccountType type)
+    {
+        return type switch
+        {
+            AccountType.Aktif => Color.Primary,
+            AccountType.Pasif => Color.Secondary,
+            AccountType.Gelir => Color.Success,
+            AccountType.Gider => Color.Error,
+            AccountType.Maliyet => Color.Warning,
+            AccountType.Nazim => Color.Info,
+            _ => Color.Default
+        };
+    }
+}

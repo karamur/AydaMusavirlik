@@ -1,23 +1,124 @@
 ﻿@inherits LayoutComponentBase
+@inject AuthService AuthService
+@inject NavigationManager Navigation
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<MudThemeProvider Theme="_theme" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+@if (!AuthService.IsAuthenticated)
+{
+    <RedirectToLogin />
+}
+else
+{
+    <MudLayout>
+        <MudAppBar Elevation="1">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
+                           OnClick="@(() => _drawerOpen = !_drawerOpen)" />
+            <MudText Typo="Typo.h5" Class="ml-3">AYDA Müşavirlik</MudText>
+            <MudSpacer />
+            
+            <MudChip T="string" Color="Color.Success" Size="Size.Small" Class="mr-4">
+                Enterprise
+            </MudChip>
+            
+            <MudMenu Icon="@Icons.Material.Filled.Person" Color="Color.Inherit">
+                <MudMenuItem>
+                    <div class="d-flex flex-column">
+                        <MudText Typo="Typo.subtitle1">@AuthService.CurrentUser?.FullName</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">@GetRoleText()</MudText>
+                    </div>
+                </MudMenuItem>
+                <MudDivider />
+                <MudMenuItem Href="/profil" Icon="@Icons.Material.Filled.AccountCircle">Profil</MudMenuItem>
+                @if (AuthService.IsAdmin)
+                {
+                    <MudMenuItem Href="/kullanicilar" Icon="@Icons.Material.Filled.People">Kullanıcı Yönetimi</MudMenuItem>
+                }
+                <MudDivider />
+                <MudMenuItem OnClick="HandleLogout" Icon="@Icons.Material.Filled.Logout">Çıkış Yap</MudMenuItem>
+            </MudMenu>
+        </MudAppBar>
+        
+        <MudDrawer @bind-Open="_drawerOpen" Elevation="2" Variant="DrawerVariant.Mini" 
+                   OpenMiniOnHover="true" ClipMode="DrawerClipMode.Always">
+            <MudDrawerHeader>
+                <MudText Typo="Typo.h6">Menü</MudText>
+            </MudDrawerHeader>
+            <MudNavMenu>
+                <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">
+                    Ana Sayfa
+                </MudNavLink>
+                
+                <MudNavGroup Title="Muhasebe" Icon="@Icons.Material.Filled.Calculate" Expanded="false">
+                    <MudNavLink Href="/muhasebe/hesap-plani" Icon="@Icons.Material.Filled.AccountTree">Hesap Planı</MudNavLink>
+                    <MudNavLink Href="/muhasebe/fisler" Icon="@Icons.Material.Filled.Receipt">Fişler</MudNavLink>
+                    <MudNavLink Href="/muhasebe/yevmiye" Icon="@Icons.Material.Filled.ListAlt">Yevmiye</MudNavLink>
+                    <MudNavLink Href="/muhasebe/mizan" Icon="@Icons.Material.Filled.TableChart">Mizan</MudNavLink>
+                </MudNavGroup>
+                
+                <MudNavGroup Title="Firmalar" Icon="@Icons.Material.Filled.Business" Expanded="false">
+                    <MudNavLink Href="/firmalar" Icon="@Icons.Material.Filled.List">Firma Listesi</MudNavLink>
+                    <MudNavLink Href="/firmalar/yeni" Icon="@Icons.Material.Filled.Add">Yeni Firma</MudNavLink>
+                </MudNavGroup>
+                
+                <MudDivider Class="my-2" />
+                
+                @if (AuthService.IsAdmin)
+                {
+                    <MudNavLink Href="/kullanicilar" Icon="@Icons.Material.Filled.People">
+                        Kullanıcı Yönetimi
+                    </MudNavLink>
+                }
+                
+                <MudNavLink Href="/raporlar" Icon="@Icons.Material.Filled.Assessment">
+                    Raporlar
+                </MudNavLink>
+                
+                <MudNavLink Href="/ayarlar" Icon="@Icons.Material.Filled.Settings">
+                    Ayarlar
+                </MudNavLink>
+            </MudNavMenu>
+        </MudDrawer>
+        
+        <MudMainContent>
+            <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+                @Body
+            </MudContainer>
+        </MudMainContent>
+    </MudLayout>
+}
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+@code {
+    private bool _drawerOpen = true;
 
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
-</div>
+    private readonly MudTheme _theme = new()
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#1976D2",
+            Secondary = "#424242",
+            AppbarBackground = "#1976D2"
+        }
+    };
+
+    private async Task HandleLogout()
+    {
+        await AuthService.LogoutAsync();
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+
+    private string GetRoleText()
+    {
+        return AuthService.CurrentUser?.Role switch
+        {
+            UserRole.Admin => "Sistem Yöneticisi",
+            UserRole.Manager => "Yönetici",
+            UserRole.Accountant => "Muhasebeci",
+            UserRole.Auditor => "Denetçi",
+            _ => "Kullanıcı"
+        };
+    }
+}
