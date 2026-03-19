@@ -1,0 +1,63 @@
+<Window x:Class="AydaMusavirlik.Desktop.Views.Companies.CompanyEditWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Firma Bilgileri" Height="550" Width="650"
+        WindowStartupLocation="CenterOwner"
+        Background="#252526">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" x:Name="txtTitle" Text="Yeni Firma" FontSize="24" Foreground="White" Margin="0,0,0,20"/>
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Firma Adi *" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                <TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3" x:Name="txtName" Background="#3E3E42" Foreground="White" Padding="8" Margin="0,0,0,10" BorderBrush="#555"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Vergi No" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                <TextBox Grid.Row="1" Grid.Column="1" x:Name="txtTaxNumber" Background="#3E3E42" Foreground="White" Padding="8" Margin="0,0,10,10" BorderBrush="#555"/>
+                <TextBlock Grid.Row="1" Grid.Column="2" Text="Vergi Dairesi" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                <TextBox Grid.Row="1" Grid.Column="3" x:Name="txtTaxOffice" Background="#3E3E42" Foreground="White" Padding="8" Margin="0,0,0,10" BorderBrush="#555"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Ticaret Sicil No" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                <TextBox Grid.Row="2" Grid.Column="1" x:Name="txtTradeRegistryNumber" Background="#3E3E42" Foreground="White" Padding="8" Margin="0,0,10,10" BorderBrush="#555"/>
+                <TextBlock Grid.Row="2" Grid.Column="2" Text="Mersis No" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                <TextBox Grid.Row="2" Grid.Column="3" x:Name="txtMersisNumber" Background="#3E3E42" Foreground="White" Padding="8" Margin="0,0,0,10" BorderBrush="#555"/>
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Adres" Foreground="White" VerticalAlignment="Top" Margin="0,0,10,10"/>
+                <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" x:Name="txtAddress" Background="#3E3E42" Foreground="White" Padding="8" Margin="0,0,0,10" BorderBrush="#555" TextWrapping="Wrap" AcceptsReturn="True" Height="60"/>
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="Sehir" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                <TextBox Grid.Row="4" Grid.Column="1" x:Name="txtCity" Background="#3E3E42" Foreground="White" Padding="8" Margin="0,0,10,10" BorderBrush="#555"/>
+                <TextBlock Grid.Row="4" Grid.Column="2" Text="Ilce" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                <TextBox Grid.Row="4" Grid.Column="3" x:Name="txtDistrict" Background="#3E3E42" Foreground="White" Padding="8" Margin="0,0,0,10" BorderBrush="#555"/>
+                <TextBlock Grid.Row="5" Grid.Column="0" Text="Telefon" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                <TextBox Grid.Row="5" Grid.Column="1" x:Name="txtPhone" Background="#3E3E42" Foreground="White" Padding="8" Margin="0,0,10,10" BorderBrush="#555"/>
+                <TextBlock Grid.Row="5" Grid.Column="2" Text="E-posta" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                <TextBox Grid.Row="5" Grid.Column="3" x:Name="txtEmail" Background="#3E3E42" Foreground="White" Padding="8" Margin="0,0,0,10" BorderBrush="#555"/>
+                <TextBlock Grid.Row="6" Grid.Column="0" Text="Sermaye" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                <TextBox Grid.Row="6" Grid.Column="1" x:Name="txtCapital" Background="#3E3E42" Foreground="White" Padding="8" Margin="0,0,10,10" BorderBrush="#555"/>
+                <TextBlock Grid.Row="7" Grid.Column="0" Text="Notlar" Foreground="White" VerticalAlignment="Top" Margin="0,0,10,10"/>
+                <TextBox Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="3" x:Name="txtNotes" Background="#3E3E42" Foreground="White" Padding="8" Margin="0,0,0,10" BorderBrush="#555" TextWrapping="Wrap" AcceptsReturn="True" Height="60"/>
+            </Grid>
+        </ScrollViewer>
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button Content="Kaydet" Click="Kaydet_Click" Background="#007ACC" Foreground="White" Padding="20,10" Margin="5,0" FontSize="14" BorderThickness="0" Cursor="Hand"/>
+            <Button Content="Iptal" Click="Iptal_Click" Background="#3E3E42" Foreground="White" Padding="20,10" Margin="5,0" FontSize="14" BorderThickness="1" BorderBrush="#555" Cursor="Hand"/>
+        </StackPanel>
+    </Grid>
+</Window>

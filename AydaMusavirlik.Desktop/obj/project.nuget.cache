@@ -1,18 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "rkIHSVuXKnk=",
+  "dgSpecHash": "M/SRCv2Ss2g=",
   "success": true,
   "projectFilePath": "D:\\calisma\\Claude-Code\\AydaMusavirlik\\AydaMusavirlik.Desktop\\AydaMusavirlik.Desktop.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\muratk\\.nuget\\packages\\communitytoolkit.mvvm\\8.4.0\\communitytoolkit.mvvm.8.4.0.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\materialdesigncolors\\5.3.1\\materialdesigncolors.5.3.1.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\materialdesignthemes\\5.3.1\\materialdesignthemes.5.3.1.nupkg.sha512",
-    "C:\\Users\\muratk\\.nuget\\packages\\microsoft.entityframeworkcore\\9.0.1\\microsoft.entityframeworkcore.9.0.1.nupkg.sha512",
-    "C:\\Users\\muratk\\.nuget\\packages\\microsoft.entityframeworkcore.abstractions\\9.0.1\\microsoft.entityframeworkcore.abstractions.9.0.1.nupkg.sha512",
-    "C:\\Users\\muratk\\.nuget\\packages\\microsoft.entityframeworkcore.analyzers\\9.0.1\\microsoft.entityframeworkcore.analyzers.9.0.1.nupkg.sha512",
-    "C:\\Users\\muratk\\.nuget\\packages\\microsoft.entityframeworkcore.relational\\9.0.1\\microsoft.entityframeworkcore.relational.9.0.1.nupkg.sha512",
-    "C:\\Users\\muratk\\.nuget\\packages\\microsoft.extensions.caching.abstractions\\9.0.1\\microsoft.extensions.caching.abstractions.9.0.1.nupkg.sha512",
-    "C:\\Users\\muratk\\.nuget\\packages\\microsoft.extensions.caching.memory\\9.0.1\\microsoft.extensions.caching.memory.9.0.1.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\microsoft.extensions.configuration\\9.0.14\\microsoft.extensions.configuration.9.0.14.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\9.0.14\\microsoft.extensions.configuration.abstractions.9.0.14.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\microsoft.extensions.configuration.binder\\9.0.14\\microsoft.extensions.configuration.binder.9.0.14.nupkg.sha512",
@@ -30,6 +24,7 @@
     "C:\\Users\\muratk\\.nuget\\packages\\microsoft.extensions.filesystemglobbing\\9.0.14\\microsoft.extensions.filesystemglobbing.9.0.14.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\microsoft.extensions.hosting\\9.0.14\\microsoft.extensions.hosting.9.0.14.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\microsoft.extensions.hosting.abstractions\\9.0.14\\microsoft.extensions.hosting.abstractions.9.0.14.nupkg.sha512",
+    "C:\\Users\\muratk\\.nuget\\packages\\microsoft.extensions.http\\9.0.14\\microsoft.extensions.http.9.0.14.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\microsoft.extensions.logging\\9.0.14\\microsoft.extensions.logging.9.0.14.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\9.0.14\\microsoft.extensions.logging.abstractions.9.0.14.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\microsoft.extensions.logging.configuration\\9.0.14\\microsoft.extensions.logging.configuration.9.0.14.nupkg.sha512",
@@ -41,9 +36,8 @@
     "C:\\Users\\muratk\\.nuget\\packages\\microsoft.extensions.options.configurationextensions\\9.0.14\\microsoft.extensions.options.configurationextensions.9.0.14.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\microsoft.extensions.primitives\\9.0.14\\microsoft.extensions.primitives.9.0.14.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\microsoft.xaml.behaviors.wpf\\1.1.77\\microsoft.xaml.behaviors.wpf.1.1.77.nupkg.sha512",
-    "C:\\Users\\muratk\\.nuget\\packages\\npgsql\\9.0.3\\npgsql.9.0.3.nupkg.sha512",
-    "C:\\Users\\muratk\\.nuget\\packages\\npgsql.entityframeworkcore.postgresql\\9.0.4\\npgsql.entityframeworkcore.postgresql.9.0.4.nupkg.sha512",
-    "C:\\Users\\muratk\\.nuget\\packages\\system.diagnostics.eventlog\\9.0.14\\system.diagnostics.eventlog.9.0.14.nupkg.sha512"
+    "C:\\Users\\muratk\\.nuget\\packages\\system.diagnostics.eventlog\\9.0.14\\system.diagnostics.eventlog.9.0.14.nupkg.sha512",
+    "C:\\Users\\muratk\\.nuget\\packages\\system.text.json\\9.0.14\\system.text.json.9.0.14.nupkg.sha512"
   ],
   "logs": []
 }

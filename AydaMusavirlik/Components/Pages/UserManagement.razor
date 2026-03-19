@@ -1,0 +1,238 @@
+@page "/kullanicilar"
+@inject UserService UserService
+@inject AuthenticationService AuthService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<PageTitle>Kullanýcý Yönetimi - AYDA Müþavirlik</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">
+    <MudIcon Icon="@Icons.Material.Filled.People" Class="mr-2" />
+    Kullanýcý Yönetimi
+</MudText>
+
+@if (!AuthService.IsAdmin)
+{
+    <MudAlert Severity="Severity.Warning">
+        Bu sayfaya eriþim yetkiniz bulunmamaktadýr.
+    </MudAlert>
+}
+else
+{
+    <MudCard Class="mb-4">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Kullanýcýlar</MudText>
+            </CardHeaderContent>
+            <CardHeaderActions>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="OpenCreateDialog">
+                    Yeni Kullanýcý
+                </MudButton>
+            </CardHeaderActions>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudTable Items="@_users" Hover="true" Dense="true" Loading="@_loading">
+                <HeaderContent>
+                    <MudTh>ID</MudTh>
+                    <MudTh>Kullanýcý Adý</MudTh>
+                    <MudTh>Ad Soyad</MudTh>
+                    <MudTh>E-posta</MudTh>
+                    <MudTh>Rol</MudTh>
+                    <MudTh>Son Giriþ</MudTh>
+                    <MudTh>Durum</MudTh>
+                    <MudTh>Ýþlemler</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>@context.Id</MudTd>
+                    <MudTd>
+                        <MudText Typo="Typo.body2"><strong>@context.Username</strong></MudText>
+                    </MudTd>
+                    <MudTd>@context.FullName</MudTd>
+                    <MudTd>@context.Email</MudTd>
+                    <MudTd>
+                        <MudChip T="string" Size="Size.Small" Color="@GetRoleColor(context.Role)">
+                            @GetRoleName(context.Role)
+                        </MudChip>
+                    </MudTd>
+                    <MudTd>
+                        @if (context.LastLoginAt.HasValue)
+                        {
+                            @context.LastLoginAt.Value.ToString("dd.MM.yyyy HH:mm")
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">Hiç giriþ yapýlmadý</MudText>
+                        }
+                    </MudTd>
+                    <MudTd>
+                        @if (context.IsLocked)
+                        {
+                            <MudChip T="string" Size="Size.Small" Color="Color.Error">Kilitli</MudChip>
+                        }
+                        else if (context.IsActive)
+                        {
+                            <MudChip T="string" Size="Size.Small" Color="Color.Success">Aktif</MudChip>
+                        }
+                        else
+                        {
+                            <MudChip T="string" Size="Size.Small" Color="Color.Default">Pasif</MudChip>
+                        }
+                    </MudTd>
+                    <MudTd>
+                        @if (context.IsLocked)
+                        {
+                            <MudIconButton Icon="@Icons.Material.Filled.LockOpen" Size="Size.Small" Color="Color.Warning"
+                                           OnClick="@(() => UnlockUser(context))" Title="Kilidi Aç" />
+                        }
+                        <MudIconButton Icon="@Icons.Material.Filled.VpnKey" Size="Size.Small" Color="Color.Info"
+                                       OnClick="@(() => ResetPassword(context))" Title="Þifre Sýfýrla" />
+                        @if (context.Id != AuthService.CurrentUser?.Id)
+                        {
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                                           OnClick="@(() => DeleteUser(context))" Title="Sil" />
+                        }
+                    </MudTd>
+                </RowTemplate>
+                <NoRecordsContent>
+                    <MudText>Kullanýcý bulunamadý</MudText>
+                </NoRecordsContent>
+            </MudTable>
+        </MudCardContent>
+    </MudCard>
+
+    @* Test Kullanýcýlarý Bilgisi *@
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Test Kullanýcýlarý</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudSimpleTable Dense="true">
+                <thead>
+                    <tr>
+                        <th>Kullanýcý Adý</th>
+                        <th>Þifre</th>
+                        <th>Rol</th>
+                        <th>Açýklama</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>admin</code></td>
+                        <td><code>admin</code></td>
+                        <td><MudChip T="string" Size="Size.Small" Color="Color.Error">Admin</MudChip></td>
+                        <td>Tüm modüllere ve yönetim panellerine tam eriþim</td>
+                    </tr>
+                    <tr>
+                        <td><code>muhasebe</code></td>
+                        <td><code>muhasebe123</code></td>
+                        <td><MudChip T="string" Size="Size.Small" Color="Color.Info">Muhasebeci</MudChip></td>
+                        <td>Muhasebe modülüne eriþim</td>
+                    </tr>
+                    <tr>
+                        <td><code>yonetici</code></td>
+                        <td><code>yonetici123</code></td>
+                        <td><MudChip T="string" Size="Size.Small" Color="Color.Warning">Yönetici</MudChip></td>
+                        <td>Raporlara ve yönetim iþlevlerine eriþim</td>
+                    </tr>
+                    <tr>
+                        <td><code>denetci</code></td>
+                        <td><code>denetci123</code></td>
+                        <td><MudChip T="string" Size="Size.Small" Color="Color.Secondary">Denetçi</MudChip></td>
+                        <td>Denetim modülüne eriþim</td>
+                    </tr>
+                </tbody>
+            </MudSimpleTable>
+        </MudCardContent>
+    </MudCard>
+}
+
+@code {
+    private List<User> _users = new();
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        _loading = true;
+        _users = await UserService.GetAllAsync();
+        _loading = false;
+    }
+
+    private Color GetRoleColor(UserRole role)
+    {
+        return role switch
+        {
+            UserRole.Admin => Color.Error,
+            UserRole.Manager => Color.Warning,
+            UserRole.Accountant => Color.Info,
+            UserRole.Auditor => Color.Secondary,
+            _ => Color.Default
+        };
+    }
+
+    private string GetRoleName(UserRole role)
+    {
+        return role switch
+        {
+            UserRole.Admin => "Admin",
+            UserRole.Manager => "Yönetici",
+            UserRole.Accountant => "Muhasebeci",
+            UserRole.Auditor => "Denetçi",
+            _ => "Kullanýcý"
+        };
+    }
+
+    private async Task OpenCreateDialog()
+    {
+        var parameters = new DialogParameters<UserDialog>
+        {
+            { x => x.User, new User() },
+            { x => x.IsEdit, false }
+        };
+
+        var dialog = await DialogService.ShowAsync<UserDialog>("Yeni Kullanýcý", parameters);
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+            await LoadUsers();
+            Snackbar.Add("Kullanýcý oluþturuldu", Severity.Success);
+        }
+    }
+
+    private async Task UnlockUser(User user)
+    {
+        await UserService.UnlockAccountAsync(user.Id);
+        await LoadUsers();
+        Snackbar.Add($"{user.Username} kullanýcýsýnýn kilidi açýldý", Severity.Success);
+    }
+
+    private async Task ResetPassword(User user)
+    {
+        var newPassword = "123456";
+        await UserService.ResetPasswordAsync(user.Id, newPassword);
+        Snackbar.Add($"{user.Username} kullanýcýsýnýn þifresi '123456' olarak sýfýrlandý", Severity.Info);
+    }
+
+    private async Task DeleteUser(User user)
+    {
+        var confirmed = await DialogService.ShowMessageBox(
+            "Kullanýcý Sil",
+            $"{user.FullName} kullanýcýsýný silmek istediðinizden emin misiniz?",
+            yesText: "Sil", cancelText: "Ýptal");
+
+        if (confirmed == true)
+        {
+            await UserService.DeleteAsync(user.Id);
+            await LoadUsers();
+            Snackbar.Add("Kullanýcý silindi", Severity.Success);
+        }
+    }
+}

@@ -1,22 +1,25 @@
+
+using AydaMusavirlik.Core.Models.Common;
+
 namespace AydaMusavirlik.Core.Models.Payroll;
 
 /// <summary>
-/// Bordro kaydý
+/// Bordro kaydi
 /// </summary>
-public class PayrollRecord : Common.BaseEntity
+public class PayrollRecord : BaseEntity
 {
     public int EmployeeId { get; set; }
     public int Year { get; set; }
     public int Month { get; set; }
     public DateTime PaymentDate { get; set; }
 
-    // Çalýþma süreleri
+    // Calisma sureleri
     public int WorkingDays { get; set; }
     public int OvertimeHours { get; set; }
     public int WeekendOvertimeHours { get; set; }
     public int HolidayOvertimeHours { get; set; }
 
-    // Brüt kazançlar
+    // Brut kazanclar
     public decimal GrossSalary { get; set; }
     public decimal OvertimePay { get; set; }
     public decimal BonusPay { get; set; }
@@ -24,23 +27,23 @@ public class PayrollRecord : Common.BaseEntity
     public decimal TotalGross { get; set; }
 
     // SGK kesintileri
-    public decimal SgkEmployeeShare { get; set; }           // SGK iþçi payý (%14)
-    public decimal SgkUnemploymentEmployee { get; set; }    // Ýþsizlik sigortasý iþçi (%1)
-    public decimal SgkEmployerShare { get; set; }           // SGK iþveren payý (%20.5)
-    public decimal SgkUnemploymentEmployer { get; set; }    // Ýþsizlik sigortasý iþveren (%2)
+    public decimal SgkWorkerDeduction { get; set; }         // SGK isci payi (%14)
+    public decimal SgkUnemploymentWorker { get; set; }      // Issizlik sigortasi isci (%1)
+    public decimal SgkEmployerCost { get; set; }            // SGK isveren payi (%20.5)
+    public decimal SgkUnemploymentEmployer { get; set; }    // Issizlik sigortasi isveren (%2)
 
     // Vergi kesintileri
-    public decimal IncomeTaxBase { get; set; }              // Gelir vergisi matrahý
+    public decimal IncomeTaxBase { get; set; }              // Gelir vergisi matrahi
     public decimal IncomeTax { get; set; }                  // Gelir vergisi
     public decimal StampTax { get; set; }                   // Damga vergisi
-    public decimal MinimumWageExemption { get; set; }       // Asgari ücret istisnasý
+    public decimal MinimumWageExemption { get; set; }       // Asgari ucret istisnasi
 
-    // Net ücret
+    // Net ucret
     public decimal TotalDeductions { get; set; }            // Toplam kesinti
-    public decimal NetSalary { get; set; }                  // Net maaþ
+    public decimal NetSalary { get; set; }                  // Net maas
 
     // Maliyet
-    public decimal TotalEmployerCost { get; set; }          // Toplam iþveren maliyeti
+    public decimal TotalEmployerCost { get; set; }          // Toplam isveren maliyeti
 
     public PayrollStatus Status { get; set; } = PayrollStatus.Draft;
     public string? Notes { get; set; }

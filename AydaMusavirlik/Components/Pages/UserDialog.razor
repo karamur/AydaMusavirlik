@@ -1,0 +1,92 @@
+@inject UserService UserService
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@(IsEdit ? Icons.Material.Filled.Edit : Icons.Material.Filled.Add)" Class="mr-2" />
+            @(IsEdit ? "Kullanýcý Düzenle" : "Yeni Kullanýcý")
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudForm @ref="_form" @bind-IsValid="@_formIsValid">
+            <MudGrid>
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="User.Username" Label="Kullanýcý Adý" 
+                                  Required="true" RequiredError="Kullanýcý adý gerekli"
+                                  Disabled="@IsEdit" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudSelect @bind-Value="User.Role" Label="Rol" Required="true">
+                        <MudSelectItem Value="UserRole.Admin">Admin</MudSelectItem>
+                        <MudSelectItem Value="UserRole.Manager">Yönetici</MudSelectItem>
+                        <MudSelectItem Value="UserRole.Accountant">Muhasebeci</MudSelectItem>
+                        <MudSelectItem Value="UserRole.Auditor">Denetçi</MudSelectItem>
+                        <MudSelectItem Value="UserRole.User">Kullanýcý</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="User.FirstName" Label="Ad" 
+                                  Required="true" RequiredError="Ad gerekli" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="User.LastName" Label="Soyad" 
+                                  Required="true" RequiredError="Soyad gerekli" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="User.Email" Label="E-posta" 
+                                  InputType="InputType.Email" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="User.Phone" Label="Telefon" />
+                </MudItem>
+                @if (!IsEdit)
+                {
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_password" Label="Þifre" 
+                                      InputType="InputType.Password"
+                                      Required="true" RequiredError="Þifre gerekli" />
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Ýptal</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" 
+                   OnClick="Submit" Disabled="@(!_formIsValid)">
+            @(IsEdit ? "Güncelle" : "Oluþtur")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter]
+    public User User { get; set; } = new();
+
+    [Parameter]
+    public bool IsEdit { get; set; }
+
+    private MudForm? _form;
+    private bool _formIsValid;
+    private string _password = string.Empty;
+
+    private async Task Submit()
+    {
+        if (!IsEdit)
+        {
+            User.PasswordHash = AuthenticationService.HashPassword(_password);
+            await UserService.CreateAsync(User);
+        }
+        else
+        {
+            await UserService.UpdateAsync(User);
+        }
+
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

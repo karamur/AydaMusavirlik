@@ -1,0 +1,73 @@
+<UserControl x:Class="AydaMusavirlik.Desktop.Views.Accounting.TrialBalanceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1000"
+             Background="#252526">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Text="Mizan" FontSize="24" Foreground="White" Margin="0,0,0,20"/>
+        <Border Grid.Row="1" Background="#2D2D30" BorderBrush="#555" BorderThickness="1" Padding="15" Margin="0,0,0,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Baslangic:" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <DatePicker Grid.Column="1" x:Name="dpStartDate" Background="#3E3E42" Padding="8" BorderBrush="#555" Margin="0,0,20,0"/>
+                <TextBlock Grid.Column="2" Text="Bitis:" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <DatePicker Grid.Column="3" x:Name="dpEndDate" Background="#3E3E42" Padding="8" BorderBrush="#555" Margin="0,0,20,0"/>
+                <Button Grid.Column="5" Content="Mizan Olustur" Click="MizanOlustur_Click" Background="#007ACC" Foreground="White" Padding="15,8" FontSize="14" BorderThickness="0" Cursor="Hand"/>
+            </Grid>
+        </Border>
+        <DataGrid Grid.Row="2" x:Name="dgTrialBalance" AutoGenerateColumns="False" Background="#2D2D30" Foreground="White" BorderThickness="1" BorderBrush="#555" RowBackground="#2D2D30" AlternatingRowBackground="#333337" GridLinesVisibility="All" HorizontalGridLinesBrush="#444" VerticalGridLinesBrush="#444" HeadersVisibility="Column" IsReadOnly="True" CanUserAddRows="False">
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="#007ACC"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="Padding" Value="10,8"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Hesap Kodu" Binding="{Binding AccountCode}" Width="120"/>
+                <DataGridTextColumn Header="Hesap Adi" Binding="{Binding AccountName}" Width="*"/>
+                <DataGridTextColumn Header="Borc Toplami" Binding="{Binding TotalDebit, StringFormat=N2}" Width="140"/>
+                <DataGridTextColumn Header="Alacak Toplami" Binding="{Binding TotalCredit, StringFormat=N2}" Width="140"/>
+                <DataGridTextColumn Header="Borc Bakiye" Binding="{Binding DebitBalance, StringFormat=N2}" Width="130"/>
+                <DataGridTextColumn Header="Alacak Bakiye" Binding="{Binding CreditBalance, StringFormat=N2}" Width="130"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Border Grid.Row="3" Background="#2D2D30" BorderBrush="#555" BorderThickness="1" Padding="15" Margin="0,15,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="Borc Toplami: " Foreground="Gray" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="txtGrandTotalDebit" Text="0,00 TL" Foreground="#4FC3F7" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Margin="0,0,30,0"/>
+                    <TextBlock Text="Alacak Toplami: " Foreground="Gray" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="txtGrandTotalCredit" Text="0,00 TL" Foreground="#FF8A65" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Margin="0,0,30,0"/>
+                    <TextBlock Text="Fark: " Foreground="Gray" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="txtGrandDifference" Text="0,00 TL" Foreground="#4CAF50" FontWeight="Bold" FontSize="16" VerticalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Content="Excel Aktar" Click="ExcelAktar_Click" Background="#217346" Foreground="White" Padding="15,8" Margin="5,0" FontSize="14" BorderThickness="0" Cursor="Hand"/>
+                    <Button Content="Yazdir" Click="Yazdir_Click" Background="#3E3E42" Foreground="White" Padding="15,8" Margin="5,0" FontSize="14" BorderThickness="1" BorderBrush="#555" Cursor="Hand"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

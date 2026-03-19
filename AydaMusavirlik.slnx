@@ -1,5 +1,7 @@
 <Solution>
+  <Project Path="AydaMusavirlik.Api/AydaMusavirlik.Api.csproj" />
   <Project Path="AydaMusavirlik.Core/AydaMusavirlik.Core.csproj" />
   <Project Path="AydaMusavirlik.Data/AydaMusavirlik.Data.csproj" />
   <Project Path="AydaMusavirlik.Desktop/AydaMusavirlik.Desktop.csproj" />
+  <Project Path="AydaMusavirlik.Web/AydaMusavirlik.Web.csproj" />
 </Solution>

@@ -1,0 +1,96 @@
+<UserControl x:Class="AydaMusavirlik.Desktop.Views.Accounting.AccountPlanView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="900"
+             Background="#252526">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Text="Hesap Plani" FontSize="24" Foreground="White" Margin="0,0,0,20"/>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,15">
+            <Button Content="Yeni Hesap" Click="YeniHesap_Click" Background="#007ACC" Foreground="White" Padding="15,8" Margin="0,0,10,0" FontSize="14" BorderThickness="0" Cursor="Hand"/>
+            <Button Content="Standart Plan Yukle" Click="StandartPlanYukle_Click" Background="#3E3E42" Foreground="White" Padding="15,8" Margin="0,0,10,0" FontSize="14" BorderThickness="1" BorderBrush="#555" Cursor="Hand"/>
+            <TextBox x:Name="txtSearch" Width="250" Background="#3E3E42" Foreground="White" Padding="10,8" FontSize="14" BorderBrush="#555" BorderThickness="1"/>
+        </StackPanel>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="400"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Border Grid.Column="0" Background="#2D2D30" BorderBrush="#555" BorderThickness="1" Margin="0,0,10,0">
+                <TreeView x:Name="tvAccounts" Background="Transparent" BorderThickness="0" Foreground="White" Padding="10">
+                    <TreeViewItem Header="1 - DONEN VARLIKLAR" IsExpanded="True">
+                        <TreeViewItem Header="10 - HAZIR DEGERLER" IsExpanded="True">
+                            <TreeViewItem Header="100 - KASA"/>
+                            <TreeViewItem Header="101 - ALINAN CEKLER"/>
+                            <TreeViewItem Header="102 - BANKALAR"/>
+                        </TreeViewItem>
+                        <TreeViewItem Header="12 - TICARI ALACAKLAR">
+                            <TreeViewItem Header="120 - ALICILAR"/>
+                            <TreeViewItem Header="121 - ALACAK SENETLERI"/>
+                        </TreeViewItem>
+                    </TreeViewItem>
+                    <TreeViewItem Header="2 - DURAN VARLIKLAR">
+                        <TreeViewItem Header="25 - MADDI DURAN VARLIKLAR">
+                            <TreeViewItem Header="254 - TASITLAR"/>
+                            <TreeViewItem Header="255 - DEMIRBASLAR"/>
+                        </TreeViewItem>
+                    </TreeViewItem>
+                    <TreeViewItem Header="3 - KISA VADELI YABANCI KAYNAKLAR">
+                        <TreeViewItem Header="32 - TICARI BORCLAR">
+                            <TreeViewItem Header="320 - SATICILAR"/>
+                        </TreeViewItem>
+                    </TreeViewItem>
+                    <TreeViewItem Header="5 - OZKAYNAKLAR">
+                        <TreeViewItem Header="50 - ODENMIS SERMAYE">
+                            <TreeViewItem Header="500 - SERMAYE"/>
+                        </TreeViewItem>
+                    </TreeViewItem>
+                    <TreeViewItem Header="6 - GELIR TABLOSU HESAPLARI">
+                        <TreeViewItem Header="60 - BRUT SATISLAR">
+                            <TreeViewItem Header="600 - YURTICI SATISLAR"/>
+                        </TreeViewItem>
+                    </TreeViewItem>
+                </TreeView>
+            </Border>
+            <Border Grid.Column="1" Background="#2D2D30" BorderBrush="#555" BorderThickness="1" Padding="20">
+                <StackPanel>
+                    <TextBlock Text="Hesap Detayi" FontSize="18" Foreground="White" Margin="0,0,0,20"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Hesap Kodu:" Foreground="Gray" Margin="0,0,0,10"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" x:Name="txtAccountCode" Text="100" Foreground="White" FontWeight="Bold" Margin="0,0,0,10"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Hesap Adi:" Foreground="Gray" Margin="0,0,0,10"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" x:Name="txtAccountName" Text="KASA" Foreground="White" Margin="0,0,0,10"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Borc Toplami:" Foreground="Gray" Margin="0,0,0,10"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" x:Name="txtDebitTotal" Text="125.450,00 TL" Foreground="#4FC3F7" Margin="0,0,0,10"/>
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Alacak Toplami:" Foreground="Gray" Margin="0,0,0,10"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" x:Name="txtCreditTotal" Text="98.200,00 TL" Foreground="#FF8A65" Margin="0,0,0,10"/>
+                    </Grid>
+                    <Separator Background="#555" Margin="0,20"/>
+                    <TextBlock Text="Bakiye: 27.250,00 TL" FontSize="20" Foreground="#4CAF50" FontWeight="Bold"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,30,0,0">
+                        <Button Content="Duzenle" Background="#007ACC" Foreground="White" Padding="15,8" Margin="0,0,10,0" BorderThickness="0" Cursor="Hand"/>
+                        <Button Content="Hesap Ekstresi" Background="#3E3E42" Foreground="White" Padding="15,8" Margin="0,0,10,0" BorderThickness="1" BorderBrush="#555" Cursor="Hand"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

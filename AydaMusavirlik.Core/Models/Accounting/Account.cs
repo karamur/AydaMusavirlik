@@ -1,10 +1,13 @@
+using AydaMusavirlik.Core.Models.Common;
+
 namespace AydaMusavirlik.Core.Models.Accounting;
 
 /// <summary>
 /// Muhasebe hesabý (Hesap Planý)
 /// </summary>
-public class Account : Common.BaseEntity
+public class Account : SoftDeleteEntity
 {
+    public int CompanyId { get; set; }
     public string Code { get; set; } = string.Empty;           // Hesap kodu (100, 101, 102...)
     public string Name { get; set; } = string.Empty;           // Hesap adý
     public int? ParentId { get; set; }                         // Üst hesap
@@ -18,6 +21,7 @@ public class Account : Common.BaseEntity
     public string? Notes { get; set; }
 
     // Navigation
+    public virtual Company Company { get; set; } = null!;
     public virtual Account? Parent { get; set; }
     public virtual ICollection<Account> Children { get; set; } = new List<Account>();
     public virtual ICollection<AccountingEntry> Entries { get; set; } = new List<AccountingEntry>();

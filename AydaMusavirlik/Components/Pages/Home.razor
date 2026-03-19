@@ -1,0 +1,183 @@
+@page "/"
+@inject ModuleService ModuleService
+@inject LicenseService LicenseService
+@inject AuthenticationService AuthService
+
+<PageTitle>Ana Sayfa - AYDA Müþavirlik</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">
+    <MudIcon Icon="@Icons.Material.Filled.Dashboard" Class="mr-2" />
+    Hoþ Geldiniz, @AuthService.CurrentUser?.FirstName!
+</MudText>
+
+<MudGrid>
+    @* Kullanýcý Bilgisi *@
+    <MudItem xs="12" md="4">
+        <MudCard Elevation="2">
+            <MudCardHeader>
+                <CardHeaderAvatar>
+                    <MudAvatar Color="Color.Primary" Size="Size.Large">
+                        @AuthService.CurrentUser?.FirstName?.Substring(0, 1)@AuthService.CurrentUser?.LastName?.Substring(0, 1)
+                    </MudAvatar>
+                </CardHeaderAvatar>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">@AuthService.CurrentUser?.FullName</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">@GetRoleText()</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudText Typo="Typo.body2">
+                    <MudIcon Icon="@Icons.Material.Filled.Email" Size="Size.Small" Class="mr-1" />
+                    @AuthService.CurrentUser?.Email
+                </MudText>
+                <MudText Typo="Typo.body2" Class="mt-2">
+                    <MudIcon Icon="@Icons.Material.Filled.AccessTime" Size="Size.Small" Class="mr-1" />
+                    Son Giriþ: @(AuthService.CurrentUser?.LastLoginAt?.ToString("dd.MM.yyyy HH:mm") ?? "Ýlk giriþ")
+                </MudText>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    @* Lisans Bilgisi *@
+    <MudItem xs="12" md="4">
+        <MudCard Elevation="2">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.Key" Class="mr-2" />
+                        Lisans Durumu
+                    </MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                @{
+                    var license = LicenseService.GetCurrentLicense();
+                }
+                <MudChip T="string" Color="@GetLicenseColor(license.Type)" Class="mb-2">
+                    @license.Type.GetDisplayName()
+                </MudChip>
+                <MudText Typo="Typo.body2">
+                    <strong>Müþteri:</strong> @license.CustomerName
+                </MudText>
+                <MudText Typo="Typo.body2">
+                    <strong>Þirket:</strong> @license.CompanyName
+                </MudText>
+                <MudText Typo="Typo.body2">
+                    <strong>Geçerlilik:</strong> @license.ExpirationDate?.ToString("dd.MM.yyyy")
+                </MudText>
+                <MudText Typo="Typo.body2">
+                    <strong>Kalan:</strong> @LicenseService.GetRemainingDays() gün
+                </MudText>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    @* Modül Özeti *@
+    <MudItem xs="12" md="4">
+        <MudCard Elevation="2">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.Extension" Class="mr-2" />
+                        Aktif Modüller
+                    </MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                @foreach (var module in ModuleService.GetLicensedModules().Take(5))
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Primary" Class="ma-1">
+                        @module.ModuleName
+                    </MudChip>
+                }
+                <MudText Typo="Typo.body2" Class="mt-2">
+                    Toplam: @ModuleService.GetLicensedModules().Count modül aktif
+                </MudText>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+<MudText Typo="Typo.h5" Class="mt-6 mb-4">Modüller</MudText>
+
+<MudGrid>
+    @foreach (var module in ModuleService.GetLicensedModules())
+    {
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Elevation="2" Class="cursor-pointer" @onclick="() => NavigateToModule(module)">
+                <MudCardHeader>
+                    <CardHeaderAvatar>
+                        <MudAvatar Color="Color.Primary">
+                            <MudIcon Icon="@GetModuleIcon(module.Icon)" />
+                        </MudAvatar>
+                    </CardHeaderAvatar>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">@module.ModuleName</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">v@module.Version</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudText Typo="Typo.body2">@module.Description</MudText>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Variant="Variant.Text" Color="Color.Primary" 
+                               Href="@module.MenuItems.FirstOrDefault()?.Route">
+                        Aç
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    }
+</MudGrid>
+
+@code {
+    [Inject] private NavigationManager Navigation { get; set; } = null!;
+
+    private string GetRoleText()
+    {
+        return AuthService.CurrentUser?.Role switch
+        {
+            UserRole.Admin => "Sistem Yöneticisi",
+            UserRole.Manager => "Yönetici",
+            UserRole.Accountant => "Muhasebeci",
+            UserRole.Auditor => "Denetçi",
+            _ => "Kullanýcý"
+        };
+    }
+
+    private Color GetLicenseColor(LicenseType type)
+    {
+        return type switch
+        {
+            LicenseType.Trial => Color.Warning,
+            LicenseType.Basic => Color.Info,
+            LicenseType.Standard => Color.Success,
+            LicenseType.Professional => Color.Primary,
+            LicenseType.Enterprise => Color.Secondary,
+            _ => Color.Default
+        };
+    }
+
+    private string GetModuleIcon(string iconName)
+    {
+        return iconName switch
+        {
+            "Calculator" => Icons.Material.Filled.Calculate,
+            "Users" => Icons.Material.Filled.People,
+            "Search" => Icons.Material.Filled.Search,
+            "BarChart" => Icons.Material.Filled.BarChart,
+            "Lightbulb" => Icons.Material.Filled.Lightbulb,
+            "Building" => Icons.Material.Filled.Business,
+            _ => Icons.Material.Filled.Circle
+        };
+    }
+
+    private void NavigateToModule(ModuleInfo module)
+    {
+        var firstRoute = module.MenuItems.FirstOrDefault()?.Route;
+        if (!string.IsNullOrEmpty(firstRoute))
+        {
+            Navigation.NavigateTo(firstRoute);
+        }
+    }
+}

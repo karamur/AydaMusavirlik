@@ -1,0 +1,61 @@
+<UserControl x:Class="AydaMusavirlik.Desktop.Views.Companies.CompanyListView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="900"
+             Background="#252526">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Text="Firma Listesi" FontSize="24" Foreground="White" Margin="0,0,0,20"/>
+        <Grid Grid.Row="1" Margin="0,0,0,15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="txtSearch" Grid.Column="0" Background="#3E3E42" Foreground="White" Padding="10,8" FontSize="14" BorderBrush="#555" BorderThickness="1"/>
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <Button Content="Yeni Firma" Click="YeniFirma_Click" Background="#007ACC" Foreground="White" Padding="15,8" Margin="5,0" FontSize="14" BorderThickness="0" Cursor="Hand"/>
+                <Button Content="Yenile" Click="Yenile_Click" Background="#3E3E42" Foreground="White" Padding="15,8" Margin="5,0" FontSize="14" BorderThickness="1" BorderBrush="#555" Cursor="Hand"/>
+            </StackPanel>
+        </Grid>
+        <DataGrid Grid.Row="2" x:Name="dgCompanies" AutoGenerateColumns="False" Background="#2D2D30" Foreground="White" BorderThickness="1" BorderBrush="#555" RowBackground="#2D2D30" AlternatingRowBackground="#333337" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#444" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow" IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False">
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="#007ACC"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="Padding" Value="10,8"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Firma Adi" Binding="{Binding Name}" Width="*"/>
+                <DataGridTextColumn Header="Vergi No" Binding="{Binding TaxNumber}" Width="120"/>
+                <DataGridTextColumn Header="Vergi Dairesi" Binding="{Binding TaxOffice}" Width="150"/>
+                <DataGridTextColumn Header="Sehir" Binding="{Binding City}" Width="100"/>
+                <DataGridTextColumn Header="Telefon" Binding="{Binding Phone}" Width="130"/>
+                <DataGridTemplateColumn Header="Islemler" Width="150">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="Duzenle" Click="Duzenle_Click" Background="Transparent" Foreground="White" BorderThickness="0" Padding="5" Cursor="Hand"/>
+                                <Button Content="Sec" Click="Sec_Click" Background="Transparent" Foreground="LightGreen" BorderThickness="0" Padding="5" Cursor="Hand"/>
+                                <Button Content="Sil" Click="Sil_Click" Background="Transparent" Foreground="Red" BorderThickness="0" Padding="5" Cursor="Hand"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,10,0,0">
+            <TextBlock x:Name="txtRecordCount" Text="Toplam: 0 kayit" Foreground="Gray" VerticalAlignment="Center"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

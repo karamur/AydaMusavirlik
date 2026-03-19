@@ -1,0 +1,104 @@
+<UserControl x:Class="AydaMusavirlik.Desktop.Views.Payroll.PayrollCalculationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1000"
+             Background="#252526">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Text="Bordro Hesaplama" FontSize="24" Foreground="White" Margin="0,0,0,20"/>
+        <Border Grid.Row="1" Background="#2D2D30" BorderBrush="#555" BorderThickness="1" Padding="15" Margin="0,0,0,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Yil:" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <ComboBox Grid.Column="1" x:Name="cmbYear" Background="#3E3E42" Foreground="White" Padding="8" BorderBrush="#555" Margin="0,0,20,0">
+                    <ComboBoxItem Content="2024" IsSelected="True"/>
+                    <ComboBoxItem Content="2023"/>
+                </ComboBox>
+                <TextBlock Grid.Column="2" Text="Ay:" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <ComboBox Grid.Column="3" x:Name="cmbMonth" Background="#3E3E42" Foreground="White" Padding="8" BorderBrush="#555">
+                    <ComboBoxItem Content="Ocak"/>
+                    <ComboBoxItem Content="Subat"/>
+                    <ComboBoxItem Content="Mart" IsSelected="True"/>
+                    <ComboBoxItem Content="Nisan"/>
+                    <ComboBoxItem Content="Mayis"/>
+                    <ComboBoxItem Content="Haziran"/>
+                    <ComboBoxItem Content="Temmuz"/>
+                    <ComboBoxItem Content="Agustos"/>
+                    <ComboBoxItem Content="Eylul"/>
+                    <ComboBoxItem Content="Ekim"/>
+                    <ComboBoxItem Content="Kasim"/>
+                    <ComboBoxItem Content="Aralik"/>
+                </ComboBox>
+                <StackPanel Grid.Column="5" Orientation="Horizontal">
+                    <Button Content="Tumunu Hesapla" Click="TumunuHesapla_Click" Background="#007ACC" Foreground="White" Padding="15,8" Margin="5,0" FontSize="14" BorderThickness="0" Cursor="Hand"/>
+                    <Button Content="SGK Bildirge" Click="SgkBildirge_Click" Background="#3E3E42" Foreground="White" Padding="15,8" Margin="5,0" FontSize="14" BorderThickness="1" BorderBrush="#555" Cursor="Hand"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        <DataGrid Grid.Row="2" x:Name="dgPayrolls" AutoGenerateColumns="False" Background="#2D2D30" Foreground="White" BorderThickness="1" BorderBrush="#555" RowBackground="#2D2D30" AlternatingRowBackground="#333337" GridLinesVisibility="All" HorizontalGridLinesBrush="#444" VerticalGridLinesBrush="#444" HeadersVisibility="Column" IsReadOnly="True" CanUserAddRows="False">
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="#007ACC"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="Padding" Value="8,6"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                    <Setter Property="FontSize" Value="12"/>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Sicil" Binding="{Binding EmployeeNumber}" Width="50"/>
+                <DataGridTextColumn Header="Ad Soyad" Binding="{Binding FullName}" Width="150"/>
+                <DataGridTextColumn Header="Brut Maas" Binding="{Binding GrossSalary, StringFormat=N2}" Width="100"/>
+                <DataGridTextColumn Header="SGK Isci" Binding="{Binding SgkWorker, StringFormat=N2}" Width="80"/>
+                <DataGridTextColumn Header="Issizlik" Binding="{Binding UnemploymentWorker, StringFormat=N2}" Width="80"/>
+                <DataGridTextColumn Header="Gelir Vergisi" Binding="{Binding IncomeTax, StringFormat=N2}" Width="90"/>
+                <DataGridTextColumn Header="Damga V." Binding="{Binding StampTax, StringFormat=N2}" Width="80"/>
+                <DataGridTextColumn Header="Kesintiler" Binding="{Binding TotalDeductions, StringFormat=N2}" Width="90"/>
+                <DataGridTextColumn Header="Net Maas" Binding="{Binding NetSalary, StringFormat=N2}" Width="100"/>
+                <DataGridTextColumn Header="SGK Isveren" Binding="{Binding SgkEmployer, StringFormat=N2}" Width="90"/>
+                <DataGridTextColumn Header="Toplam Maliyet" Binding="{Binding TotalCost, StringFormat=N2}" Width="110"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Border Grid.Row="3" Background="#2D2D30" BorderBrush="#555" BorderThickness="1" Padding="15" Margin="0,15,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <WrapPanel Grid.Column="0" Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,30,0">
+                        <TextBlock Text="Toplam Brut: " Foreground="Gray" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="txtTotalGross" Text="0,00 TL" Foreground="White" FontWeight="Bold" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,30,0">
+                        <TextBlock Text="Toplam Net: " Foreground="Gray" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="txtTotalNet" Text="0,00 TL" Foreground="#4CAF50" FontWeight="Bold" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Toplam Maliyet: " Foreground="Gray" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="txtTotalCost" Text="0,00 TL" Foreground="#E91E63" FontWeight="Bold" FontSize="16" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </WrapPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Content="Excel Aktar" Click="ExcelAktar_Click" Background="#217346" Foreground="White" Padding="15,8" Margin="5,0" FontSize="14" BorderThickness="0" Cursor="Hand"/>
+                    <Button Content="Bordro Yazdir" Click="BordroYazdir_Click" Background="#3E3E42" Foreground="White" Padding="15,8" Margin="5,0" FontSize="14" BorderThickness="1" BorderBrush="#555" Cursor="Hand"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

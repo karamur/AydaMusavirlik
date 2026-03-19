@@ -5,8 +5,268 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AydaMusavirlik.Desktop"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Ayda Müşavirlik - Muhasebe ve Danışmanlık Yönetim Sistemi" 
+        Height="700" Width="1200"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized">
+    
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
+        <!-- Ana Menü -->
+        <Menu Grid.Row="0" Background="#2D2D30" Foreground="White" FontSize="14">
+            <Menu.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <DockPanel HorizontalAlignment="Stretch"/>
+                </ItemsPanelTemplate>
+            </Menu.ItemsPanel>
+            
+            <!-- Dosya Menüsü -->
+            <MenuItem Header="_Dosya" Foreground="White">
+                <MenuItem Header="_Yeni Firma" Click="YeniFirma_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="📁" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Firma Seç" Click="FirmaSec_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="🔍" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator/>
+                <MenuItem Header="_Yedekle" Click="Yedekle_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="💾" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Geri Yükle" Click="GeriYukle_Click"/>
+                <Separator/>
+                <MenuItem Header="_Çıkış" Click="Cikis_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="🚪" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+
+            <!-- Muhasebe Menüsü -->
+            <MenuItem Header="_Muhasebe" Foreground="White">
+                <MenuItem Header="_Hesap Planı" Click="HesapPlani_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="📋" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Fiş Girişi" Click="FisGirisi_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="📝" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Fiş Listesi" Click="FisListesi_Click"/>
+                <Separator/>
+                <MenuItem Header="_Mizan" Click="Mizan_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="📊" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Defterler">
+                    <MenuItem Header="Yevmiye Defteri" Click="YevmiyeDefteri_Click"/>
+                    <MenuItem Header="Kebir Defteri" Click="KebirDefteri_Click"/>
+                    <MenuItem Header="Envanter Defteri" Click="EnvanterDefteri_Click"/>
+                </MenuItem>
+                <Separator/>
+                <MenuItem Header="_Dönem İşlemleri">
+                    <MenuItem Header="Dönem Açılışı" Click="DonemAcilisi_Click"/>
+                    <MenuItem Header="Dönem Kapanışı" Click="DonemKapanisi_Click"/>
+                </MenuItem>
+            </MenuItem>
+
+            <!-- Bordro Menüsü -->
+            <MenuItem Header="_Bordro" Foreground="White">
+                <MenuItem Header="_Personel Kartları" Click="PersonelKartlari_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="👥" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Bordro Hesaplama" Click="BordroHesaplama_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="💰" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Bordro Listesi" Click="BordroListesi_Click"/>
+                <Separator/>
+                <MenuItem Header="_İzin Takibi" Click="IzinTakibi_Click"/>
+                <MenuItem Header="_SGK Bildirgeleri" Click="SgkBildirgeleri_Click"/>
+                <MenuItem Header="_Muhtasar Beyanname" Click="MuhtasarBeyanname_Click"/>
+            </MenuItem>
+
+            <!-- AR-GE Menüsü -->
+            <MenuItem Header="_AR-GE" Foreground="White">
+                <MenuItem Header="_Proje Tanımları" Click="ArgeProjeTanimlari_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="🔬" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_AR-GE Personeli" Click="ArgePersoneli_Click"/>
+                <MenuItem Header="_Gider Takibi" Click="ArgeGiderTakibi_Click"/>
+                <Separator/>
+                <MenuItem Header="_Raporlar">
+                    <MenuItem Header="Proje Bazlı Rapor" Click="ArgeProjeBazliRapor_Click"/>
+                    <MenuItem Header="Personel Bazlı Rapor" Click="ArgePersonelBazliRapor_Click"/>
+                    <MenuItem Header="Teşvik Hesaplama" Click="ArgeTesvikHesaplama_Click"/>
+                </MenuItem>
+            </MenuItem>
+
+            <!-- Şirket Kuruluş Menüsü -->
+            <MenuItem Header="_Şirket Kuruluş" Foreground="White">
+                <MenuItem Header="_Yeni Başvuru" Click="SirketKurulusYeniBaşvuru_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="🏢" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Başvuru Listesi" Click="SirketKurulusBasvuruListesi_Click"/>
+                <MenuItem Header="_Ana Sözleşme Hazırla" Click="AnaSozlesmeHazirla_Click"/>
+                <Separator/>
+                <MenuItem Header="_Evrak Takibi" Click="EvrakTakibi_Click"/>
+            </MenuItem>
+
+            <!-- Denetim Menüsü -->
+            <MenuItem Header="_Denetim" Foreground="White">
+                <MenuItem Header="_Denetim Raporları" Click="DenetimRaporlari_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="✅" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Finansal Analiz" Click="FinansalAnaliz_Click"/>
+                <MenuItem Header="_Oran Analizi" Click="OranAnalizi_Click"/>
+            </MenuItem>
+
+            <!-- Raporlar Menüsü -->
+            <MenuItem Header="_Raporlar" Foreground="White">
+                <MenuItem Header="_Bilanço" Click="Bilanco_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="📈" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Gelir Tablosu" Click="GelirTablosu_Click"/>
+                <MenuItem Header="_Nakit Akış Tablosu" Click="NakitAkisTablosu_Click"/>
+                <Separator/>
+                <MenuItem Header="_KDV Raporu" Click="KdvRaporu_Click"/>
+                <MenuItem Header="_E-Defter" Click="EDefter_Click"/>
+            </MenuItem>
+
+            <!-- Ayarlar Menüsü -->
+            <MenuItem Header="_Ayarlar" Foreground="White" HorizontalAlignment="Right">
+                <MenuItem Header="_Kullanıcı Ayarları" Click="KullaniciAyarlari_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="⚙️" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Sistem Ayarları" Click="SistemAyarlari_Click"/>
+                <Separator/>
+                <MenuItem Header="_Hakkında" Click="Hakkinda_Click"/>
+            </MenuItem>
+        </Menu>
+
+        <!-- Toolbar -->
+        <ToolBar Grid.Row="1" Background="#3E3E42">
+            <Button Content="📁 Yeni Firma" Click="YeniFirma_Click" Margin="2" Padding="8,4"/>
+            <Button Content="🔍 Firma Seç" Click="FirmaSec_Click" Margin="2" Padding="8,4"/>
+            <Separator/>
+            <Button Content="📝 Fiş Girişi" Click="FisGirisi_Click" Margin="2" Padding="8,4"/>
+            <Button Content="📋 Hesap Planı" Click="HesapPlani_Click" Margin="2" Padding="8,4"/>
+            <Button Content="📊 Mizan" Click="Mizan_Click" Margin="2" Padding="8,4"/>
+            <Separator/>
+            <Button Content="👥 Personel" Click="PersonelKartlari_Click" Margin="2" Padding="8,4"/>
+            <Button Content="💰 Bordro" Click="BordroHesaplama_Click" Margin="2" Padding="8,4"/>
+            <Separator/>
+            <TextBlock Text="Aktif Firma: " VerticalAlignment="Center" Foreground="White" Margin="10,0,5,0"/>
+            <TextBlock x:Name="txtAktifFirma" Text="Seçili Değil" VerticalAlignment="Center" Foreground="Yellow" FontWeight="Bold"/>
+        </ToolBar>
+
+        <!-- Ana İçerik Alanı -->
+        <Grid Grid.Row="2" Background="#1E1E1E">
+            <TabControl x:Name="tabControl" Background="#2D2D30" BorderThickness="0">
+                <TabControl.Resources>
+                    <Style TargetType="TabItem">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="TabItem">
+                                    <Border x:Name="Border" Background="#3E3E42" BorderThickness="1,1,1,0" BorderBrush="#555" Margin="0,0,2,0">
+                                        <StackPanel Orientation="Horizontal" Margin="10,5">
+                                            <ContentPresenter ContentSource="Header" Margin="0,0,10,0"/>
+                                            <Button Content="✕" FontSize="10" Background="Transparent" BorderThickness="0" 
+                                                    Foreground="Gray" Click="TabClose_Click" Tag="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+                                                    Cursor="Hand"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="Border" Property="Background" Value="#007ACC"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Foreground" Value="White"/>
+                    </Style>
+                </TabControl.Resources>
+            </TabControl>
+
+            <!-- Hoş Geldiniz Paneli (Tab yokken görünür) -->
+            <Border x:Name="pnlWelcome" Background="#252526" Visibility="Visible">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <TextBlock Text="🏢 Ayda Müşavirlik" FontSize="48" Foreground="#007ACC" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+                    <TextBlock Text="Muhasebe ve Danışmanlık Yönetim Sistemi" FontSize="24" Foreground="Gray" HorizontalAlignment="Center" Margin="0,0,0,40"/>
+                    
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Content="📁 Yeni Firma Oluştur" Width="180" Height="50" Margin="10" 
+                                Background="#007ACC" Foreground="White" FontSize="14"
+                                Click="YeniFirma_Click"/>
+                        <Button Content="🔍 Firma Seç" Width="180" Height="50" Margin="10"
+                                Background="#3E3E42" Foreground="White" FontSize="14"
+                                Click="FirmaSec_Click"/>
+                    </StackPanel>
+                    
+                    <TextBlock Text="Başlamak için bir firma seçin veya yeni firma oluşturun" 
+                               FontSize="14" Foreground="Gray" HorizontalAlignment="Center" Margin="0,30,0,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Durum Çubuğu -->
+        <StatusBar Grid.Row="3" Background="#007ACC">
+            <StatusBarItem>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="👤 " Foreground="White"/>
+                    <TextBlock x:Name="txtKullanici" Text="Kullanıcı" Foreground="White" FontWeight="Bold"/>
+                </StackPanel>
+            </StatusBarItem>
+            <Separator/>
+            <StatusBarItem>
+                <TextBlock Text="Hazır" Foreground="White"/>
+            </StatusBarItem>
+            <Separator/>
+            <StatusBarItem>
+                <StackPanel Orientation="Horizontal">
+                    <Ellipse x:Name="apiStatusIndicator" Width="8" Height="8" Fill="Green" Margin="0,0,5,0"/>
+                    <TextBlock x:Name="txtApiStatus" Text="API Bağlı" Foreground="White"/>
+                </StackPanel>
+            </StatusBarItem>
+            <Separator/>
+            <StatusBarItem>
+                <TextBlock x:Name="txtTarih" Text="" Foreground="White"/>
+            </StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="Çıkış" Background="Transparent" Foreground="White" 
+                            BorderThickness="0" Cursor="Hand" Click="Logout_Click" Margin="10,0"/>
+                    <TextBlock Text="v1.0.0" Foreground="White"/>
+                </StackPanel>
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </Window>

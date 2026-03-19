@@ -1,3 +1,8 @@
+using AydaMusavirlik.Core.Models.Accounting;
+using AydaMusavirlik.Core.Models.ArGe;
+using AydaMusavirlik.Core.Models.Audit;
+using AydaMusavirlik.Core.Models.Payroll;
+
 namespace AydaMusavirlik.Core.Models.Common;
 
 /// <summary>
