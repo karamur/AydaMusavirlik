@@ -1,7 +1,6 @@
 ﻿using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using AydaMusavirlik.Desktop.Services;
-using AydaMusavirlik.Desktop.Views;
 
 namespace AydaMusavirlik.Desktop;
 
@@ -16,18 +15,14 @@ public partial class App : Application
         var services = new ServiceCollection();
         ConfigureServices(services);
         Services = services.BuildServiceProvider();
-
-        // Login penceresi aç
-        var loginWindow = new LoginWindow();
-        loginWindow.Show();
     }
 
     private void ConfigureServices(IServiceCollection services)
     {
-        // Auth Token Store (Singleton - uygulamada tek instance)
+        // Auth Token Store
         services.AddSingleton<AuthTokenStore>();
         
-        // Auth Service (Offline çalışır)
+        // Auth Service (Offline)
         services.AddSingleton<IAuthService, AuthService>();
     }
 

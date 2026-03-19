@@ -14,12 +14,12 @@ public class AuthService : IAuthService
 {
     private readonly AuthTokenStore _tokenStore;
 
-    // Offline test kullanýcýlarý
+    // Offline test kullanicilari
     private static readonly Dictionary<string, (string Password, string FullName, string Role)> _users = new()
     {
-        ["admin"] = ("admin", "Sistem Yöneticisi", "Admin"),
-        ["muhasebe"] = ("muhasebe123", "Ayþe Muhasebeci", "Accountant"),
-        ["yonetici"] = ("yonetici123", "Mehmet Yönetici", "Manager")
+        ["admin"] = ("admin", "Sistem Yoneticisi", "Admin"),
+        ["muhasebe"] = ("muhasebe123", "Ayse Muhasebeci", "Accountant"),
+        ["yonetici"] = ("yonetici123", "Mehmet Yonetici", "Manager")
     };
 
     public AuthService(AuthTokenStore tokenStore)
@@ -34,8 +34,10 @@ public class AuthService : IAuthService
 
     public Task<LoginResult> LoginAsync(string username, string password)
     {
-        // Offline doðrulama
-        if (_users.TryGetValue(username.ToLower(), out var user))
+        // Offline dogrulama - buyuk/kucuk harf duyarsiz
+        var normalizedUsername = username.ToLowerInvariant().Trim();
+        
+        if (_users.TryGetValue(normalizedUsername, out var user))
         {
             if (user.Password == password)
             {
@@ -56,7 +58,7 @@ public class AuthService : IAuthService
         return Task.FromResult(new LoginResult
         {
             Success = false,
-            Error = "Kullanýcý adý veya þifre hatalý!"
+            Error = "Kullanici adi veya sifre hatali!"
         });
     }
 
