@@ -78,7 +78,7 @@ public partial class MainWindow : Window
 
     private void Cikis_Click(object sender, RoutedEventArgs e)
     {
-        if (MessageBox.Show("Programdan çıkmak istediğinize emin misiniz?", "Çıkış", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+        if (MessageBox.Show("Programdan çıkmak istediğinizden emin misiniz?", "Çıkış", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
         {
             Application.Current.Shutdown();
         }
