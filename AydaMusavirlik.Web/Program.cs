@@ -28,6 +28,7 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddSingleton<CompanyService>();
 builder.Services.AddSingleton<AccountingService>();
 builder.Services.AddSingleton<FinancialAnalysisService>();
+builder.Services.AddSingleton<AppointmentService>();
 
 var app = builder.Build();
 

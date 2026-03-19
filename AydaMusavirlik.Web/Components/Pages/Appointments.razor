@@ -1,0 +1,468 @@
+@page "/randevular"
+@inject AppointmentService AppointmentService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>Randevu Yönetimi - AYDA Müþavirlik</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">
+    <MudIcon Icon="@Icons.Material.Filled.CalendarMonth" Class="mr-2" />
+    Randevu ve Takvim Yönetimi
+</MudText>
+
+@* Üst Ýstatistik Kartlarý *@
+<MudGrid Class="mb-4">
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <MudCardContent>
+                <div class="d-flex justify-space-between align-center">
+                    <div>
+                        <MudText Typo="Typo.caption">Bugün</MudText>
+                        <MudText Typo="Typo.h4">@_stats.TodayAppointments</MudText>
+                        <MudText Typo="Typo.caption">randevu</MudText>
+                    </div>
+                    <MudIcon Icon="@Icons.Material.Filled.Today" Size="Size.Large" Style="opacity: 0.7;" />
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white;">
+            <MudCardContent>
+                <div class="d-flex justify-space-between align-center">
+                    <div>
+                        <MudText Typo="Typo.caption">Bu Hafta</MudText>
+                        <MudText Typo="Typo.h4">@_stats.ThisWeekAppointments</MudText>
+                        <MudText Typo="Typo.caption">randevu</MudText>
+                    </div>
+                    <MudIcon Icon="@Icons.Material.Filled.DateRange" Size="Size.Large" Style="opacity: 0.7;" />
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+            <MudCardContent>
+                <div class="d-flex justify-space-between align-center">
+                    <div>
+                        <MudText Typo="Typo.caption">Bekleyen</MudText>
+                        <MudText Typo="Typo.h4">@_stats.UpcomingAppointments</MudText>
+                        <MudText Typo="Typo.caption">randevu</MudText>
+                    </div>
+                    <MudIcon Icon="@Icons.Material.Filled.Schedule" Size="Size.Large" Style="opacity: 0.7;" />
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Style="background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); color: white;">
+            <MudCardContent>
+                <div class="d-flex justify-space-between align-center">
+                    <div>
+                        <MudText Typo="Typo.caption">Geciken</MudText>
+                        <MudText Typo="Typo.h4">@_stats.OverdueDeadlines</MudText>
+                        <MudText Typo="Typo.caption">son tarih</MudText>
+                    </div>
+                    <MudIcon Icon="@Icons.Material.Filled.Warning" Size="Size.Large" Style="opacity: 0.7;" />
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+<MudGrid>
+    @* Sol Panel - Takvim ve Vergi Takvimleri *@
+    <MudItem xs="12" md="4">
+        @* Mini Takvim *@
+        <MudCard Class="mb-4">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Class="mr-2" />
+                        Takvim
+                    </MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudDatePicker Date="_selectedDate" 
+                               DateChanged="OnDateChanged"
+                               PickerVariant="PickerVariant.Static"
+                               Color="Color.Primary" />
+            </MudCardContent>
+        </MudCard>
+
+        @* Vergi Takvimi *@
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.EventNote" Class="mr-2" />
+                        Yaklaþan Vergi Tarihleri
+                    </MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent Style="max-height: 400px; overflow-y: auto;">
+                @if (_taxDeadlines.Any())
+                {
+                    <MudList T="TaxCalendarItem" Dense="true">
+                        @foreach (var deadline in _taxDeadlines)
+                        {
+                            <MudListItem>
+                                <div class="d-flex align-center justify-space-between">
+                                    <div class="d-flex align-center">
+                                        <MudAvatar Size="Size.Small" Style="@($"background-color: {deadline.StatusColor};")" Class="mr-2">
+                                            @deadline.DaysRemaining
+                                        </MudAvatar>
+                                        <div>
+                                            <MudText Typo="Typo.body2"><strong>@deadline.Title</strong></MudText>
+                                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                @deadline.DueDate.ToString("dd MMM yyyy")
+                                            </MudText>
+                                        </div>
+                                    </div>
+                                    <MudChip T="string" Size="Size.Small" 
+                                             Color="@(deadline.DaysRemaining <= 3 ? Color.Error : Color.Default)">
+                                        @(deadline.DaysRemaining <= 0 ? "Geçmiþ" : $"{deadline.DaysRemaining} gün")
+                                    </MudChip>
+                                </div>
+                            </MudListItem>
+                        }
+                    </MudList>
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">Yaklaþan vergi tarihi yok.</MudText>
+                }
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    @* Sað Panel - Randevu Listesi *@
+    <MudItem xs="12" md="8">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.EventAvailable" Class="mr-2" />
+                        Randevular - @(_selectedDate?.ToString("dd MMMM yyyy") ?? "Tümü")
+                    </MudText>
+                </CardHeaderContent>
+                <CardHeaderActions>
+                    <MudButtonGroup OverrideStyles="false">
+                        <MudButton Variant="@(_viewMode == ViewMode.Day ? Variant.Filled : Variant.Outlined)" 
+                                   Color="Color.Primary" Size="Size.Small"
+                                   OnClick="@(() => SetViewMode(ViewMode.Day))">Gün</MudButton>
+                        <MudButton Variant="@(_viewMode == ViewMode.Week ? Variant.Filled : Variant.Outlined)" 
+                                   Color="Color.Primary" Size="Size.Small"
+                                   OnClick="@(() => SetViewMode(ViewMode.Week))">Hafta</MudButton>
+                        <MudButton Variant="@(_viewMode == ViewMode.Month ? Variant.Filled : Variant.Outlined)" 
+                                   Color="Color.Primary" Size="Size.Small"
+                                   OnClick="@(() => SetViewMode(ViewMode.Month))">Ay</MudButton>
+                    </MudButtonGroup>
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add"
+                               OnClick="OpenNewAppointmentDialog" Class="ml-2">
+                        Yeni Randevu
+                    </MudButton>
+                </CardHeaderActions>
+            </MudCardHeader>
+            <MudCardContent>
+                @* Filtreler *@
+                <MudGrid Class="mb-4">
+                    <MudItem xs="12" sm="4">
+                        <MudSelect T="AppointmentType?" @bind-Value="_filterType" Label="Tür" Variant="Variant.Outlined" Dense="true" Clearable="true">
+                            @foreach (AppointmentType type in Enum.GetValues<AppointmentType>())
+                            {
+                                <MudSelectItem Value="@((AppointmentType?)type)">@GetTypeName(type)</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudSelect T="AppointmentStatus?" @bind-Value="_filterStatus" Label="Durum" Variant="Variant.Outlined" Dense="true" Clearable="true">
+                            @foreach (AppointmentStatus status in Enum.GetValues<AppointmentStatus>())
+                            {
+                                <MudSelectItem Value="@((AppointmentStatus?)status)">@GetStatusName(status)</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudTextField @bind-Value="_searchText" Label="Ara..." Variant="Variant.Outlined" Dense="true"
+                                      Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" />
+                    </MudItem>
+                </MudGrid>
+
+                @* Randevu Listesi *@
+                @if (_filteredAppointments.Any())
+                {
+                    <MudTimeline TimelinePosition="TimelinePosition.Start">
+                        @foreach (var appointment in _filteredAppointments)
+                        {
+                            <MudTimelineItem Size="Size.Medium" Color="@GetStatusColor(appointment.Status)">
+                                <ItemOpposite>
+                                    <MudText Typo="Typo.caption">@appointment.StartDate.ToString("HH:mm")</MudText>
+                                    <MudText Typo="Typo.caption">@appointment.StartDate.ToString("dd MMM")</MudText>
+                                </ItemOpposite>
+                                <ItemContent>
+                                    <MudPaper Elevation="2" Class="pa-3">
+                                        <div class="d-flex justify-space-between align-start">
+                                            <div>
+                                                <MudText Typo="Typo.subtitle1"><strong>@appointment.Title</strong></MudText>
+                                                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                                    <MudIcon Icon="@Icons.Material.Filled.Business" Size="Size.Small" Class="mr-1" />
+                                                    @appointment.CompanyName
+                                                </MudText>
+                                                @if (!string.IsNullOrEmpty(appointment.Location))
+                                                {
+                                                    <MudText Typo="Typo.caption">
+                                                        <MudIcon Icon="@Icons.Material.Filled.Place" Size="Size.Small" Class="mr-1" />
+                                                        @appointment.Location
+                                                    </MudText>
+                                                }
+                                                @if (appointment.IsOnline)
+                                                {
+                                                    <MudText Typo="Typo.caption" Color="Color.Info">
+                                                        <MudIcon Icon="@Icons.Material.Filled.Videocam" Size="Size.Small" Class="mr-1" />
+                                                        Online Toplantý
+                                                    </MudText>
+                                                }
+                                            </div>
+                                            <MudStack Row="true" Spacing="1">
+                                                <MudChip T="string" Size="Size.Small" Style="@($"background-color: {appointment.ColorCode}; color: white;")">
+                                                    @GetTypeName(appointment.Type)
+                                                </MudChip>
+                                                <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(appointment.Status)">
+                                                    @GetStatusName(appointment.Status)
+                                                </MudChip>
+                                            </MudStack>
+                                        </div>
+                                        <MudDivider Class="my-2" />
+                                        <MudStack Row="true" Spacing="1">
+                                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" 
+                                                           OnClick="@(() => EditAppointment(appointment))" />
+                                            <MudIconButton Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" Color="Color.Success"
+                                                           OnClick="@(() => CompleteAppointment(appointment.Id))" 
+                                                           Disabled="@(appointment.Status == AppointmentStatus.Completed)" />
+                                            <MudIconButton Icon="@Icons.Material.Filled.Cancel" Size="Size.Small" Color="Color.Error"
+                                                           OnClick="@(() => CancelAppointment(appointment.Id))" 
+                                                           Disabled="@(appointment.Status == AppointmentStatus.Cancelled)" />
+                                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                                                           OnClick="@(() => DeleteAppointment(appointment.Id))" />
+                                        </MudStack>
+                                    </MudPaper>
+                                </ItemContent>
+                            </MudTimelineItem>
+                        }
+                    </MudTimeline>
+                }
+                else
+                {
+                    <MudAlert Severity="Severity.Info">
+                        Seçilen kriterlere uygun randevu bulunamadý.
+                    </MudAlert>
+                }
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@* Randevu Türü Daðýlýmý *@
+<MudGrid Class="mt-4">
+    <MudItem xs="12" md="6">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.PieChart" Class="mr-2" />
+                        Randevu Türü Daðýlýmý
+                    </MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                @if (_typeChartData.Length > 0)
+                {
+                    <MudChart ChartType="ChartType.Donut" 
+                              InputData="@_typeChartData" 
+                              InputLabels="@_typeChartLabels"
+                              Height="250px" />
+                }
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" md="6">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.BarChart" Class="mr-2" />
+                        Aylýk Randevu Daðýlýmý
+                    </MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                @if (_monthlyChartSeries.Any())
+                {
+                    <MudChart ChartType="ChartType.Bar" 
+                              ChartSeries="@_monthlyChartSeries" 
+                              XAxisLabels="@_monthLabels"
+                              Height="250px" />
+                }
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private DateTime? _selectedDate = DateTime.Today;
+    private ViewMode _viewMode = ViewMode.Week;
+    private AppointmentType? _filterType;
+    private AppointmentStatus? _filterStatus;
+    private string _searchText = string.Empty;
+
+    private List<Appointment> _appointments = new();
+    private List<TaxCalendarItem> _taxDeadlines = new();
+    private AppointmentStatistics _stats = new();
+
+    private double[] _typeChartData = Array.Empty<double>();
+    private string[] _typeChartLabels = Array.Empty<string>();
+    private List<ChartSeries> _monthlyChartSeries = new();
+    private string[] _monthLabels = { "Oca", "Þub", "Mar", "Nis", "May", "Haz", "Tem", "Aðu", "Eyl", "Eki", "Kas", "Ara" };
+
+    private List<Appointment> _filteredAppointments => _appointments
+        .Where(a => (_filterType == null || a.Type == _filterType) &&
+                    (_filterStatus == null || a.Status == _filterStatus) &&
+                    (string.IsNullOrEmpty(_searchText) || 
+                     a.Title.Contains(_searchText, StringComparison.OrdinalIgnoreCase) ||
+                     a.CompanyName.Contains(_searchText, StringComparison.OrdinalIgnoreCase)))
+        .ToList();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        _appointments = await AppointmentService.GetUpcomingAsync(30);
+        _taxDeadlines = await AppointmentService.GetUpcomingDeadlinesAsync(30);
+        _stats = await AppointmentService.GetStatisticsAsync();
+
+        // Chart Data
+        if (_stats.ByType.Any())
+        {
+            _typeChartData = _stats.ByType.Values.Select(v => (double)v).ToArray();
+            _typeChartLabels = _stats.ByType.Keys.Select(k => GetTypeName(k)).ToArray();
+        }
+
+        if (_stats.ByMonth.Any())
+        {
+            var monthData = new double[12];
+            foreach (var (month, count) in _stats.ByMonth)
+            {
+                if (month >= 1 && month <= 12)
+                    monthData[month - 1] = count;
+            }
+            _monthlyChartSeries = new List<ChartSeries>
+            {
+                new() { Name = "Randevu Sayýsý", Data = monthData }
+            };
+        }
+    }
+
+    private async Task OnDateChanged(DateTime? date)
+    {
+        _selectedDate = date;
+        if (date.HasValue)
+        {
+            var start = date.Value.Date;
+            var end = _viewMode switch
+            {
+                ViewMode.Day => start.AddDays(1),
+                ViewMode.Week => start.AddDays(7),
+                ViewMode.Month => start.AddMonths(1),
+                _ => start.AddDays(7)
+            };
+            _appointments = await AppointmentService.GetByDateRangeAsync(start, end);
+        }
+    }
+
+    private async Task SetViewMode(ViewMode mode)
+    {
+        _viewMode = mode;
+        await OnDateChanged(_selectedDate);
+    }
+
+    private void OpenNewAppointmentDialog()
+    {
+        Snackbar.Add("Yeni randevu dialog'u açýlacak", Severity.Info);
+    }
+
+    private void EditAppointment(Appointment appointment)
+    {
+        Snackbar.Add($"Randevu düzenleniyor: {appointment.Title}", Severity.Info);
+    }
+
+    private async Task CompleteAppointment(int id)
+    {
+        await AppointmentService.UpdateStatusAsync(id, AppointmentStatus.Completed);
+        await LoadData();
+        Snackbar.Add("Randevu tamamlandý olarak iþaretlendi", Severity.Success);
+    }
+
+    private async Task CancelAppointment(int id)
+    {
+        await AppointmentService.UpdateStatusAsync(id, AppointmentStatus.Cancelled);
+        await LoadData();
+        Snackbar.Add("Randevu iptal edildi", Severity.Warning);
+    }
+
+    private async Task DeleteAppointment(int id)
+    {
+        await AppointmentService.DeleteAsync(id);
+        await LoadData();
+        Snackbar.Add("Randevu silindi", Severity.Success);
+    }
+
+    private string GetTypeName(AppointmentType type) => type switch
+    {
+        AppointmentType.Meeting => "Toplantý",
+        AppointmentType.Consultation => "Danýþmanlýk",
+        AppointmentType.TaxDeadline => "Vergi Tarihi",
+        AppointmentType.Audit => "Denetim",
+        AppointmentType.Training => "Eðitim",
+        AppointmentType.CourtHearing => "Duruþma",
+        AppointmentType.BankAppointment => "Banka",
+        AppointmentType.SocialSecurity => "SGK",
+        AppointmentType.TaxOffice => "Vergi Dairesi",
+        AppointmentType.Other => "Diðer",
+        _ => "Bilinmiyor"
+    };
+
+    private string GetStatusName(AppointmentStatus status) => status switch
+    {
+        AppointmentStatus.Scheduled => "Planlandý",
+        AppointmentStatus.Confirmed => "Onaylandý",
+        AppointmentStatus.InProgress => "Devam Ediyor",
+        AppointmentStatus.Completed => "Tamamlandý",
+        AppointmentStatus.Cancelled => "Ýptal",
+        AppointmentStatus.Postponed => "Ertelendi",
+        AppointmentStatus.NoShow => "Gelmedi",
+        _ => "Bilinmiyor"
+    };
+
+    private Color GetStatusColor(AppointmentStatus status) => status switch
+    {
+        AppointmentStatus.Scheduled => Color.Info,
+        AppointmentStatus.Confirmed => Color.Primary,
+        AppointmentStatus.InProgress => Color.Warning,
+        AppointmentStatus.Completed => Color.Success,
+        AppointmentStatus.Cancelled => Color.Error,
+        AppointmentStatus.Postponed => Color.Secondary,
+        AppointmentStatus.NoShow => Color.Dark,
+        _ => Color.Default
+    };
+
+    private enum ViewMode { Day, Week, Month }
+}

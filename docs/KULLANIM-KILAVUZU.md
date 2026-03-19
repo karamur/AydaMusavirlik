@@ -110,4 +110,4 @@ Ayarlar > Yedekleme bölümünden veritabaný yedeði alabilirsiniz.
 
 ---
 
-© 2024 AYDA Müþavirlik - Tüm Haklarý Saklýdýr
+© 2024 Allbatros - Tüm Haklarý Saklýdýr
