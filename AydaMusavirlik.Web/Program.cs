@@ -27,6 +27,7 @@ builder.Services.AddSingleton<UserService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddSingleton<CompanyService>();
 builder.Services.AddSingleton<AccountingService>();
+builder.Services.AddSingleton<FinancialAnalysisService>();
 
 var app = builder.Build();
 

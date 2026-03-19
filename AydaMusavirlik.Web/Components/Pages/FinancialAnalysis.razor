@@ -1,0 +1,428 @@
+@page "/finansal-analiz"
+@inject FinancialAnalysisService FinancialService
+@inject AuthService AuthService
+
+<PageTitle>Finansal Analiz - AYDA Müþavirlik</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">
+    <MudIcon Icon="@Icons.Material.Filled.Analytics" Class="mr-2" />
+    Profesyonel Finansal Analiz
+</MudText>
+
+@* KPI Kartlarý *@
+<MudGrid Class="mb-4">
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <MudCardContent>
+                <div class="d-flex justify-space-between align-center">
+                    <div>
+                        <MudText Typo="Typo.caption">Toplam Gelir</MudText>
+                        <MudText Typo="Typo.h5">@_income.Revenue.ToString("N0") ?</MudText>
+                        <MudText Typo="Typo.caption">
+                            <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Size="Size.Small" /> +12.5%
+                        </MudText>
+                    </div>
+                    <MudIcon Icon="@Icons.Material.Filled.Payments" Size="Size.Large" Style="opacity: 0.7;" />
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white;">
+            <MudCardContent>
+                <div class="d-flex justify-space-between align-center">
+                    <div>
+                        <MudText Typo="Typo.caption">Net Kar</MudText>
+                        <MudText Typo="Typo.h5">@_income.NetIncome.ToString("N0") ?</MudText>
+                        <MudText Typo="Typo.caption">Marj: %@_income.NetProfitMargin.ToString("F1")</MudText>
+                    </div>
+                    <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Size="Size.Large" Style="opacity: 0.7;" />
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+            <MudCardContent>
+                <div class="d-flex justify-space-between align-center">
+                    <div>
+                        <MudText Typo="Typo.caption">Toplam Varlýk</MudText>
+                        <MudText Typo="Typo.h5">@_balance.TotalAssets.ToString("N0") ?</MudText>
+                        <MudText Typo="Typo.caption">Özsermaye: @_balance.Equity.ToString("N0") ?</MudText>
+                    </div>
+                    <MudIcon Icon="@Icons.Material.Filled.AccountBalance" Size="Size.Large" Style="opacity: 0.7;" />
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+            <MudCardContent>
+                <div class="d-flex justify-space-between align-center">
+                    <div>
+                        <MudText Typo="Typo.caption">Nakit Pozisyonu</MudText>
+                        <MudText Typo="Typo.h5">@_balance.Cash.ToString("N0") ?</MudText>
+                        <MudText Typo="Typo.caption">Cari Oran: @_currentRatio.ToString("F2")</MudText>
+                    </div>
+                    <MudIcon Icon="@Icons.Material.Filled.Money" Size="Size.Large" Style="opacity: 0.7;" />
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@* Ana Ýçerik *@
+<MudGrid>
+    @* Gelir/Gider Trend Grafiði *@
+    <MudItem xs="12" lg="8">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.ShowChart" Class="mr-2" />
+                        Aylýk Gelir-Gider Trendi (Son 12 Ay)
+                    </MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudChart ChartType="ChartType.Line" 
+                          ChartSeries="@_trendSeries" 
+                          XAxisLabels="@_trendLabels"
+                          ChartOptions="@_lineChartOptions"
+                          Height="300px" />
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    @* Gider Daðýlýmý *@
+    <MudItem xs="12" lg="4">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.PieChart" Class="mr-2" />
+                        Gider Daðýlýmý
+                    </MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudChart ChartType="ChartType.Donut"
+                          InputData="@_expenseData"
+                          InputLabels="@_expenseLabels"
+                          Height="250px" />
+                <MudStack Spacing="1" Class="mt-2">
+                    @foreach (var (category, amount, percentage) in _expenseBreakdown)
+                    {
+                        <div class="d-flex justify-space-between">
+                            <MudText Typo="Typo.caption">@category</MudText>
+                            <MudText Typo="Typo.caption"><strong>%@percentage</strong></MudText>
+                        </div>
+                    }
+                </MudStack>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    @* Finansal Oranlar *@
+    <MudItem xs="12">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.Assessment" Class="mr-2" />
+                        Finansal Oranlar ve Performans Göstergeleri
+                    </MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-4">
+                    @foreach (var category in _ratios.Select(r => r.Category).Distinct())
+                    {
+                        <MudTabPanel Text="@category" Icon="@GetCategoryIcon(category)">
+                            <MudGrid>
+                                @foreach (var ratio in _ratios.Where(r => r.Category == category))
+                                {
+                                    <MudItem xs="12" sm="6" md="4">
+                                        <MudPaper Elevation="2" Class="pa-4">
+                                            <div class="d-flex justify-space-between align-center mb-2">
+                                                <MudText Typo="Typo.subtitle2">@ratio.Name</MudText>
+                                                <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(ratio.Status)">
+                                                    @GetStatusText(ratio.Status)
+                                                </MudChip>
+                                            </div>
+                                            <MudText Typo="Typo.h4" Color="@GetValueColor(ratio.Status)">
+                                                @ratio.Value@ratio.Unit
+                                            </MudText>
+                                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                @ratio.Description
+                                            </MudText>
+                                            @if (ratio.TargetValue.HasValue)
+                                            {
+                                                <MudProgressLinear Value="@GetProgressValue(ratio)" Color="@GetStatusColor(ratio.Status)" Class="mt-2" />
+                                                <MudText Typo="Typo.caption">Hedef: @ratio.TargetValue@ratio.Unit</MudText>
+                                            }
+                                        </MudPaper>
+                                    </MudItem>
+                                }
+                            </MudGrid>
+                        </MudTabPanel>
+                    }
+                </MudTabs>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    @* Bilanço Özeti *@
+    <MudItem xs="12" md="6">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.AccountBalanceWallet" Class="mr-2" />
+                        Bilanço Özeti
+                    </MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudChart ChartType="ChartType.Bar"
+                          ChartSeries="@_balanceSeries"
+                          XAxisLabels="@_balanceLabels"
+                          Height="250px" />
+
+                <MudSimpleTable Dense="true" Class="mt-4">
+                    <tbody>
+                        <tr>
+                            <td><strong>Dönen Varlýklar</strong></td>
+                            <td align="right">@_balance.CurrentAssets.ToString("N0") ?</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Duran Varlýklar</strong></td>
+                            <td align="right">@_balance.NonCurrentAssets.ToString("N0") ?</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Kýsa Vadeli Borçlar</strong></td>
+                            <td align="right">@_balance.CurrentLiabilities.ToString("N0") ?</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Uzun Vadeli Borçlar</strong></td>
+                            <td align="right">@_balance.NonCurrentLiabilities.ToString("N0") ?</td>
+                        </tr>
+                        <tr style="background-color: #e3f2fd;">
+                            <td><strong>Özsermaye</strong></td>
+                            <td align="right"><strong>@_balance.Equity.ToString("N0") ?</strong></td>
+                        </tr>
+                    </tbody>
+                </MudSimpleTable>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    @* Gelir Tablosu Özeti *@
+    <MudItem xs="12" md="6">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.Receipt" Class="mr-2" />
+                        Gelir Tablosu Özeti
+                    </MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudChart ChartType="ChartType.Bar"
+                          ChartSeries="@_incomeSeries"
+                          XAxisLabels="@_incomeLabels"
+                          Height="250px" />
+
+                <MudSimpleTable Dense="true" Class="mt-4">
+                    <tbody>
+                        <tr>
+                            <td><strong>Satýþ Geliri</strong></td>
+                            <td align="right">@_income.Revenue.ToString("N0") ?</td>
+                        </tr>
+                        <tr>
+                            <td>Satýþlarýn Maliyeti</td>
+                            <td align="right">(@_income.CostOfGoodsSold.ToString("N0")) ?</td>
+                        </tr>
+                        <tr style="background-color: #e8f5e9;">
+                            <td><strong>Brüt Kar</strong></td>
+                            <td align="right"><strong>@_income.GrossProfit.ToString("N0") ?</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Faaliyet Giderleri</td>
+                            <td align="right">(@_income.OperatingExpenses.ToString("N0")) ?</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Faaliyet Karý (EBIT)</strong></td>
+                            <td align="right"><strong>@_income.OperatingIncome.ToString("N0") ?</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Faiz + Vergi Giderleri</td>
+                            <td align="right">(@((_income.InterestExpense + _income.TaxExpense).ToString("N0"))) ?</td>
+                        </tr>
+                        <tr style="background-color: #c8e6c9;">
+                            <td><strong>Net Kar</strong></td>
+                            <td align="right"><strong>@_income.NetIncome.ToString("N0") ?</strong></td>
+                        </tr>
+                    </tbody>
+                </MudSimpleTable>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    @* Nakit Akýþý *@
+    <MudItem xs="12">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.WaterDrop" Class="mr-2" />
+                        Nakit Akýþ Analizi
+                    </MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudChart ChartType="ChartType.StackedBar"
+                          ChartSeries="@_cashFlowSeries"
+                          XAxisLabels="@_cashFlowLabels"
+                          Height="250px" />
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private BalanceSheet _balance = new();
+    private IncomeStatement _income = new();
+    private List<FinancialRatio> _ratios = new();
+    private List<(string Category, decimal Amount, decimal Percentage)> _expenseBreakdown = new();
+    private decimal _currentRatio;
+
+    // Trend Chart
+    private List<ChartSeries> _trendSeries = new();
+    private string[] _trendLabels = Array.Empty<string>();
+    private ChartOptions _lineChartOptions = new() { YAxisTicks = 50000 };
+
+    // Expense Chart
+    private double[] _expenseData = Array.Empty<double>();
+    private string[] _expenseLabels = Array.Empty<string>();
+
+    // Balance Chart
+    private List<ChartSeries> _balanceSeries = new();
+    private string[] _balanceLabels = { "Dönen V.", "Duran V.", "K.V. Borç", "U.V. Borç", "Özsermaye" };
+
+    // Income Chart
+    private List<ChartSeries> _incomeSeries = new();
+    private string[] _incomeLabels = { "Gelir", "Maliyet", "Giderler", "Kar" };
+
+    // Cash Flow Chart
+    private List<ChartSeries> _cashFlowSeries = new();
+    private string[] _cashFlowLabels = Array.Empty<string>();
+
+    protected override void OnInitialized()
+    {
+        LoadData();
+    }
+
+    private void LoadData()
+    {
+        _balance = FinancialService.GetSampleBalanceSheet();
+        _income = FinancialService.GetSampleIncomeStatement();
+        _ratios = FinancialService.CalculateRatios(_balance, _income);
+        _expenseBreakdown = FinancialService.GetExpenseBreakdown();
+        _currentRatio = _balance.CurrentLiabilities != 0 ? _balance.CurrentAssets / _balance.CurrentLiabilities : 0;
+
+        // Trend Chart Data
+        var trendData = FinancialService.GetMonthlyTrend();
+        _trendLabels = trendData.Where(t => t.Category == "Gelir").Select(t => t.Period).ToArray();
+        _trendSeries = new List<ChartSeries>
+        {
+            new() { Name = "Gelir", Data = trendData.Where(t => t.Category == "Gelir").Select(t => (double)t.Value).ToArray() },
+            new() { Name = "Gider", Data = trendData.Where(t => t.Category == "Gider").Select(t => (double)t.Value).ToArray() },
+            new() { Name = "Kar", Data = trendData.Where(t => t.Category == "Kar").Select(t => (double)t.Value).ToArray() }
+        };
+
+        // Expense Chart Data
+        _expenseData = _expenseBreakdown.Select(e => (double)e.Percentage).ToArray();
+        _expenseLabels = _expenseBreakdown.Select(e => e.Category).ToArray();
+
+        // Balance Chart Data
+        _balanceSeries = new List<ChartSeries>
+        {
+            new() { Name = "Tutar (TL)", Data = new double[] { 
+                (double)_balance.CurrentAssets, 
+                (double)_balance.NonCurrentAssets, 
+                (double)_balance.CurrentLiabilities, 
+                (double)_balance.NonCurrentLiabilities, 
+                (double)_balance.Equity 
+            }}
+        };
+
+        // Income Chart Data
+        _incomeSeries = new List<ChartSeries>
+        {
+            new() { Name = "Tutar (TL)", Data = new double[] { 
+                (double)_income.Revenue, 
+                (double)_income.CostOfGoodsSold, 
+                (double)_income.OperatingExpenses, 
+                (double)_income.NetIncome 
+            }}
+        };
+
+        // Cash Flow Chart Data
+        var cashFlowData = FinancialService.GetCashFlowData();
+        _cashFlowLabels = cashFlowData.Select(c => $"{c.Month:D2}/{c.Year}").ToArray();
+        _cashFlowSeries = new List<ChartSeries>
+        {
+            new() { Name = "Faaliyetlerden", Data = cashFlowData.Select(c => (double)c.OperatingCashFlow).ToArray() },
+            new() { Name = "Yatýrýmlardan", Data = cashFlowData.Select(c => (double)c.InvestingCashFlow).ToArray() },
+            new() { Name = "Finansmandan", Data = cashFlowData.Select(c => (double)c.FinancingCashFlow).ToArray() }
+        };
+    }
+
+    private string GetCategoryIcon(string category) => category switch
+    {
+        "Likidite" => Icons.Material.Filled.WaterDrop,
+        "Karlýlýk" => Icons.Material.Filled.TrendingUp,
+        "Faaliyet" => Icons.Material.Filled.Speed,
+        "Borçluluk" => Icons.Material.Filled.CreditCard,
+        _ => Icons.Material.Filled.Circle
+    };
+
+    private Color GetStatusColor(RatioStatus status) => status switch
+    {
+        RatioStatus.Excellent => Color.Success,
+        RatioStatus.Good => Color.Info,
+        RatioStatus.Warning => Color.Warning,
+        RatioStatus.Critical => Color.Error,
+        _ => Color.Default
+    };
+
+    private Color GetValueColor(RatioStatus status) => status switch
+    {
+        RatioStatus.Excellent => Color.Success,
+        RatioStatus.Good => Color.Info,
+        RatioStatus.Warning => Color.Warning,
+        RatioStatus.Critical => Color.Error,
+        _ => Color.Default
+    };
+
+    private string GetStatusText(RatioStatus status) => status switch
+    {
+        RatioStatus.Excellent => "Mükemmel",
+        RatioStatus.Good => "Ýyi",
+        RatioStatus.Warning => "Dikkat",
+        RatioStatus.Critical => "Kritik",
+        _ => ""
+    };
+
+    private double GetProgressValue(FinancialRatio ratio)
+    {
+        if (!ratio.TargetValue.HasValue || ratio.TargetValue == 0) return 0;
+        var progress = ((double)ratio.Value / (double)ratio.TargetValue) * 100;
+        return Math.Min(progress, 100);
+    }
+}
