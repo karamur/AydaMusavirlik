@@ -1,0 +1,226 @@
+@page "/dashboard"
+@inject AuthService AuthService
+@inject CompanyService CompanyService
+@inject FinancialAnalysisService FinancialService
+
+<PageTitle>Dashboard - AYDA Musavirlik</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">
+    <MudIcon Icon="@Icons.Material.Filled.Dashboard" Class="mr-2" />
+    Mali Dashboard
+</MudText>
+
+<MudGrid>
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Style="background: linear-gradient(135deg, #2D5A27 0%, #4CAF50 100%); color: white;">
+            <MudCardContent>
+                <div class="d-flex justify-space-between align-center">
+                    <div>
+                        <MudText Typo="Typo.caption">Toplam Gelir</MudText>
+                        <MudText Typo="Typo.h5">@_toplamGelir.ToString("N0") TL</MudText>
+                        <MudText Typo="Typo.caption">
+                            <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Size="Size.Small" /> +%12.5 gecen aya gore
+                        </MudText>
+                    </div>
+                    <MudIcon Icon="@Icons.Material.Filled.Payments" Size="Size.Large" Style="opacity: 0.7;" />
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Style="background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%); color: white;">
+            <MudCardContent>
+                <div class="d-flex justify-space-between align-center">
+                    <div>
+                        <MudText Typo="Typo.caption">Toplam Gider</MudText>
+                        <MudText Typo="Typo.h5">@_toplamGider.ToString("N0") TL</MudText>
+                        <MudText Typo="Typo.caption">
+                            <MudIcon Icon="@Icons.Material.Filled.TrendingDown" Size="Size.Small" /> -%3.2 gecen aya gore
+                        </MudText>
+                    </div>
+                    <MudIcon Icon="@Icons.Material.Filled.MoneyOff" Size="Size.Large" Style="opacity: 0.7;" />
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Style="background: linear-gradient(135deg, #1E3A5F 0%, #3498DB 100%); color: white;">
+            <MudCardContent>
+                <div class="d-flex justify-space-between align-center">
+                    <div>
+                        <MudText Typo="Typo.caption">Net Kar</MudText>
+                        <MudText Typo="Typo.h5">@_netKar.ToString("N0") TL</MudText>
+                        <MudText Typo="Typo.caption">Kar Marji: %@_karMarji.ToString("F1")</MudText>
+                    </div>
+                    <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Size="Size.Large" Style="opacity: 0.7;" />
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Style="background: linear-gradient(135deg, #4A4A4A 0%, #757575 100%); color: white;">
+            <MudCardContent>
+                <div class="d-flex justify-space-between align-center">
+                    <div>
+                        <MudText Typo="Typo.caption">Mali Saglik</MudText>
+                        <MudText Typo="Typo.h5">@_maliSaglik / 100</MudText>
+                        <MudText Typo="Typo.caption">@_maliDerece Seviyesi</MudText>
+                    </div>
+                    <MudIcon Icon="@Icons.Material.Filled.HealthAndSafety" Size="Size.Large" Style="opacity: 0.7;" />
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+<MudGrid Class="mt-4">
+    <MudItem xs="12" md="6">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.Assessment" Class="mr-2" />
+                        Mali Oranlar
+                    </MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudSimpleTable Dense="true">
+                    <tbody>
+                        <tr>
+                            <td>Cari Oran</td>
+                            <td align="right"><MudText Color="Color.Success"><strong>1.85</strong></MudText></td>
+                        </tr>
+                        <tr>
+                            <td>Asit Test Orani</td>
+                            <td align="right"><MudText Color="Color.Success"><strong>1.42</strong></MudText></td>
+                        </tr>
+                        <tr>
+                            <td>Borc/Ozkaynak</td>
+                            <td align="right"><MudText Color="Color.Warning"><strong>0.65</strong></MudText></td>
+                        </tr>
+                        <tr>
+                            <td>Net Kar Marji</td>
+                            <td align="right"><MudText Color="Color.Success"><strong>%21.6</strong></MudText></td>
+                        </tr>
+                        <tr>
+                            <td>ROE</td>
+                            <td align="right"><MudText Color="Color.Success"><strong>%18.5</strong></MudText></td>
+                        </tr>
+                    </tbody>
+                </MudSimpleTable>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" md="6">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.History" Class="mr-2" />
+                        Son Islemler
+                    </MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudList T="string" Dense="true">
+                    @foreach (var islem in _sonIslemler)
+                    {
+                        <MudListItem>
+                            <div class="d-flex justify-space-between align-center" style="width: 100%;">
+                                <div>
+                                    <MudText Typo="Typo.body2">@islem.Aciklama</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">@islem.Tarih</MudText>
+                                </div>
+                                <MudText Typo="Typo.body2" Color="@(islem.Tutar > 0 ? Color.Success : Color.Error)">
+                                    @(islem.Tutar > 0 ? "+" : "")@islem.Tutar.ToString("N0") TL
+                                </MudText>
+                            </div>
+                        </MudListItem>
+                    }
+                </MudList>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+<MudGrid Class="mt-4">
+    <MudItem xs="12">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.Speed" Class="mr-2" />
+                        Hizli Erisim
+                    </MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudStack Row="true" Spacing="2" Wrap="Wrap.Wrap">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Business" Href="/firmalar">
+                        Firmalar
+                    </MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Receipt" Href="/muhasebe/fisler">
+                        Fis Girisi
+                    </MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Warning" StartIcon="@Icons.Material.Filled.People" Href="/bordro">
+                        Bordro
+                    </MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.AccountBalance" Href="/muhasebe/mizan">
+                        Mizan
+                    </MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Info" StartIcon="@Icons.Material.Filled.Analytics" Href="/finansal-analiz">
+                        Mali Analiz
+                    </MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Dark" StartIcon="@Icons.Material.Filled.PictureAsPdf" OnClick="@PdfRaporOlustur">
+                        PDF Rapor
+                    </MudButton>
+                </MudStack>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private decimal _toplamGelir = 1250000;
+    private decimal _toplamGider = 980000;
+    private decimal _netKar = 270000;
+    private decimal _karMarji = 21.6m;
+    private int _maliSaglik = 78;
+    private string _maliDerece = "B+";
+
+    private List<SonIslem> _sonIslemler = new();
+
+    protected override void OnInitialized()
+    {
+        LoadSampleData();
+    }
+
+    private void LoadSampleData()
+    {
+        _sonIslemler = new List<SonIslem>
+        {
+            new SonIslem { Aciklama = "Satis Geliri - ABC Ltd.", Tarih = "Bugun 14:30", Tutar = 45000 },
+            new SonIslem { Aciklama = "Personel Maaslari", Tarih = "Bugun 10:00", Tutar = -125000 },
+            new SonIslem { Aciklama = "Hizmet Geliri - XYZ A.S.", Tarih = "Dun 16:45", Tutar = 28500 },
+            new SonIslem { Aciklama = "Kira Odemesi", Tarih = "Dun 09:00", Tutar = -15000 },
+            new SonIslem { Aciklama = "Elektrik Faturasi", Tarih = "2 gun once", Tutar = -4200 }
+        };
+    }
+
+    private void PdfRaporOlustur()
+    {
+        // PDF rapor olusturma
+    }
+
+    private class SonIslem
+    {
+        public string Aciklama { get; set; } = "";
+        public string Tarih { get; set; } = "";
+        public decimal Tutar { get; set; }
+    }
+}

@@ -1,0 +1,257 @@
+@page "/muhasebe/mizan"
+@inject AccountingService AccountingService
+@inject AuthService AuthService
+
+<PageTitle>Mizan - AYDA Musavirlik</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">
+    <MudIcon Icon="@Icons.Material.Filled.AccountBalance" Class="mr-2" />
+    Mizan
+</MudText>
+
+<MudCard Class="mb-4">
+    <MudCardContent>
+        <MudGrid>
+            <MudItem xs="12" sm="4">
+                <MudDatePicker Label="Baslangic Tarihi" @bind-Date="_baslangicTarihi" DateFormat="dd.MM.yyyy" />
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudDatePicker Label="Bitis Tarihi" @bind-Date="_bitisTarihi" DateFormat="dd.MM.yyyy" />
+            </MudItem>
+            <MudItem xs="12" sm="4" Class="d-flex align-center">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Search" OnClick="@MizanGetir">
+                    Mizan Getir
+                </MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Success" StartIcon="@Icons.Material.Filled.FileDownload" Class="ml-2" OnClick="@ExcelIndir">
+                    Excel
+                </MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" StartIcon="@Icons.Material.Filled.PictureAsPdf" Class="ml-2" OnClick="@PdfIndir">
+                    PDF
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudCardContent>
+</MudCard>
+
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">Mizan Tablosu</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudTable Items="@_mizanList" Dense="true" Hover="true" Bordered="true" Striped="true" FixedHeader="true" Height="500px">
+            <HeaderContent>
+                <MudTh>Hesap Kodu</MudTh>
+                <MudTh>Hesap Adi</MudTh>
+                <MudTh Style="text-align: right">Borc</MudTh>
+                <MudTh Style="text-align: right">Alacak</MudTh>
+                <MudTh Style="text-align: right">Borc Bakiye</MudTh>
+                <MudTh Style="text-align: right">Alacak Bakiye</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Hesap Kodu">
+                    <MudText Style="@(context.HesapKodu.Length <= 3 ? "font-weight: bold;" : "")">
+                        @context.HesapKodu
+                    </MudText>
+                </MudTd>
+                <MudTd DataLabel="Hesap Adi">
+                    <MudText Style="@(context.HesapKodu.Length <= 3 ? "font-weight: bold;" : "")">
+                        @context.HesapAdi
+                    </MudText>
+                </MudTd>
+                <MudTd DataLabel="Borc" Style="text-align: right">@context.Borc.ToString("N2")</MudTd>
+                <MudTd DataLabel="Alacak" Style="text-align: right">@context.Alacak.ToString("N2")</MudTd>
+                <MudTd DataLabel="Borc Bakiye" Style="text-align: right">
+                    @if (context.BorcBakiye > 0)
+                    {
+                        <strong>@context.BorcBakiye.ToString("N2")</strong>
+                    }
+                </MudTd>
+                <MudTd DataLabel="Alacak Bakiye" Style="text-align: right">
+                    @if (context.AlacakBakiye > 0)
+                    {
+                        <strong>@context.AlacakBakiye.ToString("N2")</strong>
+                    }
+                </MudTd>
+            </RowTemplate>
+            <FooterContent>
+                <MudTh colspan="2"><strong>GENEL TOPLAM</strong></MudTh>
+                <MudTh Style="text-align: right"><strong>@_mizanList.Sum(x => x.Borc).ToString("N2")</strong></MudTh>
+                <MudTh Style="text-align: right"><strong>@_mizanList.Sum(x => x.Alacak).ToString("N2")</strong></MudTh>
+                <MudTh Style="text-align: right"><strong>@_mizanList.Sum(x => x.BorcBakiye).ToString("N2")</strong></MudTh>
+                <MudTh Style="text-align: right"><strong>@_mizanList.Sum(x => x.AlacakBakiye).ToString("N2")</strong></MudTh>
+            </FooterContent>
+        </MudTable>
+    </MudCardContent>
+</MudCard>
+
+<MudGrid Class="mt-4">
+    <MudItem xs="12" md="6">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Hesap Grubu Ozeti</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudSimpleTable Dense="true">
+                    <thead>
+                        <tr>
+                            <th>Hesap Grubu</th>
+                            <th style="text-align: right">Borc</th>
+                            <th style="text-align: right">Alacak</th>
+                            <th style="text-align: right">Bakiye</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var grup in _hesapGruplari)
+                        {
+                            <tr>
+                                <td>@grup.GrupAdi</td>
+                                <td style="text-align: right">@grup.Borc.ToString("N2")</td>
+                                <td style="text-align: right">@grup.Alacak.ToString("N2")</td>
+                                <td style="text-align: right"><strong>@grup.Bakiye.ToString("N2")</strong></td>
+                            </tr>
+                        }
+                    </tbody>
+                </MudSimpleTable>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" md="6">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Mizan Kontrolu</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                @if (_mizanDenkMi)
+                {
+                    <MudAlert Severity="Severity.Success">
+                        <MudIcon Icon="@Icons.Material.Filled.CheckCircle" /> Mizan denklemesi saglanmistir.
+                    </MudAlert>
+                }
+                else
+                {
+                    <MudAlert Severity="Severity.Error">
+                        <MudIcon Icon="@Icons.Material.Filled.Error" /> Mizan denklemesi saglanamamistir! Fark: @_mizanFark.ToString("N2") TL
+                    </MudAlert>
+                }
+                <MudSimpleTable Dense="true" Class="mt-3">
+                    <tbody>
+                        <tr>
+                            <td>Toplam Borc</td>
+                            <td align="right"><strong>@_mizanList.Sum(x => x.Borc).ToString("N2") TL</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Toplam Alacak</td>
+                            <td align="right"><strong>@_mizanList.Sum(x => x.Alacak).ToString("N2") TL</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Borc Bakiye Toplami</td>
+                            <td align="right">@_mizanList.Sum(x => x.BorcBakiye).ToString("N2") TL</td>
+                        </tr>
+                        <tr>
+                            <td>Alacak Bakiye Toplami</td>
+                            <td align="right">@_mizanList.Sum(x => x.AlacakBakiye).ToString("N2") TL</td>
+                        </tr>
+                    </tbody>
+                </MudSimpleTable>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private DateTime? _baslangicTarihi = new DateTime(DateTime.Now.Year, 1, 1);
+    private DateTime? _bitisTarihi = DateTime.Now;
+    private List<MizanSatir> _mizanList = new();
+    private List<HesapGrubu> _hesapGruplari = new();
+    private bool _mizanDenkMi = true;
+    private decimal _mizanFark = 0;
+
+    protected override void OnInitialized()
+    {
+        LoadSampleData();
+    }
+
+    private void LoadSampleData()
+    {
+        _mizanList = new List<MizanSatir>
+        {
+            new MizanSatir { HesapKodu = "100", HesapAdi = "KASA", Borc = 150000, Alacak = 100000 },
+            new MizanSatir { HesapKodu = "102", HesapAdi = "BANKALAR", Borc = 800000, Alacak = 350000 },
+            new MizanSatir { HesapKodu = "120", HesapAdi = "ALICILAR", Borc = 450000, Alacak = 170000 },
+            new MizanSatir { HesapKodu = "150", HesapAdi = "STOKLAR", Borc = 280000, Alacak = 100000 },
+            new MizanSatir { HesapKodu = "253", HesapAdi = "TESIS MAKINA CIHAZLAR", Borc = 500000, Alacak = 0 },
+            new MizanSatir { HesapKodu = "254", HesapAdi = "TASITLAR", Borc = 250000, Alacak = 0 },
+            new MizanSatir { HesapKodu = "257", HesapAdi = "BIRIKMIS AMORTISMANLAR", Borc = 0, Alacak = 180000 },
+            new MizanSatir { HesapKodu = "300", HesapAdi = "BANKA KREDILERI", Borc = 100000, Alacak = 300000 },
+            new MizanSatir { HesapKodu = "320", HesapAdi = "SATICILAR", Borc = 120000, Alacak = 300000 },
+            new MizanSatir { HesapKodu = "360", HesapAdi = "ODENECEK VERGILER", Borc = 50000, Alacak = 150000 },
+            new MizanSatir { HesapKodu = "500", HesapAdi = "SERMAYE", Borc = 0, Alacak = 500000 },
+            new MizanSatir { HesapKodu = "570", HesapAdi = "GECMIS YIL KARLARI", Borc = 0, Alacak = 400000 },
+            new MizanSatir { HesapKodu = "600", HesapAdi = "YURTICI SATISLAR", Borc = 0, Alacak = 1500000 },
+            new MizanSatir { HesapKodu = "620", HesapAdi = "SATILAN MAMULLER MALIYETI", Borc = 950000, Alacak = 0 },
+            new MizanSatir { HesapKodu = "630", HesapAdi = "ARASTIRMA GELISTIRME GIDERLERI", Borc = 80000, Alacak = 0 },
+            new MizanSatir { HesapKodu = "632", HesapAdi = "GENEL YONETIM GIDERLERI", Borc = 200000, Alacak = 0 },
+            new MizanSatir { HesapKodu = "660", HesapAdi = "KISA VADELI BORC KARSILIKLARI", Borc = 0, Alacak = 30000 }
+        };
+
+        foreach (var satir in _mizanList)
+        {
+            satir.BorcBakiye = satir.Borc > satir.Alacak ? satir.Borc - satir.Alacak : 0;
+            satir.AlacakBakiye = satir.Alacak > satir.Borc ? satir.Alacak - satir.Borc : 0;
+        }
+
+        _hesapGruplari = new List<HesapGrubu>
+        {
+            new HesapGrubu { GrupAdi = "1 - Donen Varliklar", Borc = 1680000, Alacak = 720000, Bakiye = 960000 },
+            new HesapGrubu { GrupAdi = "2 - Duran Varliklar", Borc = 750000, Alacak = 180000, Bakiye = 570000 },
+            new HesapGrubu { GrupAdi = "3 - Kisa Vadeli Yabanci Kaynaklar", Borc = 270000, Alacak = 750000, Bakiye = -480000 },
+            new HesapGrubu { GrupAdi = "5 - Oz Kaynaklar", Borc = 0, Alacak = 900000, Bakiye = -900000 },
+            new HesapGrubu { GrupAdi = "6 - Gelir Tablosu Hesaplari", Borc = 1230000, Alacak = 1530000, Bakiye = -300000 }
+        };
+
+        var toplamBorc = _mizanList.Sum(x => x.Borc);
+        var toplamAlacak = _mizanList.Sum(x => x.Alacak);
+        _mizanFark = Math.Abs(toplamBorc - toplamAlacak);
+        _mizanDenkMi = _mizanFark < 0.01m;
+    }
+
+    private void MizanGetir()
+    {
+        // API'den mizan getir
+    }
+
+    private void ExcelIndir()
+    {
+        // Excel indir
+    }
+
+    private void PdfIndir()
+    {
+        // PDF indir
+    }
+
+    private class MizanSatir
+    {
+        public string HesapKodu { get; set; } = "";
+        public string HesapAdi { get; set; } = "";
+        public decimal Borc { get; set; }
+        public decimal Alacak { get; set; }
+        public decimal BorcBakiye { get; set; }
+        public decimal AlacakBakiye { get; set; }
+    }
+
+    private class HesapGrubu
+    {
+        public string GrupAdi { get; set; } = "";
+        public decimal Borc { get; set; }
+        public decimal Alacak { get; set; }
+        public decimal Bakiye { get; set; }
+    }
+}

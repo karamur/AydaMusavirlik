@@ -1,0 +1,258 @@
+@page "/bordro"
+@inject AuthService AuthService
+
+<PageTitle>Bordro Yonetimi - AYDA Musavirlik</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">
+    <MudIcon Icon="@Icons.Material.Filled.People" Class="mr-2" />
+    Bordro Yonetimi
+</MudText>
+
+<MudGrid>
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard>
+            <MudCardContent>
+                <div class="d-flex justify-space-between align-center">
+                    <div>
+                        <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Toplam Personel</MudText>
+                        <MudText Typo="Typo.h4">@_toplamPersonel</MudText>
+                    </div>
+                    <MudIcon Icon="@Icons.Material.Filled.People" Size="Size.Large" Color="Color.Primary" />
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard>
+            <MudCardContent>
+                <div class="d-flex justify-space-between align-center">
+                    <div>
+                        <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Brut Maas Toplami</MudText>
+                        <MudText Typo="Typo.h4">@_brutMaasToplam.ToString("N0") TL</MudText>
+                    </div>
+                    <MudIcon Icon="@Icons.Material.Filled.AccountBalanceWallet" Size="Size.Large" Color="Color.Info" />
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard>
+            <MudCardContent>
+                <div class="d-flex justify-space-between align-center">
+                    <div>
+                        <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Net Maas Toplami</MudText>
+                        <MudText Typo="Typo.h4">@_netMaasToplam.ToString("N0") TL</MudText>
+                    </div>
+                    <MudIcon Icon="@Icons.Material.Filled.Payments" Size="Size.Large" Color="Color.Success" />
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard>
+            <MudCardContent>
+                <div class="d-flex justify-space-between align-center">
+                    <div>
+                        <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Isveren Maliyeti</MudText>
+                        <MudText Typo="Typo.h4">@_isverenMaliyet.ToString("N0") TL</MudText>
+                    </div>
+                    <MudIcon Icon="@Icons.Material.Filled.Business" Size="Size.Large" Color="Color.Warning" />
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+<MudGrid Class="mt-4">
+    <MudItem xs="12">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Bordro Listesi - @DateTime.Now.ToString("MMMM yyyy")</MudText>
+                </CardHeaderContent>
+                <CardHeaderActions>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Calculate" OnClick="@BordroHesapla">
+                        Bordro Hesapla
+                    </MudButton>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Success" StartIcon="@Icons.Material.Filled.FileDownload" OnClick="@ExcelIndir">
+                        Excel
+                    </MudButton>
+                </CardHeaderActions>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTable Items="@_bordroList" Dense="true" Hover="true" Bordered="true" Striped="true">
+                    <HeaderContent>
+                        <MudTh>Personel</MudTh>
+                        <MudTh Style="text-align: right">Brut Maas</MudTh>
+                        <MudTh Style="text-align: right">SGK Isci</MudTh>
+                        <MudTh Style="text-align: right">Gelir Vergisi</MudTh>
+                        <MudTh Style="text-align: right">Damga Vergisi</MudTh>
+                        <MudTh Style="text-align: right">Net Maas</MudTh>
+                        <MudTh Style="text-align: right">SGK Isveren</MudTh>
+                        <MudTh Style="text-align: right">Toplam Maliyet</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Personel">@context.PersonelAdi</MudTd>
+                        <MudTd DataLabel="Brut Maas" Style="text-align: right">@context.BrutMaas.ToString("N2")</MudTd>
+                        <MudTd DataLabel="SGK Isci" Style="text-align: right">@context.SgkIsci.ToString("N2")</MudTd>
+                        <MudTd DataLabel="Gelir Vergisi" Style="text-align: right">@context.GelirVergisi.ToString("N2")</MudTd>
+                        <MudTd DataLabel="Damga Vergisi" Style="text-align: right">@context.DamgaVergisi.ToString("N2")</MudTd>
+                        <MudTd DataLabel="Net Maas" Style="text-align: right"><strong>@context.NetMaas.ToString("N2")</strong></MudTd>
+                        <MudTd DataLabel="SGK Isveren" Style="text-align: right">@context.SgkIsveren.ToString("N2")</MudTd>
+                        <MudTd DataLabel="Toplam Maliyet" Style="text-align: right"><strong>@context.ToplamMaliyet.ToString("N2")</strong></MudTd>
+                    </RowTemplate>
+                    <FooterContent>
+                        <MudTh>TOPLAM</MudTh>
+                        <MudTh Style="text-align: right"><strong>@_bordroList.Sum(x => x.BrutMaas).ToString("N2")</strong></MudTh>
+                        <MudTh Style="text-align: right">@_bordroList.Sum(x => x.SgkIsci).ToString("N2")</MudTh>
+                        <MudTh Style="text-align: right">@_bordroList.Sum(x => x.GelirVergisi).ToString("N2")</MudTh>
+                        <MudTh Style="text-align: right">@_bordroList.Sum(x => x.DamgaVergisi).ToString("N2")</MudTh>
+                        <MudTh Style="text-align: right"><strong>@_bordroList.Sum(x => x.NetMaas).ToString("N2")</strong></MudTh>
+                        <MudTh Style="text-align: right">@_bordroList.Sum(x => x.SgkIsveren).ToString("N2")</MudTh>
+                        <MudTh Style="text-align: right"><strong>@_bordroList.Sum(x => x.ToplamMaliyet).ToString("N2")</strong></MudTh>
+                    </FooterContent>
+                </MudTable>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+<MudGrid Class="mt-4">
+    <MudItem xs="12" md="6">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">SGK Bildirge Ozeti</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudSimpleTable Dense="true">
+                    <tbody>
+                        <tr>
+                            <td>Prim Gun Sayisi</td>
+                            <td align="right"><strong>@(_toplamPersonel * 30)</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Prime Esas Kazanc</td>
+                            <td align="right"><strong>@_brutMaasToplam.ToString("N2") TL</strong></td>
+                        </tr>
+                        <tr>
+                            <td>SGK Isci Payi (%14)</td>
+                            <td align="right">@(_bordroList.Sum(x => x.SgkIsci)).ToString("N2") TL</td>
+                        </tr>
+                        <tr>
+                            <td>SGK Isveren Payi (%20.5)</td>
+                            <td align="right">@(_bordroList.Sum(x => x.SgkIsveren)).ToString("N2") TL</td>
+                        </tr>
+                        <tr>
+                            <td>Issizlik Isci (%1)</td>
+                            <td align="right">@(_brutMaasToplam * 0.01m).ToString("N2") TL</td>
+                        </tr>
+                        <tr>
+                            <td>Issizlik Isveren (%2)</td>
+                            <td align="right">@(_brutMaasToplam * 0.02m).ToString("N2") TL</td>
+                        </tr>
+                        <tr style="background-color: #f5f5f5;">
+                            <td><strong>TOPLAM SGK</strong></td>
+                            <td align="right"><strong>@((_bordroList.Sum(x => x.SgkIsci) + _bordroList.Sum(x => x.SgkIsveren) + _brutMaasToplam * 0.03m)).ToString("N2") TL</strong></td>
+                        </tr>
+                    </tbody>
+                </MudSimpleTable>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" md="6">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Vergi Beyanname Ozeti</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudSimpleTable Dense="true">
+                    <tbody>
+                        <tr>
+                            <td>Gelir Vergisi Matrahi</td>
+                            <td align="right"><strong>@(_brutMaasToplam - _bordroList.Sum(x => x.SgkIsci)).ToString("N2") TL</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Gelir Vergisi</td>
+                            <td align="right">@(_bordroList.Sum(x => x.GelirVergisi)).ToString("N2") TL</td>
+                        </tr>
+                        <tr>
+                            <td>Damga Vergisi</td>
+                            <td align="right">@(_bordroList.Sum(x => x.DamgaVergisi)).ToString("N2") TL</td>
+                        </tr>
+                        <tr style="background-color: #f5f5f5;">
+                            <td><strong>TOPLAM VERGI</strong></td>
+                            <td align="right"><strong>@((_bordroList.Sum(x => x.GelirVergisi) + _bordroList.Sum(x => x.DamgaVergisi))).ToString("N2") TL</strong></td>
+                        </tr>
+                    </tbody>
+                </MudSimpleTable>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private int _toplamPersonel = 5;
+    private decimal _brutMaasToplam = 175000;
+    private decimal _netMaasToplam = 138250;
+    private decimal _isverenMaliyet = 215000;
+
+    private List<BordroKayit> _bordroList = new();
+
+    protected override void OnInitialized()
+    {
+        LoadSampleData();
+    }
+
+    private void LoadSampleData()
+    {
+        _bordroList = new List<BordroKayit>
+        {
+            new BordroKayit { PersonelAdi = "Ahmet Yilmaz", BrutMaas = 45000, SgkIsci = 6300, GelirVergisi = 5805, DamgaVergisi = 341.55m, SgkIsveren = 9225 },
+            new BordroKayit { PersonelAdi = "Mehmet Demir", BrutMaas = 38000, SgkIsci = 5320, GelirVergisi = 4902, DamgaVergisi = 288.42m, SgkIsveren = 7790 },
+            new BordroKayit { PersonelAdi = "Ayse Kaya", BrutMaas = 35000, SgkIsci = 4900, GelirVergisi = 4515, DamgaVergisi = 265.65m, SgkIsveren = 7175 },
+            new BordroKayit { PersonelAdi = "Fatma Ozturk", BrutMaas = 32000, SgkIsci = 4480, GelirVergisi = 4128, DamgaVergisi = 242.88m, SgkIsveren = 6560 },
+            new BordroKayit { PersonelAdi = "Ali Celik", BrutMaas = 25000, SgkIsci = 3500, GelirVergisi = 3225, DamgaVergisi = 189.75m, SgkIsveren = 5125 }
+        };
+
+        foreach (var bordro in _bordroList)
+        {
+            bordro.NetMaas = bordro.BrutMaas - bordro.SgkIsci - bordro.GelirVergisi - bordro.DamgaVergisi;
+            bordro.ToplamMaliyet = bordro.BrutMaas + bordro.SgkIsveren;
+        }
+
+        _brutMaasToplam = _bordroList.Sum(x => x.BrutMaas);
+        _netMaasToplam = _bordroList.Sum(x => x.NetMaas);
+        _isverenMaliyet = _bordroList.Sum(x => x.ToplamMaliyet);
+        _toplamPersonel = _bordroList.Count;
+    }
+
+    private void BordroHesapla()
+    {
+        // Bordro hesaplama
+    }
+
+    private void ExcelIndir()
+    {
+        // Excel indirme
+    }
+
+    private class BordroKayit
+    {
+        public string PersonelAdi { get; set; } = "";
+        public decimal BrutMaas { get; set; }
+        public decimal SgkIsci { get; set; }
+        public decimal GelirVergisi { get; set; }
+        public decimal DamgaVergisi { get; set; }
+        public decimal NetMaas { get; set; }
+        public decimal SgkIsveren { get; set; }
+        public decimal ToplamMaliyet { get; set; }
+    }
+}

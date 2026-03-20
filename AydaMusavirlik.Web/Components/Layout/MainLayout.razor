@@ -17,7 +17,7 @@ else
         <MudAppBar Elevation="1">
             <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
                            OnClick="@(() => _drawerOpen = !_drawerOpen)" />
-            <MudText Typo="Typo.h5" Class="ml-3">AYDA Müşavirlik</MudText>
+            <MudText Typo="Typo.h5" Class="ml-3">AYDA Musavirlik</MudText>
             <MudSpacer />
             
             <MudChip T="string" Color="Color.Success" Size="Size.Small" Class="mr-4">
@@ -35,32 +35,40 @@ else
                 <MudMenuItem Href="/profil" Icon="@Icons.Material.Filled.AccountCircle">Profil</MudMenuItem>
                 @if (AuthService.IsAdmin)
                 {
-                    <MudMenuItem Href="/kullanicilar" Icon="@Icons.Material.Filled.People">Kullanıcı Yönetimi</MudMenuItem>
+                    <MudMenuItem Href="/kullanicilar" Icon="@Icons.Material.Filled.People">Kullanici Yonetimi</MudMenuItem>
                 }
                 <MudDivider />
-                <MudMenuItem OnClick="HandleLogout" Icon="@Icons.Material.Filled.Logout">Çıkış Yap</MudMenuItem>
+                <MudMenuItem OnClick="HandleLogout" Icon="@Icons.Material.Filled.Logout">Cikis Yap</MudMenuItem>
             </MudMenu>
         </MudAppBar>
         
         <MudDrawer @bind-Open="_drawerOpen" Elevation="2" Variant="DrawerVariant.Mini" 
                    OpenMiniOnHover="true" ClipMode="DrawerClipMode.Always">
             <MudDrawerHeader>
-                <MudText Typo="Typo.h6">Menü</MudText>
+                <MudText Typo="Typo.h6">Menu</MudText>
             </MudDrawerHeader>
             <MudNavMenu>
-                <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">
+                <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">
                     Ana Sayfa
                 </MudNavLink>
                 
+                <MudNavLink Href="/dashboard" Icon="@Icons.Material.Filled.Dashboard">
+                    Dashboard
+                </MudNavLink>
+                
                 <MudNavGroup Title="Muhasebe" Icon="@Icons.Material.Filled.Calculate" Expanded="false">
-                    <MudNavLink Href="/muhasebe/hesap-plani" Icon="@Icons.Material.Filled.AccountTree">Hesap Planı</MudNavLink>
-                    <MudNavLink Href="/muhasebe/fisler" Icon="@Icons.Material.Filled.Receipt">Fişler</MudNavLink>
+                    <MudNavLink Href="/muhasebe/hesap-plani" Icon="@Icons.Material.Filled.AccountTree">Hesap Plani</MudNavLink>
+                    <MudNavLink Href="/muhasebe/fisler" Icon="@Icons.Material.Filled.Receipt">Fisler</MudNavLink>
                     <MudNavLink Href="/muhasebe/yevmiye" Icon="@Icons.Material.Filled.ListAlt">Yevmiye</MudNavLink>
                     <MudNavLink Href="/muhasebe/mizan" Icon="@Icons.Material.Filled.TableChart">Mizan</MudNavLink>
                 </MudNavGroup>
                 
+                <MudNavLink Href="/bordro" Icon="@Icons.Material.Filled.People">
+                    Bordro
+                </MudNavLink>
+                
                 <MudNavLink Href="/finansal-analiz" Icon="@Icons.Material.Filled.Analytics">
-                    Finansal Analiz
+                    Mali Analiz
                 </MudNavLink>
                 
                 <MudNavLink Href="/randevular" Icon="@Icons.Material.Filled.CalendarMonth">
@@ -77,11 +85,11 @@ else
                 @if (AuthService.IsAdmin)
                 {
                     <MudNavLink Href="/kullanicilar" Icon="@Icons.Material.Filled.People">
-                        Kullanıcı Yönetimi
+                        Kullanici Yonetimi
                     </MudNavLink>
                     
                     <MudNavGroup Title="Ayarlar" Icon="@Icons.Material.Filled.Settings" Expanded="false">
-                        <MudNavLink Href="/ayarlar/veritabani" Icon="@Icons.Material.Filled.Storage">Veritabanı</MudNavLink>
+                        <MudNavLink Href="/ayarlar/veritabani" Icon="@Icons.Material.Filled.Storage">Veritabani</MudNavLink>
                         <MudNavLink Href="/ayarlar/genel" Icon="@Icons.Material.Filled.Tune">Genel Ayarlar</MudNavLink>
                     </MudNavGroup>
                 }
