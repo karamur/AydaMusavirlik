@@ -12,12 +12,13 @@ public partial class App : Application
 {
     public static IServiceProvider Services { get; private set; } = null!;
 
-    protected override async void OnStartup(StartupEventArgs e)
+    protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
 
+        // Servisleri senkron olarak yapılandır
         var services = new ServiceCollection();
-        await ConfigureServicesAsync(services);
+        ConfigureServices(services);
         Services = services.BuildServiceProvider();
 
         // Login penceresi aç
@@ -25,11 +26,11 @@ public partial class App : Application
         loginWindow.Show();
     }
 
-    private async Task ConfigureServicesAsync(IServiceCollection services)
+    private void ConfigureServices(IServiceCollection services)
     {
         // Settings Service - Singleton
         var settingsService = new SettingsService();
-        await settingsService.LoadAsync();
+        settingsService.LoadAsync().GetAwaiter().GetResult();
         services.AddSingleton<ISettingsService>(settingsService);
 
         // API Settings
