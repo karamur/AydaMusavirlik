@@ -70,6 +70,11 @@ public partial class App : Application
             sp.GetService<ApiClient>()
         ));
         
+        // Accounting Record Service
+        services.AddTransient<IAccountingRecordService>(sp => new AccountingRecordService(
+            sp.GetRequiredService<ISettingsService>()
+        ));
+        
         services.AddTransient<IEmployeeService, EmployeeService>();
         services.AddTransient<IPayrollService, PayrollService>();
 
