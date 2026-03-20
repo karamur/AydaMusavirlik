@@ -58,10 +58,20 @@ public partial class App : Application
             sp.GetService<ApiClient>()
         ));
         
-        services.AddTransient<ICompanyService, CompanyService>();
+        // Company Service with SettingsService
+        services.AddTransient<ICompanyService>(sp => new CompanyService(
+            sp.GetRequiredService<ISettingsService>(),
+            sp.GetService<ApiClient>()
+        ));
+        
+        // Account Service with SettingsService
+        services.AddTransient<IAccountService>(sp => new AccountService(
+            sp.GetRequiredService<ISettingsService>(),
+            sp.GetService<ApiClient>()
+        ));
+        
         services.AddTransient<IEmployeeService, EmployeeService>();
         services.AddTransient<IPayrollService, PayrollService>();
-        services.AddTransient<IAccountService, AccountService>();
 
         // Report Services
         services.AddTransient<IFinancialAnalysisService, FinancialAnalysisService>();

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AydaMusavirlik.Data")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f600b98abf073fa6fd448b6a68fb1964f39f0f8c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+87cad54ca07001ff804bf06c92b1e2997e0f4911")]
 [assembly: System.Reflection.AssemblyProductAttribute("AydaMusavirlik.Data")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AydaMusavirlik.Data")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
