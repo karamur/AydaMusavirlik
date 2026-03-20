@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AydaMusavirlik.Core\AydaMusavirlik.Core.csproj" />
+    <ProjectReference Include="..\AydaMusavirlik.Data\AydaMusavirlik.Data.csproj" />
   </ItemGroup>
 
 </Project>

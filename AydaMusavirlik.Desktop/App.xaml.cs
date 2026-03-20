@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using AydaMusavirlik.Desktop.Services;
 using AydaMusavirlik.Desktop.Services.Reports;
 using AydaMusavirlik.Desktop.Views;
+using AydaMusavirlik.Data.Services;
 
 namespace AydaMusavirlik.Desktop;
 
@@ -11,21 +12,30 @@ public partial class App : Application
 {
     public static IServiceProvider Services { get; private set; } = null!;
 
-    protected override void OnStartup(StartupEventArgs e)
+    protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
 
         var services = new ServiceCollection();
-        ConfigureServices(services);
+        await ConfigureServicesAsync(services);
         Services = services.BuildServiceProvider();
+
+        // Ayarlari yukle
+        var settingsService = Services.GetRequiredService<ISettingsService>();
+        await settingsService.LoadAsync();
 
         // Login penceresi aç
         var loginWindow = new LoginWindow();
         loginWindow.Show();
     }
 
-    private void ConfigureServices(IServiceCollection services)
+    private async Task ConfigureServicesAsync(IServiceCollection services)
     {
+        // Settings Service - Singleton
+        var settingsService = new SettingsService();
+        await settingsService.LoadAsync();
+        services.AddSingleton<ISettingsService>(settingsService);
+
         // API Settings
         var apiSettings = new ApiSettings
         {

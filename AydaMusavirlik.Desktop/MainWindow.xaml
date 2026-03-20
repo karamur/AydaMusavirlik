@@ -160,6 +160,11 @@
 
             <!-- Ayarlar Menüsü -->
             <MenuItem Header="_Ayarlar" Foreground="White" HorizontalAlignment="Right">
+                <MenuItem Header="_Veritabani Ayarlari" Click="VeritabaniAyarlari_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="🗄️" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
                 <MenuItem Header="_Kullanıcı Ayarları" Click="KullaniciAyarlari_Click">
                     <MenuItem.Icon>
                         <TextBlock Text="⚙️" FontSize="14"/>

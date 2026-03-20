@@ -9,6 +9,7 @@ using AydaMusavirlik.Desktop.Views.Companies;
 using AydaMusavirlik.Desktop.Views.Dashboard;
 using AydaMusavirlik.Desktop.Views.Payroll;
 using AydaMusavirlik.Desktop.Views.Reports;
+using AydaMusavirlik.Desktop.Views.Settings;
 
 namespace AydaMusavirlik.Desktop;
 
@@ -270,6 +271,11 @@ public partial class MainWindow : Window
     #endregion
 
     #region Ayarlar Menüsü
+    private void VeritabaniAyarlari_Click(object sender, RoutedEventArgs e)
+    {
+        OpenTabWithControl("Veritabani Ayarlari", new DatabaseSettingsView());
+    }
+
     private void KullaniciAyarlari_Click(object sender, RoutedEventArgs e)
     {
         OpenTab("Kullanıcı Ayarları", "⚙️ Kullanıcı ayarları burada görünecek.");
