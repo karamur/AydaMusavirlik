@@ -75,8 +75,15 @@ public partial class App : Application
             sp.GetRequiredService<ISettingsService>()
         ));
         
-        services.AddTransient<IEmployeeService, EmployeeService>();
-        services.AddTransient<IPayrollService, PayrollService>();
+        // Employee Service
+        services.AddTransient<IEmployeeService>(sp => new EmployeeService(
+            sp.GetRequiredService<ISettingsService>()
+        ));
+        
+        // Payroll Service
+        services.AddTransient<IPayrollService>(sp => new PayrollService(
+            sp.GetRequiredService<ISettingsService>()
+        ));
 
         // Report Services
         services.AddTransient<IFinancialAnalysisService, FinancialAnalysisService>();
