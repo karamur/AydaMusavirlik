@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Net.Http;
 using AydaMusavirlik.Desktop.Services;
 
 namespace AydaMusavirlik.Desktop.Views;
@@ -17,12 +18,36 @@ public partial class LoginWindow : Window
         Loaded += LoginWindow_Loaded;
     }
 
-    private void LoginWindow_Loaded(object sender, RoutedEventArgs e)
+    private async void LoginWindow_Loaded(object sender, RoutedEventArgs e)
     {
-        // Offline mod - her zaman hazýr
-        statusIndicator.Fill = new SolidColorBrush(Colors.Green);
-        txtStatus.Text = "Hazýr (Offline Mod)";
+        await CheckApiStatus();
         txtUsername.Focus();
+    }
+
+    private async Task CheckApiStatus()
+    {
+        try
+        {
+            using var client = new HttpClient();
+            client.Timeout = TimeSpan.FromSeconds(3);
+            var response = await client.GetAsync("http://localhost:5000/swagger/index.html");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                statusIndicator.Fill = new SolidColorBrush(Colors.Green);
+                txtStatus.Text = "API Bagli";
+            }
+            else
+            {
+                statusIndicator.Fill = new SolidColorBrush(Colors.Orange);
+                txtStatus.Text = "Offline Mod";
+            }
+        }
+        catch
+        {
+            statusIndicator.Fill = new SolidColorBrush(Colors.Orange);
+            txtStatus.Text = "Offline Mod";
+        }
     }
 
     private async void BtnLogin_Click(object sender, RoutedEventArgs e)
@@ -45,7 +70,7 @@ public partial class LoginWindow : Window
 
         if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
         {
-            ShowError("Kullanýcý adý ve þifre giriniz.");
+            ShowError("Kullanici adi ve sifre giriniz.");
             return;
         }
 
@@ -58,13 +83,20 @@ public partial class LoginWindow : Window
 
             if (result.Success)
             {
+                // Baglanti durumunu goster
+                if (result.IsOnline)
+                {
+                    statusIndicator.Fill = new SolidColorBrush(Colors.Green);
+                    txtStatus.Text = "API Bagli";
+                }
+
                 var mainWindow = new MainWindow();
                 mainWindow.Show();
                 Close();
             }
             else
             {
-                ShowError(result.Error ?? "Giriþ baþarýsýz.");
+                ShowError(result.Error ?? "Giris basarisiz.");
             }
         }
         catch (Exception ex)

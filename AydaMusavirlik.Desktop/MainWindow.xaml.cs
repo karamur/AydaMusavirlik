@@ -6,7 +6,9 @@ using AydaMusavirlik.Desktop.Views;
 using AydaMusavirlik.Desktop.Views.Accounting;
 using AydaMusavirlik.Desktop.Views.ArGe;
 using AydaMusavirlik.Desktop.Views.Companies;
+using AydaMusavirlik.Desktop.Views.Dashboard;
 using AydaMusavirlik.Desktop.Views.Payroll;
+using AydaMusavirlik.Desktop.Views.Reports;
 
 namespace AydaMusavirlik.Desktop;
 
@@ -226,12 +228,17 @@ public partial class MainWindow : Window
 
     private void FinansalAnaliz_Click(object sender, RoutedEventArgs e)
     {
-        OpenTab("Finansal Analiz", "📈 Finansal analiz ekranı burada görünecek.");
+        OpenTabWithControl("Mali Analiz", new FinancialAnalysisView());
     }
 
     private void OranAnalizi_Click(object sender, RoutedEventArgs e)
     {
-        OpenTab("Oran Analizi", "📊 Oran analizi ekranı burada görünecek.");
+        OpenTabWithControl("Mali Analiz", new FinancialAnalysisView());
+    }
+
+    private void Dashboard_Click(object sender, RoutedEventArgs e)
+    {
+        OpenTabWithControl("Dashboard", new DashboardView());
     }
     #endregion
 

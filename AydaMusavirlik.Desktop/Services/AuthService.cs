@@ -13,18 +13,20 @@ public interface IAuthService
 public class AuthService : IAuthService
 {
     private readonly AuthTokenStore _tokenStore;
+    private readonly ApiClient? _apiClient;
 
-    // Offline test kullanicilari
-    private static readonly Dictionary<string, (string Password, string FullName, string Role)> _users = new()
+    // Offline test kullanicilari (API baglantisi yoksa)
+    private static readonly Dictionary<string, (string Password, string FullName, string Role)> _offlineUsers = new()
     {
         ["admin"] = ("admin", "Sistem Yoneticisi", "Admin"),
         ["muhasebe"] = ("muhasebe123", "Ayse Muhasebeci", "Accountant"),
         ["yonetici"] = ("yonetici123", "Mehmet Yonetici", "Manager")
     };
 
-    public AuthService(AuthTokenStore tokenStore)
+    public AuthService(AuthTokenStore tokenStore, ApiClient? apiClient = null)
     {
         _tokenStore = tokenStore;
+        _apiClient = apiClient;
     }
 
     public bool IsAuthenticated => _tokenStore.IsAuthenticated;
@@ -32,12 +34,45 @@ public class AuthService : IAuthService
     public string? CurrentUserFullName => _tokenStore.FullName;
     public string? CurrentUserRole => _tokenStore.Role;
 
-    public Task<LoginResult> LoginAsync(string username, string password)
+    public async Task<LoginResult> LoginAsync(string username, string password)
     {
-        // Offline dogrulama - buyuk/kucuk harf duyarsiz
+        // Oncelikle API ile dene
+        if (_apiClient != null)
+        {
+            try
+            {
+                var response = await _apiClient.PostAsync<LoginResponse>("api/auth/login", new
+                {
+                    Username = username,
+                    Password = password
+                });
+
+                if (response.Success && response.Data != null)
+                {
+                    _tokenStore.Token = response.Data.Token;
+                    _tokenStore.Username = response.Data.Username;
+                    _tokenStore.FullName = response.Data.FullName;
+                    _tokenStore.Role = response.Data.Role;
+                    _tokenStore.ExpiresAt = response.Data.ExpiresAt;
+
+                    return new LoginResult
+                    {
+                        Success = true,
+                        FullName = response.Data.FullName,
+                        IsOnline = true
+                    };
+                }
+            }
+            catch
+            {
+                // API baglantisi basarisiz, offline moda gec
+            }
+        }
+
+        // Offline dogrulama
         var normalizedUsername = username.ToLowerInvariant().Trim();
         
-        if (_users.TryGetValue(normalizedUsername, out var user))
+        if (_offlineUsers.TryGetValue(normalizedUsername, out var user))
         {
             if (user.Password == password)
             {
@@ -47,19 +82,20 @@ public class AuthService : IAuthService
                 _tokenStore.Token = Guid.NewGuid().ToString();
                 _tokenStore.ExpiresAt = DateTime.UtcNow.AddHours(8);
 
-                return Task.FromResult(new LoginResult
+                return new LoginResult
                 {
                     Success = true,
-                    FullName = user.FullName
-                });
+                    FullName = user.FullName,
+                    IsOnline = false
+                };
             }
         }
 
-        return Task.FromResult(new LoginResult
+        return new LoginResult
         {
             Success = false,
             Error = "Kullanici adi veya sifre hatali!"
-        });
+        };
     }
 
     public void Logout()
@@ -73,4 +109,14 @@ public class LoginResult
     public bool Success { get; set; }
     public string? FullName { get; set; }
     public string? Error { get; set; }
+    public bool IsOnline { get; set; }
+}
+
+public class LoginResponse
+{
+    public string Token { get; set; } = string.Empty;
+    public string Username { get; set; } = string.Empty;
+    public string FullName { get; set; } = string.Empty;
+    public string Role { get; set; } = string.Empty;
+    public DateTime ExpiresAt { get; set; }
 }
