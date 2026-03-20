@@ -246,22 +246,22 @@ public partial class MainWindow : Window
     #region Raporlar Menüsü
     private void Bilanco_Click(object sender, RoutedEventArgs e)
     {
-        OpenTab("Bilanço", "📈 Bilanço raporu burada görünecek.");
+        OpenTabWithControl("Raporlar", new ReportsView());
     }
 
     private void GelirTablosu_Click(object sender, RoutedEventArgs e)
     {
-        OpenTab("Gelir Tablosu", "📊 Gelir tablosu burada görünecek.");
+        OpenTabWithControl("Raporlar", new ReportsView());
     }
 
     private void NakitAkisTablosu_Click(object sender, RoutedEventArgs e)
     {
-        OpenTab("Nakit Akış Tablosu", "💵 Nakit akış tablosu burada görünecek.");
+        OpenTabWithControl("Raporlar", new ReportsView());
     }
 
     private void KdvRaporu_Click(object sender, RoutedEventArgs e)
     {
-        OpenTab("KDV Raporu", "📋 KDV raporu burada görünecek.");
+        OpenTabWithControl("Raporlar", new ReportsView());
     }
 
     private void EDefter_Click(object sender, RoutedEventArgs e)
