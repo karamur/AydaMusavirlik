@@ -257,6 +257,8 @@ public class PayrollService : IPayrollService
         Id = p.Id,
         EmployeeId = p.EmployeeId,
         EmployeeName = p.Employee != null ? $"{p.Employee.FirstName} {p.Employee.LastName}" : "",
+        FullName = p.Employee != null ? $"{p.Employee.FirstName} {p.Employee.LastName}" : "",
+        Position = p.Employee?.Position ?? "",
         Year = p.Year,
         Month = p.Month,
         GrossSalary = p.GrossSalary,
@@ -277,6 +279,9 @@ public class PayrollRecordDto
     public int Id { get; set; }
     public int EmployeeId { get; set; }
     public string EmployeeName { get; set; } = string.Empty;
+    public string FullName { get; set; } = string.Empty;
+    public string Position { get; set; } = string.Empty;
+    public string Period => $"{Year}/{Month:D2}";
     public int Year { get; set; }
     public int Month { get; set; }
     public decimal GrossSalary { get; set; }
@@ -285,6 +290,7 @@ public class PayrollRecordDto
     public decimal IncomeTax { get; set; }
     public decimal StampTax { get; set; }
     public decimal TotalDeductions { get; set; }
+    public decimal Deductions => TotalDeductions;
     public decimal NetSalary { get; set; }
     public decimal SgkEmployerCost { get; set; }
     public decimal TotalEmployerCost { get; set; }

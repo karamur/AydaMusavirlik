@@ -47,9 +47,12 @@
                     <StackPanel>
                         <TextBlock Text="Bordro Raporlari" FontSize="18" Foreground="White" FontWeight="SemiBold" Margin="0,0,0,15"/>
                         <WrapPanel>
-                            <Button x:Name="btnBordroOzet" Content="Aylik Bordro Ozeti" Click="BordroOzet_Click"
+                            <Button x:Name="btnBordroOzet" Content="Aylik Bordro (Excel)" Click="BordroOzet_Click"
                                     Width="200" Height="80" Margin="0,0,15,15"
                                     Background="#4CAF50" Foreground="White" FontSize="14"/>
+                            <Button x:Name="btnBordroPdf" Content="Aylik Bordro (PDF)" Click="BordroPdf_Click"
+                                    Width="200" Height="80" Margin="0,0,15,15"
+                                    Background="#E91E63" Foreground="White" FontSize="14"/>
                             <Button x:Name="btnBordroDetay" Content="Personel Bordro Detay" Click="BordroDetay_Click"
                                     Width="200" Height="80" Margin="0,0,15,15"
                                     Background="#4CAF50" Foreground="White" FontSize="14"/>

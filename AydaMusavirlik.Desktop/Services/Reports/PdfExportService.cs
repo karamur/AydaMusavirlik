@@ -13,6 +13,8 @@ public interface IPdfExportService
     Task<string> ExportIncomeStatementAsync(IncomeStatementReport report, string filePath);
     Task<string> ExportFinancialAnalysisAsync(FinancialHealthScore score, LiquidityRatios liquidity, 
         ProfitabilityRatios profitability, LeverageRatios leverage, string filePath);
+    Task<string> ExportPayrollAsync(IEnumerable<PayrollRecordDto> payrolls, int year, int month, string companyName, string filePath);
+    Task<string> ExportPayslipAsync(PayrollRecordDto payroll, string employeeName, string companyName, string filePath);
 }
 
 public class PdfExportService : IPdfExportService
@@ -261,6 +263,130 @@ public class PdfExportService : IPdfExportService
                                 c.Item().Text($"Verimlilik: {score.ActivityScore:N0}/25");
                             });
                         });
+                    });
+
+                    page.Footer().Element(ComposeFooter);
+                });
+            }).GeneratePdf(filePath);
+
+            return filePath;
+        });
+    }
+
+    public async Task<string> ExportPayrollAsync(IEnumerable<PayrollRecordDto> payrolls, int year, int month, string companyName, string filePath)
+    {
+        return await Task.Run(() =>
+        {
+            Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(30);
+                    page.DefaultTextStyle(x => x.FontSize(10));
+
+                    page.Header().Element(c => ComposeHeader(c, "BORDRO RAPORU", new DateTime(year, month, 1)));
+
+                    page.Content().Column(column =>
+                    {
+                        column.Spacing(10);
+
+                        // Þirket Bilgileri
+                        column.Item().Text(companyName).Bold().FontSize(16);
+                        column.Item().Text($"Bordro Tarih Aralýðý: {new DateTime(year, month, 1):dd.MM.yyyy} - {new DateTime(year, month, 1).AddMonths(1).AddDays(-1):dd.MM.yyyy}").FontSize(10);
+                        column.Item().LineHorizontal(1);
+
+                        // Bordro Tablosu
+                        column.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(c =>
+                            {
+                                c.RelativeColumn(1);
+                                c.RelativeColumn(2);
+                                c.RelativeColumn(2);
+                                c.RelativeColumn(2);
+                                c.RelativeColumn(2);
+                            });
+
+                            // Baþlýklar
+                            table.Header(header =>
+                            {
+                                header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("ID").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Adý Soyadý").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Pozisyon").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Brüt Maaþ").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Net Maaþ").Bold();
+                            });
+
+                            // Ýçerik
+                            foreach (var payroll in payrolls)
+                            {
+                                table.Cell().Padding(5).Text(payroll.Id.ToString());
+                                table.Cell().Padding(5).Text(payroll.FullName);
+                                table.Cell().Padding(5).Text(payroll.Position);
+                                table.Cell().Padding(5).Text($"{payroll.GrossSalary:N2} TL");
+                                table.Cell().Padding(5).Text($"{payroll.NetSalary:N2} TL");
+                            }
+                        });
+                    });
+
+                    page.Footer().Element(ComposeFooter);
+                });
+            }).GeneratePdf(filePath);
+
+            return filePath;
+        });
+    }
+
+    public async Task<string> ExportPayslipAsync(PayrollRecordDto payroll, string employeeName, string companyName, string filePath)
+    {
+        return await Task.Run(() =>
+        {
+            Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(30);
+                    page.DefaultTextStyle(x => x.FontSize(10));
+
+                    page.Header().Element(c => ComposeHeader(c, "PAYSLIP", DateTime.Now));
+
+                    page.Content().Column(column =>
+                    {
+                        column.Spacing(10);
+
+                        // Þirket ve Çalýþan Bilgileri
+                        column.Item().Text(companyName).Bold().FontSize(16);
+                        column.Item().Text($"Çalýþan: {employeeName}").FontSize(12);
+                        column.Item().LineHorizontal(1);
+
+                        // Bordro Bilgileri
+                        column.Item().Row(row =>
+                        {
+                            row.RelativeItem().Column(c =>
+                            {
+                                c.Item().Text("Dönem:").Bold();
+                                c.Item().Text("Brüt Ücret:").Bold();
+                                c.Item().Text("Kesintiler:").Bold();
+                                c.Item().Text("Net Ödeme:").Bold();
+                            });
+                            row.RelativeItem().Column(c =>
+                            {
+                                c.Item().Text($"{payroll.Period}");
+                                c.Item().Text($"{payroll.GrossSalary:N2} TL");
+                                c.Item().Text($"{payroll.Deductions:N2} TL");
+                                c.Item().Text($"{payroll.NetSalary:N2} TL");
+                            });
+                        });
+
+                        column.Item().LineHorizontal(1);
+
+                        // Açýklamalar
+                        column.Item().Text("Açýklamalar:").Bold();
+                        column.Item().Text("1. Brüt ücret, çalýþanýn maaþýnýn vergiler ve kesintiler öncesindeki miktarýdýr.");
+                        column.Item().Text("2. Net ödeme, çalýþana yapýlan toplam ödemeyi belirtir.");
+                        column.Item().Text("3. Kesintiler, yasal zorunluluklar ve þirket politikalarý doðrultusunda yapýlan düþüntüleri içerir.");
                     });
 
                     page.Footer().Element(ComposeFooter);

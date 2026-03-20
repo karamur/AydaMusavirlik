@@ -9,6 +9,7 @@ namespace AydaMusavirlik.Desktop.Views.Reports;
 public partial class ReportsView : UserControl
 {
     private readonly IExcelExportService _excelService;
+    private readonly IPdfExportService _pdfService;
     private readonly IPayrollService _payrollService;
     private readonly IAccountService _accountService;
     private readonly ICompanyService _companyService;
@@ -19,6 +20,7 @@ public partial class ReportsView : UserControl
     {
         InitializeComponent();
         _excelService = App.GetService<IExcelExportService>();
+        _pdfService = App.GetService<IPdfExportService>();
         _payrollService = App.GetService<IPayrollService>();
         _accountService = App.GetService<IAccountService>();
         _companyService = App.GetService<ICompanyService>();
@@ -159,6 +161,59 @@ public partial class ReportsView : UserControl
             {
                 await _excelService.ExportPayrollAsync(payrolls, saveDialog.FileName);
                 MessageBox.Show($"Bordro raporu olusturuldu:\n{saveDialog.FileName}", 
+                    "Basarili", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Hata: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private async void BordroPdf_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var year = DateTime.Now.Year;
+            var month = DateTime.Now.Month;
+
+            var payrolls = await _payrollService.GetByPeriodAsync(_currentCompanyId, year, month);
+
+            if (!payrolls.Any())
+            {
+                var result = await _payrollService.CalculateAllAsync(new CalculateAllPayrollDto
+                {
+                    CompanyId = _currentCompanyId,
+                    Year = year,
+                    Month = month,
+                    WorkingDays = 30
+                });
+
+                if (result != null)
+                {
+                    payrolls = await _payrollService.GetByPeriodAsync(_currentCompanyId, year, month);
+                }
+            }
+
+            if (!payrolls.Any())
+            {
+                MessageBox.Show("Bu donem icin bordro verisi bulunamadi.", "Uyari", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var company = await _companyService.GetByIdAsync(_currentCompanyId);
+            var companyName = company?.Name ?? "Firma";
+
+            var saveDialog = new SaveFileDialog
+            {
+                Filter = "PDF Dosyasi (*.pdf)|*.pdf",
+                FileName = $"Bordro_{year}_{month:D2}.pdf"
+            };
+
+            if (saveDialog.ShowDialog() == true)
+            {
+                await _pdfService.ExportPayrollAsync(payrolls, year, month, companyName, saveDialog.FileName);
+                MessageBox.Show($"Bordro PDF raporu olusturuldu:\n{saveDialog.FileName}", 
                     "Basarili", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
