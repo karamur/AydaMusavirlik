@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using AydaMusavirlik.Core.Configuration;
+using AydaMusavirlik.Data.Services;
 
 namespace AydaMusavirlik.Data;
 
@@ -149,6 +150,33 @@ public static class DatabaseFactory
         );
 
         return result;
+    }
+
+    /// <summary>
+    /// Veritabanini olusturur ve seed data ekler
+    /// </summary>
+    public static async Task<(bool Success, string Message)> InitializeDatabaseAsync(DatabaseSettings settings, bool seedData = true)
+    {
+        try
+        {
+            using var context = CreateContext(settings);
+            
+            // Veritabanini olustur
+            await context.Database.EnsureCreatedAsync();
+            
+            // Seed data ekle
+            if (seedData)
+            {
+                var seedService = new SeedDataService(context);
+                await seedService.SeedAllAsync();
+            }
+            
+            return (true, "Veritabani basariyla olusturuldu ve veriler eklendi.");
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Veritabani olusturma hatasi: {ex.Message}");
+        }
     }
 }
 

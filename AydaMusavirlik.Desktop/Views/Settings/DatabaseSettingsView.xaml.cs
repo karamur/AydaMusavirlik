@@ -193,19 +193,19 @@ public partial class DatabaseSettingsView : UserControl
         try
         {
             var settings = GetCurrentSettings();
-            var success = await DatabaseFactory.EnsureDatabaseCreatedAsync(settings);
+            var (success, message) = await DatabaseFactory.InitializeDatabaseAsync(settings, seedData: false);
 
             if (success)
             {
-                ShowMessage("Veritabani basariyla olusturuldu!", false);
+                ShowMessage(message, false);
                 await RefreshConnectionStatus(settings);
-
+                
                 MessageBox.Show("Veritabani basariyla olusturuldu.", "Basarili", 
                     MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else
             {
-                ShowMessage("Veritabani olusturulamadi.", true);
+                ShowMessage(message, true);
             }
         }
         catch (Exception ex)
@@ -216,6 +216,55 @@ public partial class DatabaseSettingsView : UserControl
         {
             btnCreateDb.IsEnabled = true;
             btnCreateDb.Content = "Veritabani Olustur";
+        }
+    }
+
+    private async void SeedData_Click(object sender, RoutedEventArgs e)
+    {
+        var result = MessageBox.Show(
+            "Ornek veriler yuklenecek. Bu islem mevcut verileri etkilemez.\n\nDevam etmek istiyor musunuz?",
+            "Ornek Veri Yukleme",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+
+        if (result != MessageBoxResult.Yes)
+            return;
+
+        btnSeedData.IsEnabled = false;
+        btnSeedData.Content = "Yukleniyor...";
+
+        try
+        {
+            var settings = GetCurrentSettings();
+            var (success, message) = await DatabaseFactory.InitializeDatabaseAsync(settings, seedData: true);
+
+            if (success)
+            {
+                ShowMessage("Ornek veriler basariyla yuklendi!", false);
+                await RefreshConnectionStatus(settings);
+                
+                MessageBox.Show(
+                    "Ornek veriler basariyla yuklendi!\n\n" +
+                    "Varsayilan Kullanicilar:\n" +
+                    "- admin / Admin123!\n" +
+                    "- muhasebeci / Muhasebe123!\n" +
+                    "- kullanici / Kullanici123!",
+                    "Basarili", 
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else
+            {
+                ShowMessage(message, true);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowMessage($"Hata: {ex.Message}", true);
+        }
+        finally
+        {
+            btnSeedData.IsEnabled = true;
+            btnSeedData.Content = "Ornek Veri Yukle";
         }
     }
 
