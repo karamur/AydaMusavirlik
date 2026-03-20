@@ -20,10 +20,6 @@ public partial class App : Application
         await ConfigureServicesAsync(services);
         Services = services.BuildServiceProvider();
 
-        // Ayarlari yukle
-        var settingsService = Services.GetRequiredService<ISettingsService>();
-        await settingsService.LoadAsync();
-
         // Login penceresi aç
         var loginWindow = new LoginWindow();
         loginWindow.Show();
@@ -55,8 +51,13 @@ public partial class App : Application
             client.DefaultRequestHeaders.Add("Accept", "application/json");
         });
 
-        // API Services
-        services.AddSingleton<IAuthService, AuthService>();
+        // API Services - AuthService with SettingsService
+        services.AddSingleton<IAuthService>(sp => new AuthService(
+            sp.GetRequiredService<AuthTokenStore>(),
+            sp.GetRequiredService<ISettingsService>(),
+            sp.GetService<ApiClient>()
+        ));
+        
         services.AddTransient<ICompanyService, CompanyService>();
         services.AddTransient<IEmployeeService, EmployeeService>();
         services.AddTransient<IPayrollService, PayrollService>();

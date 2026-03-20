@@ -3,17 +3,21 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Net.Http;
 using AydaMusavirlik.Desktop.Services;
+using AydaMusavirlik.Data;
+using AydaMusavirlik.Data.Services;
 
 namespace AydaMusavirlik.Desktop.Views;
 
 public partial class LoginWindow : Window
 {
     private readonly IAuthService _authService;
+    private readonly ISettingsService _settingsService;
 
     public LoginWindow()
     {
         InitializeComponent();
         _authService = App.GetService<IAuthService>();
+        _settingsService = App.GetService<ISettingsService>();
 
         Loaded += LoginWindow_Loaded;
     }
@@ -21,6 +25,7 @@ public partial class LoginWindow : Window
     private async void LoginWindow_Loaded(object sender, RoutedEventArgs e)
     {
         await CheckApiStatus();
+        await CheckDatabaseStatus();
         txtUsername.Focus();
     }
 
@@ -35,18 +40,49 @@ public partial class LoginWindow : Window
             if (response.IsSuccessStatusCode)
             {
                 statusIndicator.Fill = new SolidColorBrush(Colors.Green);
-                txtStatus.Text = "API Bagli";
+                txtStatus.Text = "Bagli";
             }
             else
             {
                 statusIndicator.Fill = new SolidColorBrush(Colors.Orange);
-                txtStatus.Text = "Offline Mod";
+                txtStatus.Text = "Offline";
             }
         }
         catch
         {
             statusIndicator.Fill = new SolidColorBrush(Colors.Orange);
-            txtStatus.Text = "Offline Mod";
+            txtStatus.Text = "Offline";
+        }
+    }
+
+    private async Task CheckDatabaseStatus()
+    {
+        try
+        {
+            var dbSettings = _settingsService.Settings.Database;
+            var info = await DatabaseFactory.GetDatabaseInfoAsync(dbSettings);
+
+            if (info.IsConnected)
+            {
+                dbStatusIndicator.Fill = new SolidColorBrush(Colors.Green);
+                txtDbStatus.Text = $"Veritabani bagli ({dbSettings.Provider})";
+                txtDbInfo.Text = $"Kullanici: {info.CompanyCount}, Firma: {info.AccountCount} hesap";
+                brdDbStatus.Background = new SolidColorBrush(Color.FromRgb(232, 245, 233)); // Acik yesil
+            }
+            else
+            {
+                dbStatusIndicator.Fill = new SolidColorBrush(Colors.Orange);
+                txtDbStatus.Text = "Veritabani bagli degil";
+                txtDbInfo.Text = "Yedek kullanicilar aktif";
+                brdDbStatus.Background = new SolidColorBrush(Color.FromRgb(255, 243, 224)); // Acik turuncu
+            }
+        }
+        catch (Exception ex)
+        {
+            dbStatusIndicator.Fill = new SolidColorBrush(Colors.Red);
+            txtDbStatus.Text = "Veritabani hatasi";
+            txtDbInfo.Text = ex.Message.Length > 50 ? ex.Message.Substring(0, 50) + "..." : ex.Message;
+            brdDbStatus.Background = new SolidColorBrush(Color.FromRgb(255, 235, 238)); // Acik kirmizi
         }
     }
 
@@ -75,6 +111,7 @@ public partial class LoginWindow : Window
         }
 
         btnLogin.IsEnabled = false;
+        btnLogin.Content = "GIRIS YAPILIYOR...";
         txtError.Visibility = Visibility.Collapsed;
 
         try
@@ -83,13 +120,6 @@ public partial class LoginWindow : Window
 
             if (result.Success)
             {
-                // Baglanti durumunu goster
-                if (result.IsOnline)
-                {
-                    statusIndicator.Fill = new SolidColorBrush(Colors.Green);
-                    txtStatus.Text = "API Bagli";
-                }
-
                 var mainWindow = new MainWindow();
                 mainWindow.Show();
                 Close();
@@ -106,6 +136,7 @@ public partial class LoginWindow : Window
         finally
         {
             btnLogin.IsEnabled = true;
+            btnLogin.Content = "GIRIS YAP";
         }
     }
 
