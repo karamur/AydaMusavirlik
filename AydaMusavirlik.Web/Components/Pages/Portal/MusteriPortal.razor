@@ -1,0 +1,323 @@
+@page "/portal/musteri"
+@using MudBlazor
+@layout PortalLayout
+@inject NavigationManager Navigation
+
+<PageTitle>Müþteri Portalý - AydaMüþavirlik</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudGrid>
+        <!-- Hoþgeldin Kartý -->
+        <MudItem xs="12">
+            <MudPaper Class="pa-4 mb-4" Elevation="2">
+                <MudGrid>
+                    <MudItem xs="12" md="8">
+                        <MudText Typo="Typo.h4">Hoþgeldiniz, @_firmaAdi</MudText>
+                        <MudText Typo="Typo.body1" Class="mt-2">Hesap Tipi: @_hesapTipi</MudText>
+                    </MudItem>
+                    <MudItem xs="12" md="4" Class="d-flex justify-end align-center">
+                        <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Logout"
+                                   OnClick="Logout">Çýkýþ</MudButton>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+        </MudItem>
+
+        <!-- Bakiye Özeti -->
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Elevation="2" Style="@(_bakiye >= 0 ? "border-left: 4px solid #4CAF50" : "border-left: 4px solid #F44336")">
+                <MudCardContent>
+                    <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Cari Bakiye</MudText>
+                    <MudText Typo="Typo.h4" Class="mt-2" Color="@(_bakiye >= 0 ? Color.Success : Color.Error)">
+                        @Math.Abs(_bakiye).ToString("N2") ?
+                    </MudText>
+                    <MudText Typo="Typo.caption">@(_bakiye >= 0 ? "Alacaklýsýnýz" : "Borçlusunuz")</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Elevation="2">
+                <MudCardContent>
+                    <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Toplam Alýþ</MudText>
+                    <MudText Typo="Typo.h5" Class="mt-2">@_toplamAlis.ToString("N2") ?</MudText>
+                    <MudText Typo="Typo.caption">Bu ay</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Elevation="2">
+                <MudCardContent>
+                    <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Toplam Ödeme</MudText>
+                    <MudText Typo="Typo.h5" Class="mt-2">@_toplamOdeme.ToString("N2") ?</MudText>
+                    <MudText Typo="Typo.caption">Bu ay</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Elevation="2">
+                <MudCardContent>
+                    <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Bekleyen Fatura</MudText>
+                    <MudText Typo="Typo.h5" Class="mt-2">@_bekleyenFatura</MudText>
+                    <MudText Typo="Typo.caption">Adet</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <!-- Hesap Hareketleri -->
+        <MudItem xs="12">
+            <MudPaper Class="pa-4" Elevation="2">
+                <div class="d-flex justify-space-between align-center mb-4">
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.Receipt" Class="mr-2"/>
+                        Hesap Hareketleri
+                    </MudText>
+                    <div class="d-flex gap-2">
+                        <MudDateRangePicker Label="Tarih Aralýðý" @bind-DateRange="_tarihAraligi" />
+                        <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Download"
+                                   OnClick="ExportExcel">Excel</MudButton>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.PictureAsPdf"
+                                   OnClick="ExportPdf">PDF</MudButton>
+                    </div>
+                </div>
+
+                <MudTable Items="@_hesapHareketleri" Hover="true" Dense="true" Striped="true">
+                    <HeaderContent>
+                        <MudTh>Tarih</MudTh>
+                        <MudTh>Belge No</MudTh>
+                        <MudTh>Açýklama</MudTh>
+                        <MudTh Style="text-align:right">Borç</MudTh>
+                        <MudTh Style="text-align:right">Alacak</MudTh>
+                        <MudTh Style="text-align:right">Bakiye</MudTh>
+                        <MudTh></MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.Tarih</MudTd>
+                        <MudTd>@context.BelgeNo</MudTd>
+                        <MudTd>@context.Aciklama</MudTd>
+                        <MudTd Style="text-align:right">
+                            @if (context.Borc > 0)
+                            {
+                                <span style="color: #F44336">@context.Borc.ToString("N2") ?</span>
+                            }
+                        </MudTd>
+                        <MudTd Style="text-align:right">
+                            @if (context.Alacak > 0)
+                            {
+                                <span style="color: #4CAF50">@context.Alacak.ToString("N2") ?</span>
+                            }
+                        </MudTd>
+                        <MudTd Style="text-align:right">
+                            <strong style="color: @(context.Bakiye >= 0 ? "#4CAF50" : "#F44336")">
+                                @Math.Abs(context.Bakiye).ToString("N2") ? @(context.Bakiye >= 0 ? "A" : "B")
+                            </strong>
+                        </MudTd>
+                        <MudTd>
+                            @if (!string.IsNullOrEmpty(context.BelgeNo))
+                            {
+                                <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Primary"
+                                               OnClick="@(() => BelgeGoruntule(context))" Title="Belge Görüntüle"/>
+                            }
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+
+                <MudDivider Class="my-4"/>
+
+                <!-- Toplam Satýrý -->
+                <MudGrid>
+                    <MudItem xs="12" md="6"></MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudSimpleTable Dense="true">
+                            <tbody>
+                                <tr>
+                                    <td><strong>Toplam Borç:</strong></td>
+                                    <td style="text-align:right; color:#F44336"><strong>@_hesapHareketleri.Sum(h => h.Borc).ToString("N2") ?</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Toplam Alacak:</strong></td>
+                                    <td style="text-align:right; color:#4CAF50"><strong>@_hesapHareketleri.Sum(h => h.Alacak).ToString("N2") ?</strong></td>
+                                </tr>
+                                <tr style="background-color: #f5f5f5">
+                                    <td><strong>Bakiye:</strong></td>
+                                    <td style="text-align:right"><strong>@Math.Abs(_bakiye).ToString("N2") ? @(_bakiye >= 0 ? "(Alacak)" : "(Borç)")</strong></td>
+                                </tr>
+                            </tbody>
+                        </MudSimpleTable>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+        </MudItem>
+
+        <!-- Faturalar ve Mesajlar -->
+        <MudItem xs="12" md="6">
+            <MudPaper Class="pa-4" Elevation="2">
+                <MudText Typo="Typo.h6" Class="mb-4">
+                    <MudIcon Icon="@Icons.Material.Filled.Description" Class="mr-2"/>
+                    Son Faturalar
+                </MudText>
+                <MudList T="Fatura" Dense="true">
+                    @foreach (var fatura in _faturalar)
+                    {
+                        <MudListItem>
+                            <div class="d-flex justify-space-between align-center" style="width:100%">
+                                <div>
+                                    <MudText Typo="Typo.body2"><strong>@fatura.FaturaNo</strong></MudText>
+                                    <MudText Typo="Typo.caption">@fatura.Tarih - @fatura.Tutar.ToString("N2") ?</MudText>
+                                </div>
+                                <div>
+                                    <MudChip T="string" Color="@(fatura.Odendi ? Color.Success : Color.Warning)" Size="Size.Small">
+                                        @(fatura.Odendi ? "Ödendi" : "Bekliyor")
+                                    </MudChip>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Download" Size="Size.Small" Color="Color.Primary"
+                                                   OnClick="@(() => FaturaIndir(fatura))" Title="Ýndir"/>
+                                </div>
+                            </div>
+                        </MudListItem>
+                    }
+                </MudList>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="6">
+            <MudPaper Class="pa-4" Elevation="2">
+                <div class="d-flex justify-space-between align-center mb-4">
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.Message" Class="mr-2"/>
+                        Mesajlar
+                    </MudText>
+                    <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
+                               OnClick="YeniMesaj">Yeni Mesaj</MudButton>
+                </div>
+                <MudList T="Mesaj" Dense="true">
+                    @foreach (var mesaj in _mesajlar)
+                    {
+                        <MudListItem>
+                            <div style="width:100%">
+                                <div class="d-flex justify-space-between">
+                                    <MudText Typo="Typo.body2"><strong>@mesaj.Konu</strong></MudText>
+                                    <MudText Typo="Typo.caption">@mesaj.Tarih</MudText>
+                                </div>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">@mesaj.Ozet</MudText>
+                            </div>
+                        </MudListItem>
+                    }
+                </MudList>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code {
+    private string _firmaAdi = "ABC Ticaret Ltd. Þti.";
+    private string _hesapTipi = "Müþteri";
+    private decimal _bakiye = -15750.50m; // Negatif = Borçlu
+    private decimal _toplamAlis = 125000;
+    private decimal _toplamOdeme = 109249.50m;
+    private int _bekleyenFatura = 3;
+
+    private DateRange _tarihAraligi = new(DateTime.Now.AddMonths(-1), DateTime.Now);
+
+    private List<HesapHareket> _hesapHareketleri = new();
+    private List<Fatura> _faturalar = new();
+    private List<Mesaj> _mesajlar = new();
+
+    protected override void OnInitialized()
+    {
+        // Örnek hesap hareketleri
+        decimal bakiye = 0;
+        _hesapHareketleri = new List<HesapHareket>
+        {
+            new() { Tarih = "01.01.2025", BelgeNo = "", Aciklama = "Devir", Borc = 5000, Alacak = 0 },
+            new() { Tarih = "05.01.2025", BelgeNo = "FT-2025-001", Aciklama = "Satýþ Faturasý", Borc = 25000, Alacak = 0 },
+            new() { Tarih = "10.01.2025", BelgeNo = "MK-2025-001", Aciklama = "Havale ile ödeme", Borc = 0, Alacak = 20000 },
+            new() { Tarih = "15.01.2025", BelgeNo = "FT-2025-012", Aciklama = "Satýþ Faturasý", Borc = 35000, Alacak = 0 },
+            new() { Tarih = "20.01.2025", BelgeNo = "MK-2025-005", Aciklama = "EFT ile ödeme", Borc = 0, Alacak = 30000 },
+            new() { Tarih = "01.02.2025", BelgeNo = "FT-2025-025", Aciklama = "Satýþ Faturasý", Borc = 45000, Alacak = 0 },
+            new() { Tarih = "10.02.2025", BelgeNo = "MK-2025-012", Aciklama = "Havale ile ödeme", Borc = 0, Alacak = 40000 },
+            new() { Tarih = "20.02.2025", BelgeNo = "FT-2025-038", Aciklama = "Satýþ Faturasý", Borc = 20000, Alacak = 0 },
+            new() { Tarih = "01.03.2025", BelgeNo = "MK-2025-018", Aciklama = "Kredi kartý ile ödeme", Borc = 0, Alacak = 19249.50m },
+        };
+
+        // Bakiyeleri hesapla
+        foreach (var hareket in _hesapHareketleri)
+        {
+            bakiye += hareket.Borc - hareket.Alacak;
+            hareket.Bakiye = bakiye;
+        }
+        _bakiye = -bakiye; // Pozitif bakiye = müþteri borçlu
+
+        // Örnek faturalar
+        _faturalar = new List<Fatura>
+        {
+            new() { FaturaNo = "FT-2025-038", Tarih = "20.02.2025", Tutar = 20000, Odendi = false },
+            new() { FaturaNo = "FT-2025-025", Tarih = "01.02.2025", Tutar = 45000, Odendi = true },
+            new() { FaturaNo = "FT-2025-012", Tarih = "15.01.2025", Tutar = 35000, Odendi = true },
+        };
+
+        // Örnek mesajlar
+        _mesajlar = new List<Mesaj>
+        {
+            new() { Konu = "Fatura Bildirimi", Tarih = "01.03.2025", Ozet = "Yeni faturanýz hazýrlandý..." },
+            new() { Konu = "Ödeme Onayý", Tarih = "10.02.2025", Ozet = "Ödemeniz alýndý, teþekkürler..." },
+            new() { Konu = "Hesap Özeti", Tarih = "01.02.2025", Ozet = "Ocak 2025 hesap özetiniz..." },
+        };
+    }
+
+    private void BelgeGoruntule(HesapHareket hareket)
+    {
+        // Belge görüntüleme
+    }
+
+    private void ExportExcel()
+    {
+        // Excel export
+    }
+
+    private void ExportPdf()
+    {
+        // PDF export
+    }
+
+    private void FaturaIndir(Fatura fatura)
+    {
+        // Fatura indirme
+    }
+
+    private void YeniMesaj()
+    {
+        // Yeni mesaj dialog
+    }
+
+    private void Logout()
+    {
+        Navigation.NavigateTo("/portal/login");
+    }
+
+    private class HesapHareket
+    {
+        public string Tarih { get; set; } = "";
+        public string BelgeNo { get; set; } = "";
+        public string Aciklama { get; set; } = "";
+        public decimal Borc { get; set; }
+        public decimal Alacak { get; set; }
+        public decimal Bakiye { get; set; }
+    }
+
+    private class Fatura
+    {
+        public string FaturaNo { get; set; } = "";
+        public string Tarih { get; set; } = "";
+        public decimal Tutar { get; set; }
+        public bool Odendi { get; set; }
+    }
+
+    private class Mesaj
+    {
+        public string Konu { get; set; } = "";
+        public string Tarih { get; set; } = "";
+        public string Ozet { get; set; } = "";
+    }
+}

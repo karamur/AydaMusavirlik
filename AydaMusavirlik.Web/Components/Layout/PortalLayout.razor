@@ -1,0 +1,60 @@
+@using MudBlazor
+@inherits LayoutComponentBase
+
+<MudThemeProvider @bind-IsDarkMode="@_isDarkMode" Theme="_theme"/>
+<MudPopoverProvider/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+
+<MudLayout>
+    <MudAppBar Elevation="1" Color="Color.Primary">
+        <MudText Typo="Typo.h6">Ayda Müþavirlik - Portal</MudText>
+        <MudSpacer/>
+        <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)" 
+                       Color="Color.Inherit" OnClick="ToggleDarkMode" Title="Tema Deðiþtir"/>
+        <MudIconButton Icon="@Icons.Material.Filled.Help" Color="Color.Inherit" Title="Yardým"/>
+    </MudAppBar>
+
+    <MudMainContent Class="pt-16">
+        @Body
+    </MudMainContent>
+
+    <MudAppBar Bottom="true" Elevation="0" Style="background-color: transparent;">
+        <MudText Typo="Typo.caption" Class="mx-auto" Color="Color.Secondary">
+            © 2025 Ayda Müþavirlik | Destek: destek@aydamusavirlik.com | Tel: 0212 XXX XX XX
+        </MudText>
+    </MudAppBar>
+</MudLayout>
+
+@code {
+    private bool _isDarkMode = false;
+
+    private MudTheme _theme = new MudTheme
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#1976D2",
+            Secondary = "#424242",
+            Success = "#4CAF50",
+            Warning = "#FF9800",
+            Error = "#F44336",
+            Info = "#2196F3",
+            AppbarBackground = "#1976D2"
+        },
+        PaletteDark = new PaletteDark
+        {
+            Primary = "#90CAF9",
+            Secondary = "#B0B0B0",
+            Success = "#81C784",
+            Warning = "#FFB74D",
+            Error = "#E57373",
+            Info = "#64B5F6",
+            AppbarBackground = "#1E1E1E"
+        }
+    };
+
+    private void ToggleDarkMode()
+    {
+        _isDarkMode = !_isDarkMode;
+    }
+}

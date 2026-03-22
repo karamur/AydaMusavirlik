@@ -1,0 +1,266 @@
+@page "/portal/personel"
+@using MudBlazor
+@layout PortalLayout
+@inject NavigationManager Navigation
+
+<PageTitle>Personel Portalý - AydaMüþavirlik</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudGrid>
+        <!-- Hoþgeldin Kartý -->
+        <MudItem xs="12">
+            <MudPaper Class="pa-4 mb-4" Elevation="2">
+                <MudGrid>
+                    <MudItem xs="12" md="8">
+                        <MudText Typo="Typo.h4">Hoþgeldiniz, @_personelAdi</MudText>
+                        <MudText Typo="Typo.body1" Class="mt-2">@DateTime.Now.ToString("dd MMMM yyyy, dddd")</MudText>
+                    </MudItem>
+                    <MudItem xs="12" md="4" Class="d-flex justify-end align-center">
+                        <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Logout"
+                                   OnClick="Logout">Çýkýþ</MudButton>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+        </MudItem>
+
+        <!-- Özet Kartlarý -->
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Elevation="2">
+                <MudCardContent>
+                    <div class="d-flex justify-space-between">
+                        <div>
+                            <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Son Maaþ</MudText>
+                            <MudText Typo="Typo.h5" Class="mt-2">@_sonMaas.ToString("N2") ?</MudText>
+                            <MudText Typo="Typo.caption">@_sonMaasTarih</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.AccountBalanceWallet" Color="Color.Success" Style="font-size: 3rem;"/>
+                    </div>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Elevation="2">
+                <MudCardContent>
+                    <div class="d-flex justify-space-between">
+                        <div>
+                            <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Kalan Yýllýk Ýzin</MudText>
+                            <MudText Typo="Typo.h5" Class="mt-2">@_kalanIzin Gün</MudText>
+                            <MudText Typo="Typo.caption">Toplam: @_toplamIzin gün</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.BeachAccess" Color="Color.Info" Style="font-size: 3rem;"/>
+                    </div>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Elevation="2">
+                <MudCardContent>
+                    <div class="d-flex justify-space-between">
+                        <div>
+                            <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Kullanýlan Ýzin</MudText>
+                            <MudText Typo="Typo.h5" Class="mt-2">@_kullanilanIzin Gün</MudText>
+                            <MudText Typo="Typo.caption">Bu yýl</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.EventBusy" Color="Color.Warning" Style="font-size: 3rem;"/>
+                    </div>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Elevation="2">
+                <MudCardContent>
+                    <div class="d-flex justify-space-between">
+                        <div>
+                            <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Ýþe Giriþ</MudText>
+                            <MudText Typo="Typo.h5" Class="mt-2">@_iseGirisTarihi</MudText>
+                            <MudText Typo="Typo.caption">@_calismaYili yýl</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.WorkHistory" Color="Color.Primary" Style="font-size: 3rem;"/>
+                    </div>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <!-- Maaþ Geçmiþi -->
+        <MudItem xs="12" md="7">
+            <MudPaper Class="pa-4" Elevation="2">
+                <MudText Typo="Typo.h6" Class="mb-4">
+                    <MudIcon Icon="@Icons.Material.Filled.Payments" Class="mr-2"/>
+                    Maaþ Geçmiþi
+                </MudText>
+                <MudTable Items="@_maasGecmisi" Hover="true" Dense="true">
+                    <HeaderContent>
+                        <MudTh>Dönem</MudTh>
+                        <MudTh Style="text-align:right">Brüt</MudTh>
+                        <MudTh Style="text-align:right">Kesintiler</MudTh>
+                        <MudTh Style="text-align:right">Net</MudTh>
+                        <MudTh>Durum</MudTh>
+                        <MudTh></MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.Donem</MudTd>
+                        <MudTd Style="text-align:right">@context.Brut.ToString("N2") ?</MudTd>
+                        <MudTd Style="text-align:right">@context.Kesintiler.ToString("N2") ?</MudTd>
+                        <MudTd Style="text-align:right"><strong>@context.Net.ToString("N2") ?</strong></MudTd>
+                        <MudTd>
+                            <MudChip T="string" Color="@(context.Odendi ? Color.Success : Color.Warning)" Size="Size.Small">
+                                @(context.Odendi ? "Ödendi" : "Bekliyor")
+                            </MudChip>
+                        </MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Filled.Download" Color="Color.Primary" Size="Size.Small"
+                                           OnClick="@(() => DownloadBordro(context))" Title="Bordro Ýndir"/>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudPaper>
+        </MudItem>
+
+        <!-- Ýzin Talepleri -->
+        <MudItem xs="12" md="5">
+            <MudPaper Class="pa-4" Elevation="2">
+                <div class="d-flex justify-space-between align-center mb-4">
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.EventAvailable" Class="mr-2"/>
+                        Ýzin Talepleri
+                    </MudText>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                               StartIcon="@Icons.Material.Filled.Add" OnClick="YeniIzinTalebi">
+                        Yeni Talep
+                    </MudButton>
+                </div>
+                <MudList T="IzinTalep" Dense="true">
+                    @foreach (var izin in _izinTalepleri)
+                    {
+                        <MudListItem>
+                            <div class="d-flex justify-space-between align-center" style="width:100%">
+                                <div>
+                                    <MudText Typo="Typo.body2"><strong>@izin.BaslangicTarihi - @izin.BitisTarihi</strong></MudText>
+                                    <MudText Typo="Typo.caption">@izin.Tur - @izin.GunSayisi gün</MudText>
+                                </div>
+                                <MudChip T="string" Color="@GetIzinDurumRenk(izin.Durum)" Size="Size.Small">@izin.Durum</MudChip>
+                            </div>
+                        </MudListItem>
+                    }
+                </MudList>
+            </MudPaper>
+        </MudItem>
+
+        <!-- Bildirimler -->
+        <MudItem xs="12">
+            <MudPaper Class="pa-4" Elevation="2">
+                <MudText Typo="Typo.h6" Class="mb-4">
+                    <MudIcon Icon="@Icons.Material.Filled.Notifications" Class="mr-2"/>
+                    Bildirimler
+                </MudText>
+                <MudList T="Bildirim" Dense="true">
+                    @foreach (var bildirim in _bildirimler)
+                    {
+                        <MudListItem Icon="@bildirim.Icon" IconColor="@bildirim.Renk">
+                            <div class="d-flex justify-space-between" style="width:100%">
+                                <MudText>@bildirim.Mesaj</MudText>
+                                <MudText Typo="Typo.caption">@bildirim.Tarih</MudText>
+                            </div>
+                        </MudListItem>
+                    }
+                </MudList>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code {
+    private string _personelAdi = "Ahmet Yýlmaz";
+    private decimal _sonMaas = 32500;
+    private string _sonMaasTarih = "Þubat 2025";
+    private int _kalanIzin = 12;
+    private int _toplamIzin = 20;
+    private int _kullanilanIzin = 8;
+    private string _iseGirisTarihi = "15.03.2020";
+    private int _calismaYili = 5;
+
+    private List<MaasKayit> _maasGecmisi = new();
+    private List<IzinTalep> _izinTalepleri = new();
+    private List<Bildirim> _bildirimler = new();
+
+    protected override void OnInitialized()
+    {
+        // Örnek maaþ verileri
+        _maasGecmisi = new List<MaasKayit>
+        {
+            new() { Donem = "Þubat 2025", Brut = 45000, Kesintiler = 12500, Net = 32500, Odendi = true },
+            new() { Donem = "Ocak 2025", Brut = 45000, Kesintiler = 12500, Net = 32500, Odendi = true },
+            new() { Donem = "Aralýk 2024", Brut = 42000, Kesintiler = 11700, Net = 30300, Odendi = true },
+            new() { Donem = "Kasým 2024", Brut = 42000, Kesintiler = 11700, Net = 30300, Odendi = true },
+            new() { Donem = "Ekim 2024", Brut = 42000, Kesintiler = 11700, Net = 30300, Odendi = true },
+        };
+
+        // Örnek izin talepleri
+        _izinTalepleri = new List<IzinTalep>
+        {
+            new() { BaslangicTarihi = "10.04.2025", BitisTarihi = "14.04.2025", GunSayisi = 5, Tur = "Yýllýk Ýzin", Durum = "Onaylandý" },
+            new() { BaslangicTarihi = "20.02.2025", BitisTarihi = "21.02.2025", GunSayisi = 2, Tur = "Mazeret", Durum = "Bekliyor" },
+            new() { BaslangicTarihi = "05.01.2025", BitisTarihi = "05.01.2025", GunSayisi = 1, Tur = "Ýdari Ýzin", Durum = "Onaylandý" },
+        };
+
+        // Örnek bildirimler
+        _bildirimler = new List<Bildirim>
+        {
+            new() { Icon = Icons.Material.Filled.Payment, Mesaj = "Þubat 2025 maaþýnýz hesabýnýza yatýrýldý", Tarih = "01.03.2025", Renk = Color.Success },
+            new() { Icon = Icons.Material.Filled.EventAvailable, Mesaj = "Ýzin talebiniz onaylandý", Tarih = "28.02.2025", Renk = Color.Info },
+            new() { Icon = Icons.Material.Filled.Info, Mesaj = "2025 yýlý izin haklarýnýz güncellendi", Tarih = "01.01.2025", Renk = Color.Primary },
+        };
+    }
+
+    private Color GetIzinDurumRenk(string durum) => durum switch
+    {
+        "Onaylandý" => Color.Success,
+        "Bekliyor" => Color.Warning,
+        "Reddedildi" => Color.Error,
+        _ => Color.Default
+    };
+
+    private void DownloadBordro(MaasKayit kayit)
+    {
+        // Bordro PDF indirme
+    }
+
+    private void YeniIzinTalebi()
+    {
+        // Yeni izin talebi dialog
+    }
+
+    private void Logout()
+    {
+        Navigation.NavigateTo("/portal/login");
+    }
+
+    private class MaasKayit
+    {
+        public string Donem { get; set; } = "";
+        public decimal Brut { get; set; }
+        public decimal Kesintiler { get; set; }
+        public decimal Net { get; set; }
+        public bool Odendi { get; set; }
+    }
+
+    private class IzinTalep
+    {
+        public string BaslangicTarihi { get; set; } = "";
+        public string BitisTarihi { get; set; } = "";
+        public int GunSayisi { get; set; }
+        public string Tur { get; set; } = "";
+        public string Durum { get; set; } = "";
+    }
+
+    private class Bildirim
+    {
+        public string Icon { get; set; } = "";
+        public string Mesaj { get; set; } = "";
+        public string Tarih { get; set; } = "";
+        public Color Renk { get; set; }
+    }
+}

@@ -1,0 +1,145 @@
+@page "/portal/login"
+@using MudBlazor
+@layout EmptyLayout
+@inject NavigationManager Navigation
+
+<PageTitle>Portal Giriþ - AydaMüþavirlik</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="d-flex align-center" Style="height: 100vh;">
+    <MudPaper Class="pa-8" Elevation="4" Style="width: 100%;">
+        <div class="text-center mb-6">
+            <MudIcon Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Primary" Style="font-size: 4rem;"/>
+            <MudText Typo="Typo.h4" Class="mt-2">Portal Giriþ</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary">Hesabýnýza eriþmek için giriþ yapýn</MudText>
+        </div>
+
+        <MudForm @ref="_form" @bind-IsValid="_formValid">
+            <MudTabs @bind-ActivePanelIndex="_activeTab" Centered="true" Class="mb-4">
+                <MudTabPanel Text="Personel" Icon="@Icons.Material.Filled.Badge"/>
+                <MudTabPanel Text="Müþteri/Tedarikçi" Icon="@Icons.Material.Filled.Business"/>
+            </MudTabs>
+
+            @if (_activeTab == 0)
+            {
+                <!-- Personel Giriþi -->
+                <MudTextField @bind-Value="_tcKimlik" Label="T.C. Kimlik No" Variant="Variant.Outlined"
+                              Required="true" RequiredError="T.C. Kimlik No gerekli"
+                              Counter="11" MaxLength="11" InputType="InputType.Text"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Person"/>
+            }
+            else
+            {
+                <!-- Müþteri/Tedarikçi Giriþi -->
+                <MudTextField @bind-Value="_vergiNo" Label="Vergi No / T.C. Kimlik No" Variant="Variant.Outlined"
+                              Required="true" RequiredError="Vergi No gerekli"
+                              InputType="InputType.Text"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Business"/>
+            }
+
+            <MudTextField @bind-Value="_sifre" Label="Þifre" Variant="Variant.Outlined" Class="mt-4"
+                          Required="true" RequiredError="Þifre gerekli"
+                          InputType="@(_showPassword ? InputType.Text : InputType.Password)"
+                          Adornment="Adornment.End" AdornmentIcon="@(_showPassword ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff)"
+                          OnAdornmentClick="() => _showPassword = !_showPassword"/>
+
+            <div class="d-flex justify-space-between align-center mt-4">
+                <MudCheckBox @bind-Value="_rememberMe" Label="Beni hatýrla" Color="Color.Primary"/>
+                <MudLink Href="#" Typo="Typo.body2">Þifremi unuttum</MudLink>
+            </div>
+
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <MudAlert Severity="Severity.Error" Class="mt-4">@_errorMessage</MudAlert>
+            }
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Class="mt-6"
+                       Size="Size.Large" OnClick="Login" Disabled="@_isLoading">
+                @if (_isLoading)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2"/>
+                    <span>Giriþ yapýlýyor...</span>
+                }
+                else
+                {
+                    <span>Giriþ Yap</span>
+                }
+            </MudButton>
+        </MudForm>
+
+        <MudDivider Class="my-6"/>
+
+        <div class="text-center">
+            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                Ýlk kez mi giriþ yapýyorsunuz?
+            </MudText>
+            <MudLink Href="#" Typo="Typo.body2" Class="mt-2">Þifre oluþturmak için týklayýn</MudLink>
+        </div>
+
+        <MudDivider Class="my-6"/>
+
+        <div class="text-center">
+            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                © 2025 Ayda Müþavirlik - Tüm haklarý saklýdýr
+            </MudText>
+        </div>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private MudForm? _form;
+    private bool _formValid;
+    private int _activeTab = 0;
+
+    private string _tcKimlik = "";
+    private string _vergiNo = "";
+    private string _sifre = "";
+    private bool _showPassword = false;
+    private bool _rememberMe = false;
+    private bool _isLoading = false;
+    private string _errorMessage = "";
+
+    private async Task Login()
+    {
+        _errorMessage = "";
+
+        if (_form != null)
+        {
+            await _form.Validate();
+            if (!_formValid) return;
+        }
+
+        _isLoading = true;
+        StateHasChanged();
+
+        // Simüle edilmiþ giriþ
+        await Task.Delay(1500);
+
+        if (_activeTab == 0)
+        {
+            // Personel giriþi - Demo için direkt yönlendir
+            if (_tcKimlik == "12345678901" && _sifre == "123456")
+            {
+                Navigation.NavigateTo("/portal/personel");
+            }
+            else
+            {
+                _errorMessage = "T.C. Kimlik No veya þifre hatalý";
+            }
+        }
+        else
+        {
+            // Müþteri/Tedarikçi giriþi
+            if (_vergiNo == "1234567890" && _sifre == "123456")
+            {
+                Navigation.NavigateTo("/portal/musteri");
+            }
+            else
+            {
+                _errorMessage = "Vergi No veya þifre hatalý";
+            }
+        }
+
+        _isLoading = false;
+        StateHasChanged();
+    }
+}
