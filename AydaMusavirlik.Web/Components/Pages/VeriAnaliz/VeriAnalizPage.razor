@@ -1,0 +1,33 @@
+@page "/veri-analiz"
+@using AydaMusavirlik.VeriAnaliz.Models
+@using AydaMusavirlik.VeriAnaliz.Services
+@inject ISnackbar Snackbar
+
+<PageTitle>Veri Analiz - AYDA Musavirlik</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">
+    <MudIcon Icon="@Icons.Material.Filled.Analytics" Class="mr-2" />
+    Veri Analiz Modulu
+</MudText>
+
+<MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-4">
+    <MudTabPanel Text="Gelir/Gider" Icon="@Icons.Material.Filled.SwapVert">
+        <GelirGiderPanel FirmaId="_selectedFirmaId" />
+    </MudTabPanel>
+
+    <MudTabPanel Text="Ozet Rapor" Icon="@Icons.Material.Filled.Summarize">
+        <OzetRaporPanel FirmaId="_selectedFirmaId" />
+    </MudTabPanel>
+
+    <MudTabPanel Text="Grafik Analiz" Icon="@Icons.Material.Filled.BarChart">
+        <GrafikAnalizPanel FirmaId="_selectedFirmaId" />
+    </MudTabPanel>
+
+    <MudTabPanel Text="Excel Import/Export" Icon="@Icons.Material.Filled.TableChart">
+        <ExcelPanel FirmaId="_selectedFirmaId" />
+    </MudTabPanel>
+</MudTabs>
+
+@code {
+    private int _selectedFirmaId = 1; // Default firma
+}

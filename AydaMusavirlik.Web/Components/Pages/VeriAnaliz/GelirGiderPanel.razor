@@ -1,0 +1,163 @@
+@using AydaMusavirlik.VeriAnaliz.Models
+@using AydaMusavirlik.VeriAnaliz.Services
+@inject ISnackbar Snackbar
+
+<MudGrid>
+    <MudItem xs="12">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Gelir/Gider Kayitlari</MudText>
+                </CardHeaderContent>
+                <CardHeaderActions>
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" 
+                               StartIcon="@Icons.Material.Filled.Add"
+                               OnClick="OpenAddDialog">
+                        Yeni Kayit
+                    </MudButton>
+                </CardHeaderActions>
+            </MudCardHeader>
+            <MudCardContent>
+                <!-- Filtreler -->
+                <MudGrid Class="mb-4">
+                    <MudItem xs="12" md="2">
+                        <MudDatePicker Label="Baslangic" @bind-Date="_baslangic" />
+                    </MudItem>
+                    <MudItem xs="12" md="2">
+                        <MudDatePicker Label="Bitis" @bind-Date="_bitis" />
+                    </MudItem>
+                    <MudItem xs="12" md="2">
+                        <MudSelect T="string" Label="Tur" @bind-Value="_turFiltre" Clearable="true">
+                            <MudSelectItem Value="@("Gelir")">Gelir</MudSelectItem>
+                            <MudSelectItem Value="@("Gider")">Gider</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" md="2">
+                        <MudSelect T="string" Label="Kategori" @bind-Value="_kategoriFiltre" Clearable="true">
+                            @foreach (var kat in MuhasebeSabitler.GelirKategorileri.Concat(MuhasebeSabitler.GiderKategorileri).Distinct())
+                            {
+                                <MudSelectItem Value="@kat">@kat</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" md="2">
+                        <MudButton Variant="Variant.Outlined" Color="Color.Primary" 
+                                   OnClick="ApplyFilter" FullWidth="true" Class="mt-2">
+                            Filtrele
+                        </MudButton>
+                    </MudItem>
+                </MudGrid>
+
+                <!-- Tablo -->
+                <MudTable Items="_kayitlar" Hover="true" Striped="true" Dense="true">
+                    <HeaderContent>
+                        <MudTh>Tarih</MudTh>
+                        <MudTh>Tur</MudTh>
+                        <MudTh>Kategori</MudTh>
+                        <MudTh>Aciklama</MudTh>
+                        <MudTh Style="text-align:right">Tutar</MudTh>
+                        <MudTh>Kasa</MudTh>
+                        <MudTh>Islemler</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.Tarih.ToString("dd.MM.yyyy")</MudTd>
+                        <MudTd>
+                            <MudChip T="string" Size="Size.Small" 
+                                     Color="@(context.Tur == "Gelir" ? Color.Success : Color.Error)">
+                                @context.Tur
+                            </MudChip>
+                        </MudTd>
+                        <MudTd>@context.Kategori</MudTd>
+                        <MudTd>@context.Aciklama</MudTd>
+                        <MudTd Style="text-align:right">
+                            <MudText Color="@(context.Tur == "Gelir" ? Color.Success : Color.Error)">
+                                @context.Tutar.ToString("N2") TL
+                            </MudText>
+                        </MudTd>
+                        <MudTd>@context.Kasa</MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" 
+                                           OnClick="@(() => EditKayit(context))" />
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" 
+                                           Color="Color.Error"
+                                           OnClick="@(() => DeleteKayit(context))" />
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+
+                <!-- Ozet -->
+                <MudGrid Class="mt-4">
+                    <MudItem xs="12" md="4">
+                        <MudAlert Severity="Severity.Success" Variant="Variant.Outlined">
+                            <strong>Toplam Gelir:</strong> @_toplamGelir.ToString("N2") TL
+                        </MudAlert>
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">
+                            <strong>Toplam Gider:</strong> @_toplamGider.ToString("N2") TL
+                        </MudAlert>
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        <MudAlert Severity="@(_net >= 0 ? Severity.Success : Severity.Error)">
+                            <strong>Net:</strong> @_net.ToString("N2") TL
+                        </MudAlert>
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    [Parameter] public int FirmaId { get; set; }
+
+    private List<GelirGiderKayit> _kayitlar = new();
+    private DateTime? _baslangic;
+    private DateTime? _bitis;
+    private string? _turFiltre;
+    private string? _kategoriFiltre;
+
+    private decimal _toplamGelir => _kayitlar.Where(k => k.Tur == "Gelir").Sum(k => k.Tutar);
+    private decimal _toplamGider => _kayitlar.Where(k => k.Tur == "Gider").Sum(k => k.Tutar);
+    private decimal _net => _toplamGelir - _toplamGider;
+
+    protected override void OnInitialized()
+    {
+        LoadSampleData();
+    }
+
+    private void LoadSampleData()
+    {
+        _kayitlar = new List<GelirGiderKayit>
+        {
+            new() { Id = 1, Tarih = DateTime.Now.AddDays(-5), Tur = "Gelir", Kategori = "Satis Geliri", Aciklama = "Urun satisi", Tutar = 15000, Kasa = "Banka" },
+            new() { Id = 2, Tarih = DateTime.Now.AddDays(-4), Tur = "Gider", Kategori = "Personel Gideri", Aciklama = "Maas odemesi", Tutar = 8500, Kasa = "Banka" },
+            new() { Id = 3, Tarih = DateTime.Now.AddDays(-3), Tur = "Gelir", Kategori = "Hizmet Geliri", Aciklama = "Danismanlik", Tutar = 5000, Kasa = "Nakit" },
+            new() { Id = 4, Tarih = DateTime.Now.AddDays(-2), Tur = "Gider", Kategori = "Kira Gideri", Aciklama = "Ofis kirasi", Tutar = 3000, Kasa = "Banka" },
+            new() { Id = 5, Tarih = DateTime.Now.AddDays(-1), Tur = "Gider", Kategori = "Elektrik/Su/Dogalgaz", Aciklama = "Faturalar", Tutar = 850, Kasa = "Banka" },
+        };
+    }
+
+    private void ApplyFilter()
+    {
+        // Filtreleme islemi
+        Snackbar.Add("Filtre uygulandi", Severity.Info);
+    }
+
+    private void OpenAddDialog()
+    {
+        Snackbar.Add("Yeni kayit ekleme dialog'u acilacak", Severity.Info);
+    }
+
+    private void EditKayit(GelirGiderKayit kayit)
+    {
+        Snackbar.Add($"Duzenleniyor: {kayit.Aciklama}", Severity.Info);
+    }
+
+    private void DeleteKayit(GelirGiderKayit kayit)
+    {
+        _kayitlar.Remove(kayit);
+        Snackbar.Add("Kayit silindi", Severity.Success);
+        StateHasChanged();
+    }
+}

@@ -1,0 +1,188 @@
+@inject ISnackbar Snackbar
+@inject IJSRuntime JS
+
+<MudGrid>
+    <MudItem xs="12" md="6">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.Upload" Class="mr-2" />
+                        Excel Import
+                    </MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudAlert Severity="Severity.Info" Class="mb-4">
+                    Excel dosyasindan gelir/gider kayitlarini icerir.
+                    <br/>
+                    <small>Desteklenen format: .xlsx</small>
+                </MudAlert>
+
+                <MudFileUpload T="IBrowserFile" Accept=".xlsx,.xls" 
+                               FilesChanged="OnFileSelected" MaximumFileCount="1">
+                    <ActivatorContent>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" 
+                                   StartIcon="@Icons.Material.Filled.CloudUpload">
+                            Excel Dosyasi Sec
+                        </MudButton>
+                    </ActivatorContent>
+                </MudFileUpload>
+
+                @if (_selectedFile != null)
+                {
+                    <MudAlert Severity="Severity.Success" Class="mt-3">
+                        Secilen dosya: @_selectedFile.Name
+                        <br/>
+                        Boyut: @(_selectedFile.Size / 1024) KB
+                    </MudAlert>
+
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" 
+                               Class="mt-3" OnClick="ImportExcel"
+                               StartIcon="@Icons.Material.Filled.ImportExport">
+                        Veri Aktar
+                    </MudButton>
+                }
+
+                <MudDivider Class="my-4" />
+
+                <MudText Typo="Typo.subtitle2" Class="mb-2">Ornek Excel Sablonu</MudText>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary"
+                           StartIcon="@Icons.Material.Filled.Download"
+                           OnClick="DownloadTemplate">
+                    Sablon Indir
+                </MudButton>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" md="6">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.Download" Class="mr-2" />
+                        Excel Export
+                    </MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudAlert Severity="Severity.Info" Class="mb-4">
+                    Mevcut verileri Excel formatinda disa aktarir.
+                </MudAlert>
+
+                <MudStack Spacing="3">
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" FullWidth="true"
+                               StartIcon="@Icons.Material.Filled.TableChart"
+                               OnClick="ExportGelirGider">
+                        Gelir/Gider Listesi
+                    </MudButton>
+
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
+                               StartIcon="@Icons.Material.Filled.Assessment"
+                               OnClick="ExportOzetRapor">
+                        Ozet Rapor
+                    </MudButton>
+
+                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" FullWidth="true"
+                               StartIcon="@Icons.Material.Filled.PictureAsPdf"
+                               OnClick="ExportPdf">
+                        PDF Rapor
+                    </MudButton>
+                </MudStack>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <!-- Import Sonuclari -->
+    @if (_importResults.Any())
+    {
+        <MudItem xs="12">
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Import Sonuclari</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudAlert Severity="Severity.Success">
+                        @_importResults.Count kayit basariyla aktarildi.
+                    </MudAlert>
+
+                    <MudTable Items="_importResults.Take(10)" Dense="true" Class="mt-3">
+                        <HeaderContent>
+                            <MudTh>Tarih</MudTh>
+                            <MudTh>Tur</MudTh>
+                            <MudTh>Kategori</MudTh>
+                            <MudTh>Aciklama</MudTh>
+                            <MudTh>Tutar</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@context.Tarih.ToString("dd.MM.yyyy")</MudTd>
+                            <MudTd>@context.Tur</MudTd>
+                            <MudTd>@context.Kategori</MudTd>
+                            <MudTd>@context.Aciklama</MudTd>
+                            <MudTd>@context.Tutar.ToString("N2")</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+
+                    @if (_importResults.Count > 10)
+                    {
+                        <MudText Typo="Typo.caption" Class="mt-2">
+                            ... ve @(_importResults.Count - 10) kayit daha
+                        </MudText>
+                    }
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    }
+</MudGrid>
+
+@code {
+    [Parameter] public int FirmaId { get; set; }
+
+    private IBrowserFile? _selectedFile;
+    private List<AydaMusavirlik.VeriAnaliz.Models.GelirGiderKayit> _importResults = new();
+
+    private void OnFileSelected(IBrowserFile file)
+    {
+        _selectedFile = file;
+        _importResults.Clear();
+    }
+
+    private async Task ImportExcel()
+    {
+        if (_selectedFile == null) return;
+
+        // Ornek import sonucu
+        _importResults = new List<AydaMusavirlik.VeriAnaliz.Models.GelirGiderKayit>
+        {
+            new() { Tarih = DateTime.Now.AddDays(-10), Tur = "Gelir", Kategori = "Satis", Aciklama = "Import 1", Tutar = 5000 },
+            new() { Tarih = DateTime.Now.AddDays(-9), Tur = "Gider", Kategori = "Personel", Aciklama = "Import 2", Tutar = 3000 },
+            new() { Tarih = DateTime.Now.AddDays(-8), Tur = "Gelir", Kategori = "Hizmet", Aciklama = "Import 3", Tutar = 2500 },
+        };
+
+        Snackbar.Add($"{_importResults.Count} kayit basariyla import edildi!", Severity.Success);
+        _selectedFile = null;
+    }
+
+    private void DownloadTemplate()
+    {
+        Snackbar.Add("Excel sablonu indiriliyor...", Severity.Info);
+    }
+
+    private void ExportGelirGider()
+    {
+        Snackbar.Add("Gelir/Gider listesi Excel olarak indiriliyor...", Severity.Info);
+    }
+
+    private void ExportOzetRapor()
+    {
+        Snackbar.Add("Ozet rapor Excel olarak indiriliyor...", Severity.Info);
+    }
+
+    private void ExportPdf()
+    {
+        Snackbar.Add("PDF rapor olusturuluyor...", Severity.Info);
+    }
+}

@@ -1,0 +1,134 @@
+@using AydaMusavirlik.VeriAnaliz.Models
+
+<MudGrid>
+    <MudItem xs="12">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Aylik Gelir/Gider Grafigi (@DateTime.Now.Year)</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudChart ChartType="ChartType.Bar" 
+                          ChartSeries="@_chartSeries" 
+                          XAxisLabels="@_aylar"
+                          Width="100%" Height="300px"
+                          ChartOptions="@_chartOptions" />
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" md="6">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Gelir Dagilimi</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudChart ChartType="ChartType.Donut" 
+                          InputData="@_gelirData"
+                          InputLabels="@_gelirLabels"
+                          Width="100%" Height="250px" />
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" md="6">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Gider Dagilimi</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudChart ChartType="ChartType.Donut" 
+                          InputData="@_giderData"
+                          InputLabels="@_giderLabels"
+                          Width="100%" Height="250px" />
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Aylik Detay</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTable Items="_aylikOzetler" Dense="true" Hover="true" Striped="true">
+                    <HeaderContent>
+                        <MudTh>Ay</MudTh>
+                        <MudTh Style="text-align:right">Gelir</MudTh>
+                        <MudTh Style="text-align:right">Gider</MudTh>
+                        <MudTh Style="text-align:right">Net</MudTh>
+                        <MudTh Style="text-align:right">Islem</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.AyAdi</MudTd>
+                        <MudTd Style="text-align:right">
+                            <MudText Color="Color.Success">@context.ToplamGelir.ToString("N0") TL</MudText>
+                        </MudTd>
+                        <MudTd Style="text-align:right">
+                            <MudText Color="Color.Error">@context.ToplamGider.ToString("N0") TL</MudText>
+                        </MudTd>
+                        <MudTd Style="text-align:right">
+                            <MudText Color="@(context.Net >= 0 ? Color.Success : Color.Error)" 
+                                     Style="font-weight:bold">
+                                @context.Net.ToString("N0") TL
+                            </MudText>
+                        </MudTd>
+                        <MudTd Style="text-align:right">@context.IslemSayisi</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    [Parameter] public int FirmaId { get; set; }
+
+    private string[] _aylar = { "Oca", "Sub", "Mar", "Nis", "May", "Haz", "Tem", "Agu", "Eyl", "Eki", "Kas", "Ara" };
+    private List<ChartSeries> _chartSeries = new();
+    private ChartOptions _chartOptions = new() { YAxisTicks = 5 };
+
+    private double[] _gelirData = { 40, 25, 15, 12, 8 };
+    private string[] _gelirLabels = { "Satis", "Hizmet", "Faiz", "Kira", "Diger" };
+
+    private double[] _giderData = { 45, 25, 15, 10, 5 };
+    private string[] _giderLabels = { "Personel", "Kira", "Faturalar", "Pazarlama", "Diger" };
+
+    private List<AylikOzet> _aylikOzetler = new();
+
+    protected override void OnInitialized()
+    {
+        LoadSampleData();
+    }
+
+    private void LoadSampleData()
+    {
+        var random = new Random(42);
+
+        _chartSeries = new List<ChartSeries>
+        {
+            new ChartSeries { Name = "Gelir", Data = Enumerable.Range(1, 12).Select(m => (double)random.Next(8000, 20000)).ToArray() },
+            new ChartSeries { Name = "Gider", Data = Enumerable.Range(1, 12).Select(m => (double)random.Next(5000, 15000)).ToArray() }
+        };
+
+        var ayAdlari = new[] { "Ocak", "Subat", "Mart", "Nisan", "Mayis", "Haziran", 
+                               "Temmuz", "Agustos", "Eylul", "Ekim", "Kasim", "Aralik" };
+
+        _aylikOzetler = Enumerable.Range(1, 12).Select(m => new AylikOzet
+        {
+            Yil = DateTime.Now.Year,
+            Ay = m,
+            AyAdi = ayAdlari[m - 1],
+            ToplamGelir = (decimal)_chartSeries[0].Data[m - 1],
+            ToplamGider = (decimal)_chartSeries[1].Data[m - 1],
+            IslemSayisi = random.Next(5, 15)
+        }).ToList();
+    }
+}

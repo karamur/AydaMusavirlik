@@ -1,0 +1,139 @@
+@using AydaMusavirlik.VeriAnaliz.Models
+
+<MudGrid>
+    <MudItem xs="12" md="3">
+        <MudPaper Class="pa-4" Elevation="2">
+            <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Toplam Gelir</MudText>
+            <MudText Typo="Typo.h4" Color="Color.Success">@_ozet.ToplamGelir.ToString("N0") TL</MudText>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" md="3">
+        <MudPaper Class="pa-4" Elevation="2">
+            <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Toplam Gider</MudText>
+            <MudText Typo="Typo.h4" Color="Color.Error">@_ozet.ToplamGider.ToString("N0") TL</MudText>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" md="3">
+        <MudPaper Class="pa-4" Elevation="2">
+            <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Net Kar/Zarar</MudText>
+            <MudText Typo="Typo.h4" Color="@(_ozet.Guncel >= 0 ? Color.Success : Color.Error)">
+                @_ozet.Guncel.ToString("N0") TL
+            </MudText>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" md="3">
+        <MudPaper Class="pa-4" Elevation="2">
+            <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Toplam Islem</MudText>
+            <MudText Typo="Typo.h4">@_ozet.KayitSayisi</MudText>
+        </MudPaper>
+    </MudItem>
+
+    <!-- Kategori Ozet -->
+    <MudItem xs="12" md="6">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Kategori Bazli Analiz</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTable Items="_kategoriOzetleri" Dense="true" Hover="true">
+                    <HeaderContent>
+                        <MudTh>Kategori</MudTh>
+                        <MudTh Style="text-align:right">Gelir</MudTh>
+                        <MudTh Style="text-align:right">Gider</MudTh>
+                        <MudTh Style="text-align:right">Net</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.Kategori</MudTd>
+                        <MudTd Style="text-align:right">
+                            <MudText Color="Color.Success">@context.ToplamGelir.ToString("N0")</MudText>
+                        </MudTd>
+                        <MudTd Style="text-align:right">
+                            <MudText Color="Color.Error">@context.ToplamGider.ToString("N0")</MudText>
+                        </MudTd>
+                        <MudTd Style="text-align:right">
+                            <MudText Typo="Typo.body2" Style="font-weight:bold">
+                                @context.Net.ToString("N0")
+                            </MudText>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <!-- Kasa Ozet -->
+    <MudItem xs="12" md="6">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Kasa Bazli Analiz</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTable Items="_kasaOzetleri" Dense="true" Hover="true">
+                    <HeaderContent>
+                        <MudTh>Kasa</MudTh>
+                        <MudTh Style="text-align:right">Gelir</MudTh>
+                        <MudTh Style="text-align:right">Gider</MudTh>
+                        <MudTh Style="text-align:right">Bakiye</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.Kasa</MudTd>
+                        <MudTd Style="text-align:right">
+                            <MudText Color="Color.Success">@context.ToplamGelir.ToString("N0")</MudText>
+                        </MudTd>
+                        <MudTd Style="text-align:right">
+                            <MudText Color="Color.Error">@context.ToplamGider.ToString("N0")</MudText>
+                        </MudTd>
+                        <MudTd Style="text-align:right">
+                            <MudText Typo="Typo.body2" Style="font-weight:bold">
+                                @context.Bakiye.ToString("N0")
+                            </MudText>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    [Parameter] public int FirmaId { get; set; }
+
+    private MuhasebeOzet _ozet = new();
+    private List<KategoriOzet> _kategoriOzetleri = new();
+    private List<KasaOzet> _kasaOzetleri = new();
+
+    protected override void OnInitialized()
+    {
+        LoadSampleData();
+    }
+
+    private void LoadSampleData()
+    {
+        _ozet = new MuhasebeOzet
+        {
+            ToplamGelir = 125000,
+            ToplamGider = 78500,
+            KayitSayisi = 47,
+            SonIslemTarihi = DateTime.Now
+        };
+
+        _kategoriOzetleri = new List<KategoriOzet>
+        {
+            new() { Kategori = "Satis Geliri", ToplamGelir = 85000, ToplamGider = 0, IslemSayisi = 15 },
+            new() { Kategori = "Hizmet Geliri", ToplamGelir = 40000, ToplamGider = 0, IslemSayisi = 8 },
+            new() { Kategori = "Personel Gideri", ToplamGelir = 0, ToplamGider = 45000, IslemSayisi = 10 },
+            new() { Kategori = "Kira Gideri", ToplamGelir = 0, ToplamGider = 18000, IslemSayisi = 6 },
+            new() { Kategori = "Diger Giderler", ToplamGelir = 0, ToplamGider = 15500, IslemSayisi = 8 },
+        };
+
+        _kasaOzetleri = new List<KasaOzet>
+        {
+            new() { Kasa = "Banka", ToplamGelir = 100000, ToplamGider = 70000, IslemSayisi = 35 },
+            new() { Kasa = "Nakit", ToplamGelir = 25000, ToplamGider = 8500, IslemSayisi = 12 },
+        };
+    }
+}

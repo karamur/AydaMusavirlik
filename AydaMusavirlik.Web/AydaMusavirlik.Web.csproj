@@ -7,11 +7,8 @@
     <RootNamespace>AydaMusavirlik</RootNamespace>
     <AssemblyName>AydaMusavirlik</AssemblyName>
     <Version>1.0.0</Version>
-    <Authors>AYDA M��avirlik</Authors>
-    <Company>AYDA M��avirlik</Company>
-    <Product>AYDA M��avirlik - Profesyonel Mali M��avirlik Yaz�l�m�</Product>
-    <Description>Mali m��avirlik ofisleri i�in geli�tirilmi� modern muhasebe ve finansal analiz yaz�l�m�</Description>
-    <Copyright>Copyright � 2024 AYDA M��avirlik</Copyright>
+    <Authors>AYDA Musavirlik</Authors>
+    <Company>AYDA Musavirlik</Company>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,6 +24,7 @@
     <ProjectReference Include="..\AydaMusavirlik.Core\AydaMusavirlik.Core.csproj" />
     <ProjectReference Include="..\AydaMusavirlik.Application\AydaMusavirlik.Application.csproj" />
     <ProjectReference Include="..\AydaMusavirlik.Infrastructure\AydaMusavirlik.Infrastructure.csproj" />
+    <ProjectReference Include="..\AydaMusavirlik.VeriAnaliz\AydaMusavirlik.VeriAnaliz.csproj" />
   </ItemGroup>
 
 </Project>
