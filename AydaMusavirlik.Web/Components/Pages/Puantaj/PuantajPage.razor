@@ -1,0 +1,232 @@
+@page "/puantaj"
+@inject ISnackbar Snackbar
+
+<PageTitle>Puantaj - AYDA Musavirlik</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">
+    <MudIcon Icon="@Icons.Material.Filled.AccessTime" Class="mr-2" />
+    Puantaj Takibi
+</MudText>
+
+<MudCard Class="mb-4">
+    <MudCardContent>
+        <MudGrid>
+            <MudItem xs="12" md="2">
+                <MudSelect T="int" Label="Yil" @bind-Value="_selectedYear">
+                    <MudSelectItem Value="2024">2024</MudSelectItem>
+                    <MudSelectItem Value="2023">2023</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" md="2">
+                <MudSelect T="int" Label="Ay" @bind-Value="_selectedMonth">
+                    @for (int i = 1; i <= 12; i++)
+                    {
+                        <MudSelectItem Value="@i">@GetMonthName(i)</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" md="2">
+                <MudSelect T="string" Label="Departman" @bind-Value="_selectedDepartment" Clearable="true">
+                    <MudSelectItem Value="@("Tum")">Tum Departmanlar</MudSelectItem>
+                    <MudSelectItem Value="@("Muhasebe")">Muhasebe</MudSelectItem>
+                    <MudSelectItem Value="@("Uretim")">Uretim</MudSelectItem>
+                    <MudSelectItem Value="@("Satis")">Satis</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" md="2">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" 
+                           OnClick="LoadPuantaj" FullWidth="true" Class="mt-2">
+                    Yukle
+                </MudButton>
+            </MudItem>
+            <MudItem xs="12" md="2">
+                <MudButton Variant="Variant.Outlined" Color="Color.Success" 
+                           StartIcon="@Icons.Material.Filled.Save"
+                           OnClick="SavePuantaj" FullWidth="true" Class="mt-2">
+                    Kaydet
+                </MudButton>
+            </MudItem>
+            <MudItem xs="12" md="2">
+                <MudButton Variant="Variant.Outlined" Color="Color.Info" 
+                           StartIcon="@Icons.Material.Filled.FileDownload"
+                           OnClick="ExportExcel" FullWidth="true" Class="mt-2">
+                    Excel
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudCardContent>
+</MudCard>
+
+<MudCard>
+    <MudCardContent Style="overflow-x:auto">
+        <MudSimpleTable Dense="true" Bordered="true" Striped="true">
+            <thead>
+                <tr style="background-color: #1976d2; color: white">
+                    <th style="width:150px;position:sticky;left:0;background-color:#1976d2;z-index:1">Personel</th>
+                    @for (int i = 1; i <= _daysInMonth; i++)
+                    {
+                        var day = new DateTime(_selectedYear, _selectedMonth, i);
+                        var isWeekend = day.DayOfWeek == DayOfWeek.Saturday || day.DayOfWeek == DayOfWeek.Sunday;
+                        <th style="@(isWeekend ? "background-color:#ef5350;width:40px;text-align:center" : "width:40px;text-align:center")">
+                            <div>@i</div>
+                            <div style="font-size:10px">@GetDayName(day)</div>
+                        </th>
+                    }
+                    <th style="width:60px;text-align:center;background-color:#4caf50">Toplam</th>
+                    <th style="width:60px;text-align:center;background-color:#ff9800">Mesai</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var emp in _puantajData)
+                {
+                    <tr>
+                        <td style="position:sticky;left:0;background-color:white;z-index:1;font-weight:bold">@emp.EmployeeName</td>
+                        @for (int i = 1; i <= _daysInMonth; i++)
+                        {
+                            var day = new DateTime(_selectedYear, _selectedMonth, i);
+                            var isWeekend = day.DayOfWeek == DayOfWeek.Saturday || day.DayOfWeek == DayOfWeek.Sunday;
+                            var hours = emp.DailyHours.ContainsKey(i) ? emp.DailyHours[i] : 0;
+                            <td style="@GetCellStyle(isWeekend, hours)" @onclick="@(() => EditHours(emp, i))">
+                                @(hours > 0 ? hours.ToString() : "")
+                            </td>
+                        }
+                        <td style="text-align:center;font-weight:bold;background-color:#e8f5e9">@emp.TotalHours</td>
+                        <td style="text-align:center;font-weight:bold;background-color:#fff3e0">@emp.OvertimeHours</td>
+                    </tr>
+                }
+            </tbody>
+        </MudSimpleTable>
+    </MudCardContent>
+</MudCard>
+
+<MudGrid Class="mt-4">
+    <MudItem xs="12" md="3">
+        <MudPaper Class="pa-3" Elevation="2">
+            <MudText Typo="Typo.caption">Toplam Calisma Gunu</MudText>
+            <MudText Typo="Typo.h5">@_workDays gun</MudText>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" md="3">
+        <MudPaper Class="pa-3" Elevation="2">
+            <MudText Typo="Typo.caption">Hafta Sonu</MudText>
+            <MudText Typo="Typo.h5">@_weekendDays gun</MudText>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" md="3">
+        <MudPaper Class="pa-3" Elevation="2">
+            <MudText Typo="Typo.caption">Resmi Tatil</MudText>
+            <MudText Typo="Typo.h5">0 gun</MudText>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" md="3">
+        <MudPaper Class="pa-3" Elevation="2">
+            <MudText Typo="Typo.caption">Normal Mesai</MudText>
+            <MudText Typo="Typo.h5">@(_workDays * 8) saat</MudText>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private int _selectedYear = DateTime.Now.Year;
+    private int _selectedMonth = DateTime.Now.Month;
+    private string _selectedDepartment = "Tum";
+    private int _daysInMonth => DateTime.DaysInMonth(_selectedYear, _selectedMonth);
+    private int _workDays = 0;
+    private int _weekendDays = 0;
+    private List<PuantajRow> _puantajData = new();
+
+    protected override void OnInitialized()
+    {
+        LoadPuantaj();
+    }
+
+    private void LoadPuantaj()
+    {
+        CalculateWorkDays();
+
+        _puantajData = new List<PuantajRow>
+        {
+            CreatePuantajRow("Ahmet Yilmaz"),
+            CreatePuantajRow("Ayse Kaya"),
+            CreatePuantajRow("Mehmet Demir"),
+            CreatePuantajRow("Fatma Ozturk"),
+            CreatePuantajRow("Ali Celik"),
+        };
+    }
+
+    private PuantajRow CreatePuantajRow(string name)
+    {
+        var row = new PuantajRow { EmployeeName = name };
+
+        for (int i = 1; i <= _daysInMonth; i++)
+        {
+            var day = new DateTime(_selectedYear, _selectedMonth, i);
+            if (day.DayOfWeek != DayOfWeek.Saturday && day.DayOfWeek != DayOfWeek.Sunday)
+            {
+                row.DailyHours[i] = 8;
+            }
+        }
+
+        return row;
+    }
+
+    private void CalculateWorkDays()
+    {
+        _workDays = 0;
+        _weekendDays = 0;
+
+        for (int i = 1; i <= _daysInMonth; i++)
+        {
+            var day = new DateTime(_selectedYear, _selectedMonth, i);
+            if (day.DayOfWeek == DayOfWeek.Saturday || day.DayOfWeek == DayOfWeek.Sunday)
+                _weekendDays++;
+            else
+                _workDays++;
+        }
+    }
+
+    private string GetMonthName(int month)
+    {
+        var months = new[] { "Ocak", "Subat", "Mart", "Nisan", "Mayis", "Haziran", 
+                             "Temmuz", "Agustos", "Eylul", "Ekim", "Kasim", "Aralik" };
+        return months[month - 1];
+    }
+
+    private string GetDayName(DateTime date)
+    {
+        var days = new[] { "Pz", "Pt", "Sa", "Ca", "Pe", "Cu", "Ct" };
+        return days[(int)date.DayOfWeek];
+    }
+
+    private string GetCellStyle(bool isWeekend, int hours)
+    {
+        if (isWeekend && hours > 0) return "background-color:#ffcdd2;text-align:center;cursor:pointer";
+        if (isWeekend) return "background-color:#ffebee;text-align:center;cursor:pointer";
+        if (hours == 0) return "background-color:#fff9c4;text-align:center;cursor:pointer";
+        if (hours > 8) return "background-color:#c8e6c9;text-align:center;cursor:pointer";
+        return "text-align:center;cursor:pointer";
+    }
+
+    private void EditHours(PuantajRow emp, int day)
+    {
+        Snackbar.Add($"{emp.EmployeeName} - Gun {day} duzenleniyor", Severity.Info);
+    }
+
+    private void SavePuantaj()
+    {
+        Snackbar.Add("Puantaj kaydedildi", Severity.Success);
+    }
+
+    private void ExportExcel()
+    {
+        Snackbar.Add("Puantaj Excel'e aktariliyor", Severity.Info);
+    }
+
+    public class PuantajRow
+    {
+        public string EmployeeName { get; set; } = "";
+        public Dictionary<int, int> DailyHours { get; set; } = new();
+        public int TotalHours => DailyHours.Values.Sum();
+        public int OvertimeHours => Math.Max(0, TotalHours - 176);
+    }
+}

@@ -18,9 +18,10 @@ public class AuthService : IAuthService
     // Offline test kullanicilari (API baglantisi yoksa)
     private static readonly Dictionary<string, (string Password, string FullName, string Role)> _offlineUsers = new()
     {
-        ["admin"] = ("admin", "Sistem Yoneticisi", "Admin"),
+        ["admin"] = ("admin123", "Sistem Yoneticisi", "Admin"),
         ["muhasebe"] = ("muhasebe123", "Ayse Muhasebeci", "Accountant"),
-        ["yonetici"] = ("yonetici123", "Mehmet Yonetici", "Manager")
+        ["yonetici"] = ("yonetici123", "Mehmet Yonetici", "Manager"),
+        ["test"] = ("test", "Test Kullanici", "User")
     };
 
     public AuthService(AuthTokenStore tokenStore, ApiClient? apiClient = null)

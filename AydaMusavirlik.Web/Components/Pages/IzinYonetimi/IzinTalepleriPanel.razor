@@ -1,0 +1,151 @@
+@inject ISnackbar Snackbar
+
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">Izin Talepleri</MudText>
+        </CardHeaderContent>
+        <CardHeaderActions>
+            <MudButton Variant="Variant.Filled" Color="Color.Success" 
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="NewRequest">
+                Yeni Talep
+            </MudButton>
+        </CardHeaderActions>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudGrid Class="mb-4">
+            <MudItem xs="12" md="3">
+                <MudSelect T="string" Label="Durum" @bind-Value="_statusFilter" Clearable="true">
+                    <MudSelectItem Value="@("Beklemede")">Beklemede</MudSelectItem>
+                    <MudSelectItem Value="@("Onaylandi")">Onaylandi</MudSelectItem>
+                    <MudSelectItem Value="@("Reddedildi")">Reddedildi</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" md="3">
+                <MudSelect T="string" Label="Izin Tipi" @bind-Value="_typeFilter" Clearable="true">
+                    <MudSelectItem Value="@("Yillik")">Yillik Izin</MudSelectItem>
+                    <MudSelectItem Value="@("Mazeret")">Mazeret Izni</MudSelectItem>
+                    <MudSelectItem Value="@("Hastalik")">Hastalik Izni</MudSelectItem>
+                    <MudSelectItem Value="@("Ucretsiz")">Ucretsiz Izin</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+        </MudGrid>
+
+        <MudTable Items="_requests" Hover="true" Striped="true" Dense="true">
+            <HeaderContent>
+                <MudTh>Personel</MudTh>
+                <MudTh>Izin Tipi</MudTh>
+                <MudTh>Baslangic</MudTh>
+                <MudTh>Bitis</MudTh>
+                <MudTh>Gun</MudTh>
+                <MudTh>Aciklama</MudTh>
+                <MudTh>Durum</MudTh>
+                <MudTh>Islemler</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>@context.EmployeeName</MudTd>
+                <MudTd>
+                    <MudChip T="string" Size="Size.Small" Color="@GetTypeColor(context.LeaveType)">
+                        @context.LeaveType
+                    </MudChip>
+                </MudTd>
+                <MudTd>@context.StartDate.ToString("dd.MM.yyyy")</MudTd>
+                <MudTd>@context.EndDate.ToString("dd.MM.yyyy")</MudTd>
+                <MudTd>@context.Days</MudTd>
+                <MudTd>@context.Description</MudTd>
+                <MudTd>
+                    <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(context.Status)">
+                        @context.Status
+                    </MudChip>
+                </MudTd>
+                <MudTd>
+                    @if (context.Status == "Beklemede")
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Check" Size="Size.Small" 
+                                       Color="Color.Success" OnClick="@(() => Approve(context))" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small" 
+                                       Color="Color.Error" OnClick="@(() => Reject(context))" />
+                    }
+                    <MudIconButton Icon="@Icons.Material.Filled.Print" Size="Size.Small" 
+                                   OnClick="@(() => Print(context))" />
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    private string? _statusFilter;
+    private string? _typeFilter;
+    private List<LeaveRequest> _requests = new();
+
+    protected override void OnInitialized()
+    {
+        _requests = new List<LeaveRequest>
+        {
+            new() { EmployeeName = "Ahmet Yilmaz", LeaveType = "Yillik", StartDate = DateTime.Now.AddDays(5), EndDate = DateTime.Now.AddDays(10), Days = 5, Description = "Tatil", Status = "Beklemede" },
+            new() { EmployeeName = "Ayse Kaya", LeaveType = "Mazeret", StartDate = DateTime.Now.AddDays(2), EndDate = DateTime.Now.AddDays(2), Days = 1, Description = "Ozel is", Status = "Onaylandi" },
+            new() { EmployeeName = "Mehmet Demir", LeaveType = "Hastalik", StartDate = DateTime.Now.AddDays(-3), EndDate = DateTime.Now.AddDays(-1), Days = 3, Description = "Rapor", Status = "Onaylandi" },
+            new() { EmployeeName = "Fatma Ozturk", LeaveType = "Yillik", StartDate = DateTime.Now.AddDays(15), EndDate = DateTime.Now.AddDays(25), Days = 10, Description = "Yaz tatili", Status = "Beklemede" },
+        };
+    }
+
+    private Color GetTypeColor(string type)
+    {
+        return type switch
+        {
+            "Yillik" => Color.Primary,
+            "Mazeret" => Color.Info,
+            "Hastalik" => Color.Warning,
+            "Ucretsiz" => Color.Default,
+            _ => Color.Default
+        };
+    }
+
+    private Color GetStatusColor(string status)
+    {
+        return status switch
+        {
+            "Onaylandi" => Color.Success,
+            "Reddedildi" => Color.Error,
+            "Beklemede" => Color.Warning,
+            _ => Color.Default
+        };
+    }
+
+    private void NewRequest()
+    {
+        Snackbar.Add("Yeni izin talebi formu aciliyor", Severity.Info);
+    }
+
+    private void Approve(LeaveRequest request)
+    {
+        request.Status = "Onaylandi";
+        Snackbar.Add($"{request.EmployeeName} izin talebi onaylandi", Severity.Success);
+        StateHasChanged();
+    }
+
+    private void Reject(LeaveRequest request)
+    {
+        request.Status = "Reddedildi";
+        Snackbar.Add($"{request.EmployeeName} izin talebi reddedildi", Severity.Warning);
+        StateHasChanged();
+    }
+
+    private void Print(LeaveRequest request)
+    {
+        Snackbar.Add("Izin formu yazdiriliyor", Severity.Info);
+    }
+
+    public class LeaveRequest
+    {
+        public string EmployeeName { get; set; } = "";
+        public string LeaveType { get; set; } = "";
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public int Days { get; set; }
+        public string Description { get; set; } = "";
+        public string Status { get; set; } = "";
+    }
+}

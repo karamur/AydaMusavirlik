@@ -1,0 +1,90 @@
+@inject ISnackbar Snackbar
+
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">Personel Izin Bakiyeleri</MudText>
+        </CardHeaderContent>
+        <CardHeaderActions>
+            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Refresh"
+                       OnClick="LoadBalances">
+                Yenile
+            </MudButton>
+        </CardHeaderActions>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudTable Items="_balances" Hover="true" Striped="true" Dense="true">
+            <HeaderContent>
+                <MudTh>Sicil No</MudTh>
+                <MudTh>Personel</MudTh>
+                <MudTh>Ise Giris</MudTh>
+                <MudTh Style="text-align:center">Toplam Hak</MudTh>
+                <MudTh Style="text-align:center">Kullanilan</MudTh>
+                <MudTh Style="text-align:center">Kalan</MudTh>
+                <MudTh>Durum</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>@context.SicilNo</MudTd>
+                <MudTd>@context.EmployeeName</MudTd>
+                <MudTd>@context.HireDate.ToString("dd.MM.yyyy")</MudTd>
+                <MudTd Style="text-align:center">@context.TotalDays</MudTd>
+                <MudTd Style="text-align:center">@context.UsedDays</MudTd>
+                <MudTd Style="text-align:center">
+                    <MudChip T="string" Size="Size.Small" 
+                             Color="@(context.RemainingDays > 5 ? Color.Success : context.RemainingDays > 0 ? Color.Warning : Color.Error)">
+                        @context.RemainingDays
+                    </MudChip>
+                </MudTd>
+                <MudTd>
+                    <MudProgressLinear Color="@GetProgressColor(context.UsedDays, context.TotalDays)" 
+                                       Value="@GetPercentage(context.UsedDays, context.TotalDays)" 
+                                       Class="my-2" Style="width:100px" />
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    private List<LeaveBalance> _balances = new();
+
+    protected override void OnInitialized()
+    {
+        LoadBalances();
+    }
+
+    private void LoadBalances()
+    {
+        _balances = new List<LeaveBalance>
+        {
+            new() { SicilNo = "001", EmployeeName = "Ahmet Yilmaz", HireDate = new DateTime(2018, 3, 15), TotalDays = 20, UsedDays = 8 },
+            new() { SicilNo = "002", EmployeeName = "Ayse Kaya", HireDate = new DateTime(2020, 6, 1), TotalDays = 14, UsedDays = 5 },
+            new() { SicilNo = "003", EmployeeName = "Mehmet Demir", HireDate = new DateTime(2021, 9, 15), TotalDays = 14, UsedDays = 10 },
+            new() { SicilNo = "004", EmployeeName = "Fatma Ozturk", HireDate = new DateTime(2019, 1, 10), TotalDays = 14, UsedDays = 14 },
+            new() { SicilNo = "005", EmployeeName = "Ali Celik", HireDate = new DateTime(2017, 5, 20), TotalDays = 20, UsedDays = 3 },
+        };
+    }
+
+    private Color GetProgressColor(int used, int total)
+    {
+        var percent = (double)used / total * 100;
+        if (percent >= 90) return Color.Error;
+        if (percent >= 70) return Color.Warning;
+        return Color.Success;
+    }
+
+    private double GetPercentage(int used, int total)
+    {
+        return (double)used / total * 100;
+    }
+
+    public class LeaveBalance
+    {
+        public string SicilNo { get; set; } = "";
+        public string EmployeeName { get; set; } = "";
+        public DateTime HireDate { get; set; }
+        public int TotalDays { get; set; }
+        public int UsedDays { get; set; }
+        public int RemainingDays => TotalDays - UsedDays;
+    }
+}

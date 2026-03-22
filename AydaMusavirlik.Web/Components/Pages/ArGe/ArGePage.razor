@@ -1,0 +1,215 @@
+@page "/arge"
+@inject ISnackbar Snackbar
+
+<PageTitle>Ar-Ge Projeleri - AYDA Musavirlik</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">
+    <MudIcon Icon="@Icons.Material.Filled.Science" Class="mr-2" />
+    Ar-Ge Proje Yonetimi
+</MudText>
+
+<MudCard Class="mb-4">
+    <MudCardContent>
+        <MudGrid>
+            <MudItem xs="12" md="3">
+                <MudTextField T="string" Label="Proje Ara" @bind-Value="_searchText"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" />
+            </MudItem>
+            <MudItem xs="12" md="2">
+                <MudSelect T="string" Label="Durum" @bind-Value="_statusFilter" Clearable="true">
+                    <MudSelectItem Value="@("Aktif")">Aktif</MudSelectItem>
+                    <MudSelectItem Value="@("Tamamlandi")">Tamamlandi</MudSelectItem>
+                    <MudSelectItem Value="@("Beklemede")">Beklemede</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" md="2">
+                <MudSelect T="int?" Label="Yil" @bind-Value="_yearFilter" Clearable="true">
+                    <MudSelectItem Value="@((int?)2024)">2024</MudSelectItem>
+                    <MudSelectItem Value="@((int?)2023)">2023</MudSelectItem>
+                    <MudSelectItem Value="@((int?)2022)">2022</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" md="2">
+                <MudButton Variant="Variant.Filled" Color="Color.Success" 
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="AddProject" FullWidth="true" Class="mt-2">
+                    Yeni Proje
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudCardContent>
+</MudCard>
+
+<!-- Özet Kartlarý -->
+<MudGrid Class="mb-4">
+    <MudItem xs="12" md="3">
+        <MudPaper Class="pa-4" Elevation="2">
+            <MudStack Row="true" AlignItems="AlignItems.Center">
+                <MudAvatar Color="Color.Primary" Size="Size.Large">
+                    <MudIcon Icon="@Icons.Material.Filled.Folder" />
+                </MudAvatar>
+                <MudStack Spacing="0">
+                    <MudText Typo="Typo.caption">Toplam Proje</MudText>
+                    <MudText Typo="Typo.h5">@_projects.Count</MudText>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" md="3">
+        <MudPaper Class="pa-4" Elevation="2">
+            <MudStack Row="true" AlignItems="AlignItems.Center">
+                <MudAvatar Color="Color.Success" Size="Size.Large">
+                    <MudIcon Icon="@Icons.Material.Filled.PlayArrow" />
+                </MudAvatar>
+                <MudStack Spacing="0">
+                    <MudText Typo="Typo.caption">Aktif Proje</MudText>
+                    <MudText Typo="Typo.h5">@_projects.Count(p => p.Status == "Aktif")</MudText>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" md="3">
+        <MudPaper Class="pa-4" Elevation="2">
+            <MudStack Row="true" AlignItems="AlignItems.Center">
+                <MudAvatar Color="Color.Info" Size="Size.Large">
+                    <MudIcon Icon="@Icons.Material.Filled.AttachMoney" />
+                </MudAvatar>
+                <MudStack Spacing="0">
+                    <MudText Typo="Typo.caption">Toplam Butce</MudText>
+                    <MudText Typo="Typo.h5">@_projects.Sum(p => p.Budget).ToString("N0") TL</MudText>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" md="3">
+        <MudPaper Class="pa-4" Elevation="2">
+            <MudStack Row="true" AlignItems="AlignItems.Center">
+                <MudAvatar Color="Color.Warning" Size="Size.Large">
+                    <MudIcon Icon="@Icons.Material.Filled.Savings" />
+                </MudAvatar>
+                <MudStack Spacing="0">
+                    <MudText Typo="Typo.caption">Vergi Indirimi</MudText>
+                    <MudText Typo="Typo.h5">@(_projects.Sum(p => p.Budget) * 0.15m).ToString("N0") TL</MudText>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+<MudCard>
+    <MudCardContent>
+        <MudTable Items="_projects" Hover="true" Striped="true" Dense="true">
+            <HeaderContent>
+                <MudTh>Proje Kodu</MudTh>
+                <MudTh>Proje Adi</MudTh>
+                <MudTh>Baslangic</MudTh>
+                <MudTh>Bitis</MudTh>
+                <MudTh Style="text-align:right">Butce</MudTh>
+                <MudTh Style="text-align:right">Harcama</MudTh>
+                <MudTh>Ilerleme</MudTh>
+                <MudTh>Durum</MudTh>
+                <MudTh>Islemler</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>@context.Code</MudTd>
+                <MudTd>@context.Name</MudTd>
+                <MudTd>@context.StartDate.ToString("dd.MM.yyyy")</MudTd>
+                <MudTd>@context.EndDate?.ToString("dd.MM.yyyy")</MudTd>
+                <MudTd Style="text-align:right">@context.Budget.ToString("N0")</MudTd>
+                <MudTd Style="text-align:right">@context.Spent.ToString("N0")</MudTd>
+                <MudTd>
+                    <MudProgressLinear Color="@GetProgressColor(context.Progress)" Value="@context.Progress" Class="my-2" />
+                    <MudText Typo="Typo.caption">%@context.Progress</MudText>
+                </MudTd>
+                <MudTd>
+                    <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(context.Status)">
+                        @context.Status
+                    </MudChip>
+                </MudTd>
+                <MudTd>
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" 
+                                   OnClick="@(() => EditProject(context))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" 
+                                   OnClick="@(() => ViewProject(context))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Description" Size="Size.Small" 
+                                   OnClick="@(() => GenerateReport(context))" Title="Rapor" />
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    private string? _searchText;
+    private string? _statusFilter;
+    private int? _yearFilter;
+    private List<ArGeProject> _projects = new();
+
+    protected override void OnInitialized()
+    {
+        LoadProjects();
+    }
+
+    private void LoadProjects()
+    {
+        _projects = new List<ArGeProject>
+        {
+            new() { Code = "ARGE-2024-001", Name = "Yapay Zeka Tabanli Muhasebe Sistemi", StartDate = new DateTime(2024, 1, 15), EndDate = new DateTime(2024, 12, 31), Budget = 500000, Spent = 125000, Progress = 25, Status = "Aktif" },
+            new() { Code = "ARGE-2024-002", Name = "Bulut Tabanli ERP Entegrasyonu", StartDate = new DateTime(2024, 3, 1), EndDate = new DateTime(2024, 9, 30), Budget = 350000, Spent = 87500, Progress = 35, Status = "Aktif" },
+            new() { Code = "ARGE-2023-005", Name = "Otomatik Fatura Okuma Sistemi", StartDate = new DateTime(2023, 6, 1), EndDate = new DateTime(2024, 2, 28), Budget = 280000, Spent = 280000, Progress = 100, Status = "Tamamlandi" },
+            new() { Code = "ARGE-2024-003", Name = "Mobil Muhasebe Uygulamasi", StartDate = new DateTime(2024, 4, 1), Budget = 420000, Spent = 42000, Progress = 10, Status = "Aktif" },
+            new() { Code = "ARGE-2024-004", Name = "Blockchain Tabanli Denetim", StartDate = new DateTime(2024, 6, 1), Budget = 600000, Spent = 0, Progress = 0, Status = "Beklemede" },
+        };
+    }
+
+    private Color GetStatusColor(string status)
+    {
+        return status switch
+        {
+            "Aktif" => Color.Success,
+            "Tamamlandi" => Color.Info,
+            "Beklemede" => Color.Warning,
+            _ => Color.Default
+        };
+    }
+
+    private Color GetProgressColor(int progress)
+    {
+        if (progress >= 75) return Color.Success;
+        if (progress >= 50) return Color.Info;
+        if (progress >= 25) return Color.Warning;
+        return Color.Error;
+    }
+
+    private void AddProject()
+    {
+        Snackbar.Add("Yeni Ar-Ge projesi ekleniyor", Severity.Info);
+    }
+
+    private void EditProject(ArGeProject project)
+    {
+        Snackbar.Add($"{project.Name} duzenleniyor", Severity.Info);
+    }
+
+    private void ViewProject(ArGeProject project)
+    {
+        Snackbar.Add($"{project.Name} detaylari", Severity.Info);
+    }
+
+    private void GenerateReport(ArGeProject project)
+    {
+        Snackbar.Add($"{project.Code} raporu olusturuluyor", Severity.Info);
+    }
+
+    public class ArGeProject
+    {
+        public string Code { get; set; } = "";
+        public string Name { get; set; } = "";
+        public DateTime StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public decimal Budget { get; set; }
+        public decimal Spent { get; set; }
+        public int Progress { get; set; }
+        public string Status { get; set; } = "";
+    }
+}

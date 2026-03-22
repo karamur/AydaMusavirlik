@@ -1,0 +1,144 @@
+@inject ISnackbar Snackbar
+
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">Izin Takvimi - @_currentMonth.ToString("MMMM yyyy")</MudText>
+        </CardHeaderContent>
+        <CardHeaderActions>
+            <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft" OnClick="PreviousMonth" />
+            <MudIconButton Icon="@Icons.Material.Filled.ChevronRight" OnClick="NextMonth" />
+        </CardHeaderActions>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudSimpleTable Dense="true" Bordered="true" Style="width:100%">
+            <thead>
+                <tr style="background-color: #f5f5f5">
+                    <th style="width:150px">Personel</th>
+                    @for (int i = 1; i <= DateTime.DaysInMonth(_currentMonth.Year, _currentMonth.Month); i++)
+                    {
+                        var day = new DateTime(_currentMonth.Year, _currentMonth.Month, i);
+                        var isWeekend = day.DayOfWeek == DayOfWeek.Saturday || day.DayOfWeek == DayOfWeek.Sunday;
+                        <th style="@(isWeekend ? "background-color:#e0e0e0;width:30px;text-align:center" : "width:30px;text-align:center")">
+                            @i
+                        </th>
+                    }
+                    <th style="width:60px;text-align:center">Toplam</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var emp in _employees)
+                {
+                    <tr>
+                        <td>@emp.Name</td>
+                        @for (int i = 1; i <= DateTime.DaysInMonth(_currentMonth.Year, _currentMonth.Month); i++)
+                        {
+                            var day = new DateTime(_currentMonth.Year, _currentMonth.Month, i);
+                            var isWeekend = day.DayOfWeek == DayOfWeek.Saturday || day.DayOfWeek == DayOfWeek.Sunday;
+                            var leaveType = GetLeaveType(emp.Name, day);
+                            <td style="@GetCellStyle(isWeekend, leaveType)" title="@leaveType">
+                                @GetLeaveIcon(leaveType)
+                            </td>
+                        }
+                        <td style="text-align:center;font-weight:bold">@CountLeaveDays(emp.Name)</td>
+                    </tr>
+                }
+            </tbody>
+        </MudSimpleTable>
+
+        <MudStack Row="true" Class="mt-4" Spacing="4">
+            <MudChip T="string" Size="Size.Small" Style="background-color:#4caf50;color:white">Y - Yillik</MudChip>
+            <MudChip T="string" Size="Size.Small" Style="background-color:#2196f3;color:white">M - Mazeret</MudChip>
+            <MudChip T="string" Size="Size.Small" Style="background-color:#ff9800;color:white">H - Hastalik</MudChip>
+            <MudChip T="string" Size="Size.Small" Style="background-color:#9e9e9e;color:white">U - Ucretsiz</MudChip>
+        </MudStack>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    private DateTime _currentMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+    private List<Employee> _employees = new();
+    private List<LeaveEntry> _leaves = new();
+
+    protected override void OnInitialized()
+    {
+        _employees = new List<Employee>
+        {
+            new() { Name = "Ahmet Yilmaz" },
+            new() { Name = "Ayse Kaya" },
+            new() { Name = "Mehmet Demir" },
+            new() { Name = "Fatma Ozturk" },
+            new() { Name = "Ali Celik" },
+        };
+
+        _leaves = new List<LeaveEntry>
+        {
+            new() { EmployeeName = "Ahmet Yilmaz", Date = new DateTime(2024, 3, 11), Type = "Yillik" },
+            new() { EmployeeName = "Ahmet Yilmaz", Date = new DateTime(2024, 3, 12), Type = "Yillik" },
+            new() { EmployeeName = "Ahmet Yilmaz", Date = new DateTime(2024, 3, 13), Type = "Yillik" },
+            new() { EmployeeName = "Ayse Kaya", Date = new DateTime(2024, 3, 18), Type = "Mazeret" },
+            new() { EmployeeName = "Mehmet Demir", Date = new DateTime(2024, 3, 5), Type = "Hastalik" },
+            new() { EmployeeName = "Mehmet Demir", Date = new DateTime(2024, 3, 6), Type = "Hastalik" },
+        };
+    }
+
+    private void PreviousMonth()
+    {
+        _currentMonth = _currentMonth.AddMonths(-1);
+    }
+
+    private void NextMonth()
+    {
+        _currentMonth = _currentMonth.AddMonths(1);
+    }
+
+    private string GetLeaveType(string empName, DateTime date)
+    {
+        return _leaves.FirstOrDefault(l => l.EmployeeName == empName && l.Date.Date == date.Date)?.Type ?? "";
+    }
+
+    private string GetCellStyle(bool isWeekend, string leaveType)
+    {
+        if (isWeekend) return "background-color:#e0e0e0;text-align:center";
+
+        return leaveType switch
+        {
+            "Yillik" => "background-color:#4caf50;color:white;text-align:center",
+            "Mazeret" => "background-color:#2196f3;color:white;text-align:center",
+            "Hastalik" => "background-color:#ff9800;color:white;text-align:center",
+            "Ucretsiz" => "background-color:#9e9e9e;color:white;text-align:center",
+            _ => "text-align:center"
+        };
+    }
+
+    private string GetLeaveIcon(string leaveType)
+    {
+        return leaveType switch
+        {
+            "Yillik" => "Y",
+            "Mazeret" => "M",
+            "Hastalik" => "H",
+            "Ucretsiz" => "U",
+            _ => ""
+        };
+    }
+
+    private int CountLeaveDays(string empName)
+    {
+        return _leaves.Count(l => l.EmployeeName == empName && 
+                                   l.Date.Month == _currentMonth.Month && 
+                                   l.Date.Year == _currentMonth.Year);
+    }
+
+    public class Employee
+    {
+        public string Name { get; set; } = "";
+    }
+
+    public class LeaveEntry
+    {
+        public string EmployeeName { get; set; } = "";
+        public DateTime Date { get; set; }
+        public string Type { get; set; } = "";
+    }
+}
