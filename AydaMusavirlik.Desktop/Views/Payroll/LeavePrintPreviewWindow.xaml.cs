@@ -2,19 +2,50 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Printing;
 using System.Windows.Media;
+using System.Diagnostics;
 using Microsoft.Win32;
+using AydaMusavirlik.Infrastructure.Services;
 
 namespace AydaMusavirlik.Desktop.Views.Payroll;
 
 public partial class LeavePrintPreviewWindow : Window
 {
     private readonly IzinTalebiViewModel _talep;
+    private readonly ILeaveFormPdfService _pdfService;
 
     public LeavePrintPreviewWindow(IzinTalebiViewModel talep)
     {
         InitializeComponent();
         _talep = talep;
+        _pdfService = new LeaveFormPdfService();
         LoadData();
+    }
+
+    private LeaveFormPdfModel CreatePdfModel()
+    {
+        return new LeaveFormPdfModel
+        {
+            FormNo = _talep.FormNo,
+            FirmaAdi = "Ayda Müþavirlik A.Þ.",
+            FirmaAdres = "Merkez Mah. Ýþ Cad. No:1 Ýstanbul",
+            PersonelAdi = _talep.PersonelAdi,
+            TcKimlikNo = "12345678901",
+            SicilNo = "P001",
+            Departman = "Muhasebe",
+            Pozisyon = "Uzman",
+            IseGirisTarihi = new DateTime(2020, 3, 15),
+            IzinTuru = _talep.IzinTuru,
+            BaslangicTarihi = _talep.BaslangicTarihi,
+            BitisTarihi = _talep.BitisTarihi,
+            GunSayisi = _talep.GunSayisi,
+            Aciklama = "Ailevi nedenlerle izin talep ediyorum.",
+            ToplamHakedilen = 20,
+            Kullanilan = 8,
+            Kalan = 12,
+            OnayDurumu = _talep.Durum,
+            OnaylayanAdi = _talep.OnaylayanAdi,
+            OnayTarihi = _talep.Onaylandi ? DateTime.Now.AddDays(-1) : null
+        };
     }
 
     private void LoadData()
@@ -22,23 +53,23 @@ public partial class LeavePrintPreviewWindow : Window
         txtFormNo.Text = $"Form No: {_talep.FormNo}";
         txtTarih.Text = DateTime.Now.ToString("dd.MM.yyyy");
         txtPersonelAdi.Text = _talep.PersonelAdi;
-        txtTcKimlik.Text = "12345678901"; // Demo
+        txtTcKimlik.Text = "12345678901";
         txtSicilNo.Text = "P001";
         txtDepartman.Text = "Muhasebe";
         txtIseGiris.Text = "15.03.2020";
-
+        
         txtIzinTuru.Text = _talep.IzinTuru;
         txtBaslangic.Text = _talep.BaslangicTarihi.ToString("dd.MM.yyyy");
         txtBitis.Text = _talep.BitisTarihi.ToString("dd.MM.yyyy");
         txtGunSayisi.Text = $"{_talep.GunSayisi} gün";
         txtAciklama.Text = "Ailevi nedenlerle izin talep ediyorum.";
-
+        
         txtHakedilen.Text = "20 gün";
         txtKullanilan.Text = "8 gün";
         txtKalan.Text = "12 gün";
-
+        
         txtPersonelImza.Text = _talep.PersonelAdi;
-
+        
         if (_talep.Onaylandi)
         {
             brdOnayDurumu.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E8F5E9"));
@@ -88,9 +119,20 @@ public partial class LeavePrintPreviewWindow : Window
         {
             try
             {
-                // PDF oluþturma (gerçek uygulamada QuestPDF veya iTextSharp kullanýlabilir)
-                // Demo için sadece mesaj göster
-                MessageBox.Show($"PDF kaydedildi:\n{saveDialog.FileName}", "Baþarýlý", MessageBoxButton.OK, MessageBoxImage.Information);
+                var model = CreatePdfModel();
+                var pdfBytes = _pdfService.GenerateLeaveFormPdf(model);
+                System.IO.File.WriteAllBytes(saveDialog.FileName, pdfBytes);
+                
+                var result = MessageBox.Show(
+                    $"PDF baþarýyla kaydedildi:\n{saveDialog.FileName}\n\nDosyayý açmak ister misiniz?", 
+                    "Baþarýlý", 
+                    MessageBoxButton.YesNo, 
+                    MessageBoxImage.Information);
+                
+                if (result == MessageBoxResult.Yes)
+                {
+                    Process.Start(new ProcessStartInfo(saveDialog.FileName) { UseShellExecute = true });
+                }
             }
             catch (Exception ex)
             {
@@ -101,16 +143,33 @@ public partial class LeavePrintPreviewWindow : Window
 
     private void BtnMailGonder_Click(object sender, RoutedEventArgs e)
     {
-        var emailWindow = new EmailSendWindow(_talep);
+        var model = CreatePdfModel();
+        var pdfBytes = _pdfService.GenerateLeaveFormPdf(model);
+        
+        var emailWindow = new EmailSendWindow(_talep, pdfBytes);
         emailWindow.Owner = this;
         emailWindow.ShowDialog();
     }
 
     private void BtnPaylas_Click(object sender, RoutedEventArgs e)
     {
-        var shareLink = $"https://ayda.com/izin/{_talep.FormNo}";
-        Clipboard.SetText(shareLink);
-        MessageBox.Show($"Paylaþým linki panoya kopyalandý:\n{shareLink}", "Paylaþým", MessageBoxButton.OK, MessageBoxImage.Information);
+        try
+        {
+            // Geçici PDF oluþtur
+            var tempPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"IzinFormu_{_talep.FormNo}.pdf");
+            var model = CreatePdfModel();
+            var pdfBytes = _pdfService.GenerateLeaveFormPdf(model);
+            System.IO.File.WriteAllBytes(tempPath, pdfBytes);
+            
+            // Paylaþým seçenekleri
+            var shareWindow = new ShareOptionsWindow(tempPath, _talep.FormNo);
+            shareWindow.Owner = this;
+            shareWindow.ShowDialog();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Paylaþým hatasý: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     private void BtnKapat_Click(object sender, RoutedEventArgs e)

@@ -268,73 +268,73 @@ public class LeaveController : ControllerBase
     public async Task<ActionResult<LeaveRequestDto>> ApproveRequest(int id, [FromBody] ApproveLeaveRequestDto request)
     {
         var leaveRequest = await _leaveRepository.GetByIdAsync(id);
-
+        
         if (leaveRequest == null)
-            return NotFound(new { message = "Ýzin talebi bulunamadý" });
+            return NotFound(new { message = "Izin talebi bulunamadi" });
 
         if (leaveRequest.Status != LeaveStatus.Pending)
-            return BadRequest(new { message = "Bu izin talebi zaten iþlem görmüþ" });
+            return BadRequest(new { message = "Bu izin talebi zaten islem gormus" });
 
         leaveRequest.Status = LeaveStatus.Approved;
         leaveRequest.ApprovedById = request.OnaylayanId;
         leaveRequest.ApprovalDate = DateTime.Now;
         leaveRequest.ApprovalNote = request.OnayNotu;
 
-        _leaveRepository.Update(leaveRequest);
+        await _leaveRepository.UpdateAsync(leaveRequest);
         await _unitOfWork.SaveChangesAsync();
 
-        return Ok(new { message = "Ýzin talebi onaylandý", formNo = leaveRequest.FormNumber });
+        return Ok(new { message = "Izin talebi onaylandi", formNo = leaveRequest.FormNumber });
     }
 
     /// <summary>
-    /// Ýzin talebini reddeder
+    /// Izin talebini reddeder
     /// </summary>
     [HttpPost("{id}/reject")]
     public async Task<ActionResult> RejectRequest(int id, [FromBody] RejectLeaveRequestDto request)
     {
         var leaveRequest = await _leaveRepository.GetByIdAsync(id);
-
+        
         if (leaveRequest == null)
-            return NotFound(new { message = "Ýzin talebi bulunamadý" });
+            return NotFound(new { message = "Izin talebi bulunamadi" });
 
         if (leaveRequest.Status != LeaveStatus.Pending)
-            return BadRequest(new { message = "Bu izin talebi zaten iþlem görmüþ" });
+            return BadRequest(new { message = "Bu izin talebi zaten islem gormus" });
 
         leaveRequest.Status = LeaveStatus.Rejected;
         leaveRequest.ApprovedById = request.ReddedenId;
         leaveRequest.ApprovalDate = DateTime.Now;
         leaveRequest.ApprovalNote = request.RedNedeni;
 
-        _leaveRepository.Update(leaveRequest);
+        await _leaveRepository.UpdateAsync(leaveRequest);
         await _unitOfWork.SaveChangesAsync();
 
-        return Ok(new { message = "Ýzin talebi reddedildi" });
+        return Ok(new { message = "Izin talebi reddedildi" });
     }
 
     /// <summary>
-    /// Ýzin talebini iptal eder
+    /// Izin talebini iptal eder
     /// </summary>
     [HttpPost("{id}/cancel")]
     public async Task<ActionResult> CancelRequest(int id)
     {
         var leaveRequest = await _leaveRepository.GetByIdAsync(id);
-
+        
         if (leaveRequest == null)
-            return NotFound(new { message = "Ýzin talebi bulunamadý" });
+            return NotFound(new { message = "Izin talebi bulunamadi" });
 
         if (leaveRequest.Status != LeaveStatus.Pending)
             return BadRequest(new { message = "Sadece bekleyen talepler iptal edilebilir" });
 
         leaveRequest.Status = LeaveStatus.Cancelled;
 
-        _leaveRepository.Update(leaveRequest);
+        await _leaveRepository.UpdateAsync(leaveRequest);
         await _unitOfWork.SaveChangesAsync();
 
-        return Ok(new { message = "Ýzin talebi iptal edildi" });
+        return Ok(new { message = "Izin talebi iptal edildi" });
     }
 
     /// <summary>
-    /// Kalan izin hakkýný getirir
+    /// Kalan izin hakkini getirir
     /// </summary>
     [HttpGet("remaining/{employeeId}")]
     public async Task<ActionResult<LeaveBalanceDto>> GetLeaveBalance(int employeeId, [FromQuery] int year = 0)

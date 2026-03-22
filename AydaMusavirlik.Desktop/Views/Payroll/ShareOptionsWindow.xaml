@@ -1,0 +1,60 @@
+<Window x:Class="AydaMusavirlik.Desktop.Views.Payroll.ShareOptionsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Paylas" Height="350" Width="400"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Margin="0,0,0,20">
+            <TextBlock Text="Izin Formu Paylas" FontSize="18" FontWeight="Bold"/>
+            <TextBlock x:Name="txtFormNo" Text="IZN-2025-001" Foreground="#666" Margin="0,5,0,0"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1">
+            <Button x:Name="btnWhatsApp" Height="50" Margin="0,0,0,10" HorizontalContentAlignment="Left"
+                    Click="BtnWhatsApp_Click">
+                <StackPanel Orientation="Horizontal" Margin="15,0">
+                    <TextBlock Text="WhatsApp ile Gonder" VerticalAlignment="Center" FontSize="14"/>
+                </StackPanel>
+            </Button>
+
+            <Button x:Name="btnTelegram" Height="50" Margin="0,0,0,10" HorizontalContentAlignment="Left"
+                    Click="BtnTelegram_Click">
+                <StackPanel Orientation="Horizontal" Margin="15,0">
+                    <TextBlock Text="Telegram ile Gonder" VerticalAlignment="Center" FontSize="14"/>
+                </StackPanel>
+            </Button>
+
+            <Button x:Name="btnKopyala" Height="50" Margin="0,0,0,10" HorizontalContentAlignment="Left"
+                    Click="BtnKopyala_Click">
+                <StackPanel Orientation="Horizontal" Margin="15,0">
+                    <TextBlock Text="Dosya Yolunu Kopyala" VerticalAlignment="Center" FontSize="14"/>
+                </StackPanel>
+            </Button>
+
+            <Button x:Name="btnKlasorAc" Height="50" Margin="0,0,0,10" HorizontalContentAlignment="Left"
+                    Click="BtnKlasorAc_Click">
+                <StackPanel Orientation="Horizontal" Margin="15,0">
+                    <TextBlock Text="Dosya Konumunu Ac" VerticalAlignment="Center" FontSize="14"/>
+                </StackPanel>
+            </Button>
+
+            <Button x:Name="btnWindowsPaylas" Height="50" HorizontalContentAlignment="Left"
+                    Click="BtnWindowsPaylas_Click">
+                <StackPanel Orientation="Horizontal" Margin="15,0">
+                    <TextBlock Text="Windows Paylasim Menusu" VerticalAlignment="Center" FontSize="14"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+
+        <Button Grid.Row="2" Content="Kapat" HorizontalAlignment="Right" Padding="20,10" 
+                Click="BtnKapat_Click"/>
+    </Grid>
+</Window>

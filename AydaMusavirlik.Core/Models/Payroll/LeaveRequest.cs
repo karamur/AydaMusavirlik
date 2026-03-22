@@ -3,38 +3,38 @@ using AydaMusavirlik.Core.Models.Common;
 namespace AydaMusavirlik.Core.Models.Payroll;
 
 /// <summary>
-/// Ýzin talebi
+/// Izin talebi
 /// </summary>
 public class LeaveRequest : BaseEntity
 {
     public int EmployeeId { get; set; }
     public int CompanyId { get; set; }
-
-    // Ýzin bilgileri
+    
+    // Izin bilgileri
     public LeaveType LeaveType { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public int TotalDays { get; set; }
     public string? Description { get; set; }
-
+    
     // Onay bilgileri
     public LeaveStatus Status { get; set; } = LeaveStatus.Pending;
     public int? ApprovedById { get; set; }
     public DateTime? ApprovalDate { get; set; }
     public string? ApprovalNote { get; set; }
-
+    
     // Vekalet bilgileri
     public int? DeputyEmployeeId { get; set; }
     public string? DeputyNote { get; set; }
-
-    // Ýletiþim
+    
+    // Iletisim
     public string? ContactPhone { get; set; }
     public string? ContactAddress { get; set; }
-
+    
     // Form bilgileri
     public string? FormNumber { get; set; }
     public DateTime RequestDate { get; set; } = DateTime.Now;
-
+    
     // Navigation
     public virtual Employee Employee { get; set; } = null!;
     public virtual Employee? ApprovedBy { get; set; }
@@ -42,69 +42,69 @@ public class LeaveRequest : BaseEntity
 }
 
 /// <summary>
-/// Ýzin türleri
+/// Izin turleri
 /// </summary>
 public enum LeaveType
 {
-    Annual = 1,           // Yýllýk izin
-    Sick = 2,             // Hastalýk izni
-    Maternity = 3,        // Doðum izni
-    Paternity = 4,        // Babalýk izni
-    Marriage = 5,         // Evlilik izni
-    Bereavement = 6,      // Ölüm izni
-    Unpaid = 7,           // Ücretsiz izin
-    Administrative = 8,   // Ýdari izin
-    Compensatory = 9,     // Mazeret izni
-    Military = 10,        // Askerlik izni
-    Education = 11        // Eðitim izni
+    Annual = 1,
+    Sick = 2,
+    Maternity = 3,
+    Paternity = 4,
+    Marriage = 5,
+    Bereavement = 6,
+    Unpaid = 7,
+    Administrative = 8,
+    Compensatory = 9,
+    Military = 10,
+    Education = 11
 }
 
 /// <summary>
-/// Ýzin durumlarý
+/// Izin durumlari
 /// </summary>
 public enum LeaveStatus
 {
-    Pending = 1,          // Bekliyor
-    Approved = 2,         // Onaylandý
-    Rejected = 3,         // Reddedildi
-    Cancelled = 4,        // Ýptal edildi
-    InProgress = 5        // Kullanýlýyor
+    Pending = 1,
+    Approved = 2,
+    Rejected = 3,
+    Cancelled = 4,
+    InProgress = 5
 }
 
 /// <summary>
-/// Ýzin türü helper
+/// Izin turu helper
 /// </summary>
 public static class LeaveTypeHelper
 {
     public static string GetDisplayName(LeaveType type) => type switch
     {
-        LeaveType.Annual => "Yýllýk Ýzin",
-        LeaveType.Sick => "Hastalýk Ýzni",
-        LeaveType.Maternity => "Doðum Ýzni",
-        LeaveType.Paternity => "Babalýk Ýzni",
-        LeaveType.Marriage => "Evlilik Ýzni",
-        LeaveType.Bereavement => "Ölüm Ýzni",
-        LeaveType.Unpaid => "Ücretsiz Ýzin",
-        LeaveType.Administrative => "Ýdari Ýzin",
-        LeaveType.Compensatory => "Mazeret Ýzni",
-        LeaveType.Military => "Askerlik Ýzni",
-        LeaveType.Education => "Eðitim Ýzni",
+        LeaveType.Annual => "Yillik Izin",
+        LeaveType.Sick => "Hastalik Izni",
+        LeaveType.Maternity => "Dogum Izni",
+        LeaveType.Paternity => "Babalik Izni",
+        LeaveType.Marriage => "Evlilik Izni",
+        LeaveType.Bereavement => "Olum Izni",
+        LeaveType.Unpaid => "Ucretsiz Izin",
+        LeaveType.Administrative => "Idari Izin",
+        LeaveType.Compensatory => "Mazeret Izni",
+        LeaveType.Military => "Askerlik Izni",
+        LeaveType.Education => "Egitim Izni",
         _ => "Bilinmeyen"
     };
 
     public static int GetMaxDays(LeaveType type) => type switch
     {
-        LeaveType.Annual => 14,        // Kanuni yýllýk izin
-        LeaveType.Sick => 0,           // Rapor süresince
-        LeaveType.Maternity => 112,    // 16 hafta
-        LeaveType.Paternity => 5,      // 5 gün
-        LeaveType.Marriage => 3,       // 3 gün
-        LeaveType.Bereavement => 3,    // 3 gün
-        LeaveType.Unpaid => 90,        // Max 3 ay
-        LeaveType.Administrative => 1, // 1 gün
-        LeaveType.Compensatory => 5,   // 5 gün
-        LeaveType.Military => 90,      // Askerlik süresi
-        LeaveType.Education => 5,      // 5 gün
+        LeaveType.Annual => 14,
+        LeaveType.Sick => 0,
+        LeaveType.Maternity => 112,
+        LeaveType.Paternity => 5,
+        LeaveType.Marriage => 3,
+        LeaveType.Bereavement => 3,
+        LeaveType.Unpaid => 90,
+        LeaveType.Administrative => 1,
+        LeaveType.Compensatory => 5,
+        LeaveType.Military => 90,
+        LeaveType.Education => 5,
         _ => 0
     };
 
@@ -120,10 +120,10 @@ public static class LeaveStatusHelper
     public static string GetDisplayName(LeaveStatus status) => status switch
     {
         LeaveStatus.Pending => "Bekliyor",
-        LeaveStatus.Approved => "Onaylandý",
+        LeaveStatus.Approved => "Onaylandi",
         LeaveStatus.Rejected => "Reddedildi",
-        LeaveStatus.Cancelled => "Ýptal Edildi",
-        LeaveStatus.InProgress => "Kullanýlýyor",
+        LeaveStatus.Cancelled => "Iptal Edildi",
+        LeaveStatus.InProgress => "Kullaniliyor",
         _ => "Bilinmeyen"
     };
 

@@ -1,0 +1,234 @@
+<Window x:Class="AydaMusavirlik.Desktop.Views.Payroll.LeavePrintPreviewWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="İzin Formu Önizleme" Height="800" Width="650"
+        WindowStartupLocation="CenterOwner"
+        Background="#F5F5F5">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <Border Grid.Row="0" Background="White" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="15,10">
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="btnYazdir" Content="🖨️ Yazdır" Padding="15,8" Margin="0,0,10,0"
+                        Background="#1976D2" Foreground="White" Click="BtnYazdir_Click"/>
+                <Button x:Name="btnPdfKaydet" Content="📄 PDF Kaydet" Padding="15,8" Margin="0,0,10,0"
+                        Click="BtnPdfKaydet_Click"/>
+                <Button x:Name="btnMailGonder" Content="📧 E-posta Gönder" Padding="15,8" Margin="0,0,10,0"
+                        Click="BtnMailGonder_Click"/>
+                <Button x:Name="btnPaylas" Content="📤 Paylaş" Padding="15,8"
+                        Click="BtnPaylas_Click"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Form Önizleme -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+            <Border x:Name="printArea" Background="White" Margin="30" Padding="40"
+                    BorderBrush="#DDD" BorderThickness="1">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="10" ShadowDepth="3" Opacity="0.2"/>
+                </Border.Effect>
+
+                <StackPanel Width="520">
+                    <!-- Başlık -->
+                    <Border BorderBrush="#1976D2" BorderThickness="0,0,0,3" Padding="0,0,0,15" Margin="0,0,0,20">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="İZİN TALEBİ FORMU" FontSize="22" FontWeight="Bold" 
+                                       Foreground="#1976D2" HorizontalAlignment="Center"/>
+                            <TextBlock x:Name="txtFormNo" Text="Form No: IZN-2025-001" FontSize="12" 
+                                       Foreground="#666" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Firma Bilgileri -->
+                    <Border Background="#F5F5F5" Padding="15" Margin="0,0,0,20">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="AYDA MÜŞAVİRLİK A.Ş." FontWeight="Bold" FontSize="14"/>
+                                <TextBlock Text="Merkez Mah. İş Cad. No:1 İstanbul" FontSize="11" Foreground="#666"/>
+                            </StackPanel>
+                            <TextBlock Grid.Column="1" x:Name="txtTarih" Text="25.03.2025" 
+                                       VerticalAlignment="Center" FontWeight="SemiBold"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Personel Bilgileri -->
+                    <TextBlock Text="PERSONEL BİLGİLERİ" FontWeight="Bold" FontSize="12" 
+                               Foreground="#1976D2" Margin="0,0,0,10"/>
+                    <Grid Margin="0,0,0,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="Adı Soyadı:" FontWeight="SemiBold" Grid.Row="0" Margin="0,5"/>
+                        <TextBlock x:Name="txtPersonelAdi" Text="Ahmet Yılmaz" Grid.Row="0" Grid.Column="1" Margin="0,5"/>
+
+                        <TextBlock Text="TC Kimlik No:" FontWeight="SemiBold" Grid.Row="1" Margin="0,5"/>
+                        <TextBlock x:Name="txtTcKimlik" Text="12345678901" Grid.Row="1" Grid.Column="1" Margin="0,5"/>
+
+                        <TextBlock Text="Sicil No:" FontWeight="SemiBold" Grid.Row="2" Margin="0,5"/>
+                        <TextBlock x:Name="txtSicilNo" Text="P001" Grid.Row="2" Grid.Column="1" Margin="0,5"/>
+
+                        <TextBlock Text="Departman:" FontWeight="SemiBold" Grid.Row="3" Margin="0,5"/>
+                        <TextBlock x:Name="txtDepartman" Text="Muhasebe" Grid.Row="3" Grid.Column="1" Margin="0,5"/>
+
+                        <TextBlock Text="İşe Giriş Tarihi:" FontWeight="SemiBold" Grid.Row="4" Margin="0,5"/>
+                        <TextBlock x:Name="txtIseGiris" Text="15.03.2020" Grid.Row="4" Grid.Column="1" Margin="0,5"/>
+                    </Grid>
+
+                    <!-- İzin Bilgileri -->
+                    <TextBlock Text="İZİN BİLGİLERİ" FontWeight="Bold" FontSize="12" 
+                               Foreground="#1976D2" Margin="0,0,0,10"/>
+                    <Border BorderBrush="#DDD" BorderThickness="1" Margin="0,0,0,20">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Background="#F9F9F9" Grid.Row="0" Grid.ColumnSpan="2" Padding="10">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="İzin Türü:" FontWeight="SemiBold"/>
+                                    <TextBlock x:Name="txtIzinTuru" Text="Yıllık İzin" Grid.Column="1" FontWeight="Bold"/>
+                                </Grid>
+                            </Border>
+
+                            <TextBlock Text="Başlangıç Tarihi:" FontWeight="SemiBold" Grid.Row="1" Padding="10,8"/>
+                            <TextBlock x:Name="txtBaslangic" Text="10.04.2025" Grid.Row="1" Grid.Column="1" Padding="10,8"/>
+
+                            <Border Background="#F9F9F9" Grid.Row="2" Grid.ColumnSpan="2" Padding="10,8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Bitiş Tarihi:" FontWeight="SemiBold"/>
+                                    <TextBlock x:Name="txtBitis" Text="14.04.2025" Grid.Column="1"/>
+                                </Grid>
+                            </Border>
+
+                            <TextBlock Text="Toplam Gün:" FontWeight="SemiBold" Grid.Row="3" Padding="10,8"/>
+                            <TextBlock x:Name="txtGunSayisi" Text="5 gün" Grid.Row="3" Grid.Column="1" Padding="10,8" FontWeight="Bold" Foreground="#1976D2"/>
+
+                            <Border Background="#F9F9F9" Grid.Row="4" Grid.ColumnSpan="2" Padding="10,8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="İzin Nedeni:" FontWeight="SemiBold"/>
+                                    <TextBlock x:Name="txtAciklama" Text="Ailevi nedenlerle izin talep ediyorum." Grid.Column="1" TextWrapping="Wrap"/>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- İzin Bakiyesi -->
+                    <TextBlock Text="İZİN BAKİYESİ" FontWeight="Bold" FontSize="12" 
+                               Foreground="#1976D2" Margin="0,0,0,10"/>
+                    <Grid Margin="0,0,0,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Background="#E3F2FD" Padding="10" Margin="0,0,5,0">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="Hak Edilen" FontSize="10" Foreground="#666"/>
+                                <TextBlock x:Name="txtHakedilen" Text="20 gün" FontWeight="Bold" FontSize="14"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="#FFEBEE" Padding="10" Margin="5,0" Grid.Column="1">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="Kullanılan" FontSize="10" Foreground="#666"/>
+                                <TextBlock x:Name="txtKullanilan" Text="8 gün" FontWeight="Bold" FontSize="14"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="#E8F5E9" Padding="10" Margin="5,0,0,0" Grid.Column="2">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="Kalan" FontSize="10" Foreground="#666"/>
+                                <TextBlock x:Name="txtKalan" Text="12 gün" FontWeight="Bold" FontSize="14"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- Onay Durumu -->
+                    <Border x:Name="brdOnayDurumu" Background="#E8F5E9" BorderBrush="#4CAF50" 
+                            BorderThickness="2" Padding="15" Margin="0,0,0,20">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="✓" FontSize="24" Foreground="#4CAF50" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="ONAYLANDI" FontWeight="Bold" FontSize="14" Foreground="#2E7D32"/>
+                                <TextBlock x:Name="txtOnayBilgi" Text="Onaylayan: Müdür Bey | Tarih: 24.03.2025" FontSize="11" Foreground="#666"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- İmza Alanları -->
+                    <Grid Margin="0,30,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel HorizontalAlignment="Center">
+                            <Border BorderBrush="#333" BorderThickness="0,0,0,1" Width="150" Height="50"/>
+                            <TextBlock Text="Personel İmza" HorizontalAlignment="Center" Margin="0,5,0,0" FontSize="11"/>
+                            <TextBlock x:Name="txtPersonelImza" Text="Ahmet Yılmaz" HorizontalAlignment="Center" FontSize="10" Foreground="#666"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                            <Border BorderBrush="#333" BorderThickness="0,0,0,1" Width="150" Height="50"/>
+                            <TextBlock Text="Yönetici Onay" HorizontalAlignment="Center" Margin="0,5,0,0" FontSize="11"/>
+                            <TextBlock x:Name="txtYoneticiImza" Text="Müdür Bey" HorizontalAlignment="Center" FontSize="10" Foreground="#666"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </ScrollViewer>
+
+        <!-- Footer -->
+        <Border Grid.Row="2" Background="White" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0" Padding="15,10">
+            <Grid>
+                <TextBlock Text="© 2025 Ayda Müşavirlik - İzin Yönetim Sistemi" 
+                           VerticalAlignment="Center" Foreground="#999" FontSize="11"/>
+                <Button Content="Kapat" HorizontalAlignment="Right" Padding="20,8" Click="BtnKapat_Click"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

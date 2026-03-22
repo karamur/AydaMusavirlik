@@ -25,6 +25,7 @@
     <ProjectReference Include="..\AydaMusavirlik.Core\AydaMusavirlik.Core.csproj" />
     <ProjectReference Include="..\AydaMusavirlik.Data\AydaMusavirlik.Data.csproj" />
     <ProjectReference Include="..\AydaMusavirlik.Application\AydaMusavirlik.Application.csproj" />
+    <ProjectReference Include="..\AydaMusavirlik.Infrastructure\AydaMusavirlik.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
