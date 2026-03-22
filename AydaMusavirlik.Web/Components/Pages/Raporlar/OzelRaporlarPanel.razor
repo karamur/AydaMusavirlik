@@ -1,0 +1,204 @@
+@inject ISnackbar Snackbar
+
+<MudGrid>
+    <MudItem xs="12" md="8">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Ozel Rapor Olusturucu</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudGrid>
+                    <MudItem xs="12" md="4">
+                        <MudTextField T="string" Label="Rapor Adi" @bind-Value="_reportName" />
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        <MudSelect T="string" Label="Veri Kaynagi" @bind-Value="_dataSource">
+                            <MudSelectItem Value="@("Muhasebe")">Muhasebe Verileri</MudSelectItem>
+                            <MudSelectItem Value="@("Bordro")">Bordro Verileri</MudSelectItem>
+                            <MudSelectItem Value="@("Stok")">Stok Verileri</MudSelectItem>
+                            <MudSelectItem Value="@("Satis")">Satis Verileri</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        <MudSelect T="string" Label="Gruplama" @bind-Value="_groupBy">
+                            <MudSelectItem Value="@("Yok")">Gruplama Yok</MudSelectItem>
+                            <MudSelectItem Value="@("Tarih")">Tarihe Gore</MudSelectItem>
+                            <MudSelectItem Value="@("Kategori")">Kategoriye Gore</MudSelectItem>
+                            <MudSelectItem Value="@("Departman")">Departmana Gore</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.subtitle2" Class="mb-2">Sutunlar</MudText>
+                        <MudChipSet T="string" SelectionMode="SelectionMode.MultiSelection" @bind-SelectedValues="_selectedColumns">
+                            <MudChip Text="Tarih" Value="@("Tarih")" />
+                            <MudChip Text="Hesap Kodu" Value="@("HesapKodu")" />
+                            <MudChip Text="Hesap Adi" Value="@("HesapAdi")" />
+                            <MudChip Text="Borc" Value="@("Borc")" />
+                            <MudChip Text="Alacak" Value="@("Alacak")" />
+                            <MudChip Text="Bakiye" Value="@("Bakiye")" />
+                            <MudChip Text="Aciklama" Value="@("Aciklama")" />
+                        </MudChipSet>
+                    </MudItem>
+
+                    <MudItem xs="12" md="4">
+                        <MudDatePicker Label="Baslangic Tarihi" @bind-Date="_startDate" />
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        <MudDatePicker Label="Bitis Tarihi" @bind-Date="_endDate" />
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        <MudSelect T="string" Label="Cikti Formati" @bind-Value="_outputFormat">
+                            <MudSelectItem Value="@("PDF")">PDF</MudSelectItem>
+                            <MudSelectItem Value="@("Excel")">Excel</MudSelectItem>
+                            <MudSelectItem Value="@("CSV")">CSV</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+
+                    <MudItem xs="12">
+                        <MudStack Row="true" Justify="Justify.FlexEnd">
+                            <MudButton Variant="Variant.Outlined" OnClick="PreviewReport">
+                                Onizleme
+                            </MudButton>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="SaveTemplate">
+                                Sablon Kaydet
+                            </MudButton>
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="GenerateCustomReport"
+                                       StartIcon="@Icons.Material.Filled.FileDownload">
+                                Rapor Olustur
+                            </MudButton>
+                        </MudStack>
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" md="4">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Kayitli Sablonlar</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudList T="string" Dense="true">
+                    @foreach (var template in _savedTemplates)
+                    {
+                        <MudListItem OnClick="@(() => LoadTemplate(template))">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Style="width:100%">
+                                <MudIcon Icon="@Icons.Material.Filled.Description" Size="Size.Small" Class="mr-2" />
+                                <MudText>@template.Name</MudText>
+                                <MudSpacer />
+                                <MudIconButton Icon="@Icons.Material.Filled.PlayArrow" Size="Size.Small" 
+                                               OnClick="@(() => RunTemplate(template))" />
+                            </MudStack>
+                        </MudListItem>
+                    }
+                </MudList>
+            </MudCardContent>
+        </MudCard>
+
+        <MudCard Class="mt-4">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Son Olusturulan</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudList T="string" Dense="true">
+                    @foreach (var report in _recentReports)
+                    {
+                        <MudListItem>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Style="width:100%">
+                                <MudStack Spacing="0">
+                                    <MudText Typo="Typo.body2">@report.Name</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        @report.CreatedAt.ToString("dd.MM.yyyy HH:mm")
+                                    </MudText>
+                                </MudStack>
+                                <MudSpacer />
+                                <MudIconButton Icon="@Icons.Material.Filled.Download" Size="Size.Small" />
+                            </MudStack>
+                        </MudListItem>
+                    }
+                </MudList>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private string _reportName = "";
+    private string _dataSource = "Muhasebe";
+    private string _groupBy = "Yok";
+    private IReadOnlyCollection<string> _selectedColumns = new List<string> { "Tarih", "HesapKodu", "HesapAdi", "Borc", "Alacak" };
+    private DateTime? _startDate = new DateTime(DateTime.Now.Year, 1, 1);
+    private DateTime? _endDate = DateTime.Now;
+    private string _outputFormat = "Excel";
+
+    private List<ReportTemplate> _savedTemplates = new();
+    private List<RecentReport> _recentReports = new();
+
+    protected override void OnInitialized()
+    {
+        _savedTemplates = new List<ReportTemplate>
+        {
+            new() { Name = "Aylik Mizan Ozeti" },
+            new() { Name = "Personel Maas Listesi" },
+            new() { Name = "KDV Detay Raporu" },
+            new() { Name = "Banka Hareketleri" },
+        };
+
+        _recentReports = new List<RecentReport>
+        {
+            new() { Name = "Mart 2024 Mizan", CreatedAt = DateTime.Now.AddHours(-2) },
+            new() { Name = "Bordro Icmal Subat", CreatedAt = DateTime.Now.AddDays(-1) },
+            new() { Name = "KDV Raporu Q1", CreatedAt = DateTime.Now.AddDays(-3) },
+        };
+    }
+
+    private void PreviewReport()
+    {
+        Snackbar.Add("Rapor onizlemesi hazirlaniyor...", Severity.Info);
+    }
+
+    private void SaveTemplate()
+    {
+        if (string.IsNullOrEmpty(_reportName))
+        {
+            Snackbar.Add("Lutfen rapor adi girin", Severity.Warning);
+            return;
+        }
+        Snackbar.Add($"'{_reportName}' sablonu kaydedildi", Severity.Success);
+    }
+
+    private void GenerateCustomReport()
+    {
+        Snackbar.Add($"Rapor {_outputFormat} formatinda olusturuluyor...", Severity.Info);
+    }
+
+    private void LoadTemplate(ReportTemplate template)
+    {
+        _reportName = template.Name;
+        Snackbar.Add($"'{template.Name}' sablonu yuklendi", Severity.Info);
+    }
+
+    private void RunTemplate(ReportTemplate template)
+    {
+        Snackbar.Add($"'{template.Name}' raporu olusturuluyor...", Severity.Info);
+    }
+
+    public class ReportTemplate
+    {
+        public string Name { get; set; } = "";
+    }
+
+    public class RecentReport
+    {
+        public string Name { get; set; } = "";
+        public DateTime CreatedAt { get; set; }
+    }
+}

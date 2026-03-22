@@ -1,0 +1,236 @@
+@page "/bildirimler"
+@inject ISnackbar Snackbar
+
+<PageTitle>Bildirimler - AYDA Musavirlik</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">
+    <MudIcon Icon="@Icons.Material.Filled.Notifications" Class="mr-2" />
+    Bildirim Merkezi
+</MudText>
+
+<MudGrid>
+    <MudItem xs="12" md="8">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudStack Row="true" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.h6">Bildirimler</MudText>
+                        <MudSpacer />
+                        <MudChip T="string" Size="Size.Small" Color="Color.Error">
+                            @_unreadCount Okunmamis
+                        </MudChip>
+                    </MudStack>
+                </CardHeaderContent>
+                <CardHeaderActions>
+                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="MarkAllAsRead">
+                        Tumunu Okundu Isaretle
+                    </MudButton>
+                </CardHeaderActions>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true">
+                    <MudTabPanel Text="Tumu" BadgeData="@_notifications.Count" BadgeColor="Color.Primary">
+                        <MudList T="string" Dense="true">
+                            @foreach (var notification in _notifications.OrderByDescending(n => n.CreatedAt))
+                            {
+                                <MudListItem Class="@(notification.IsRead ? "" : "mud-primary-text")" 
+                                             OnClick="@(() => OnNotificationRead(notification))">
+                                    <MudStack Row="true" AlignItems="AlignItems.Start" Style="width:100%">
+                                        <MudAvatar Size="Size.Small" Color="@GetTypeColor(notification.Type)" Class="mt-1">
+                                            <MudIcon Icon="@GetTypeIcon(notification.Type)" Size="Size.Small" />
+                                        </MudAvatar>
+                                        <MudStack Spacing="0" Style="flex:1">
+                                            <MudText Typo="Typo.body2"><strong>@notification.Title</strong></MudText>
+                                            <MudText Typo="Typo.caption">@notification.Message</MudText>
+                                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                @GetTimeAgo(notification.CreatedAt)
+                                            </MudText>
+                                        </MudStack>
+                                    </MudStack>
+                                </MudListItem>
+                                <MudDivider />
+                            }
+                        </MudList>
+                    </MudTabPanel>
+                    <MudTabPanel Text="Okunmamis" BadgeData="@_unreadCount" BadgeColor="Color.Error">
+                        <MudText>Okunmamis bildirimler burada gosterilecek</MudText>
+                    </MudTabPanel>
+                    <MudTabPanel Text="Onemli" BadgeData="@_highPriorityCount" BadgeColor="Color.Warning">
+                        <MudText>Onemli bildirimler burada gosterilecek</MudText>
+                    </MudTabPanel>
+                </MudTabs>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" md="4">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Hatirlaticilar</MudText>
+                </CardHeaderContent>
+                <CardHeaderActions>
+                    <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Success" 
+                                   OnClick="AddReminder" />
+                </CardHeaderActions>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudList T="string" Dense="true">
+                    @foreach (var reminder in _reminders)
+                    {
+                        <MudListItem>
+                            <MudStack>
+                                <MudStack Row="true" AlignItems="AlignItems.Center">
+                                    <MudIcon Icon="@Icons.Material.Filled.Alarm" Size="Size.Small" 
+                                             Color="@GetReminderColor(reminder.DueDate)" />
+                                    <MudText Typo="Typo.body2"><strong>@reminder.Title</strong></MudText>
+                                </MudStack>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                    @reminder.DueDate.ToString("dd MMM yyyy") - @GetDaysRemaining(reminder.DueDate)
+                                </MudText>
+                            </MudStack>
+                        </MudListItem>
+                    }
+                </MudList>
+            </MudCardContent>
+        </MudCard>
+
+        <MudCard Class="mt-4">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Bildirim Ayarlari</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudStack Spacing="2">
+                    <MudSwitch @bind-Value="_emailNotifications" Label="E-posta Bildirimleri" Color="Color.Primary" />
+                    <MudSwitch @bind-Value="_smsNotifications" Label="SMS Bildirimleri" Color="Color.Primary" />
+                    <MudSwitch @bind-Value="_pushNotifications" Label="Anlik Bildirimler" Color="Color.Primary" />
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" 
+                               OnClick="SaveSettings" FullWidth="true" Class="mt-2">
+                        Kaydet
+                    </MudButton>
+                </MudStack>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private List<NotificationItem> _notifications = new();
+    private List<ReminderItem> _reminders = new();
+    private int _unreadCount => _notifications.Count(n => !n.IsRead);
+    private int _highPriorityCount => _notifications.Count(n => n.Priority == "High");
+
+    private bool _emailNotifications = true;
+    private bool _smsNotifications = false;
+    private bool _pushNotifications = true;
+
+    protected override void OnInitialized()
+    {
+        LoadNotifications();
+        LoadReminders();
+    }
+
+    private void LoadNotifications()
+    {
+        _notifications = new List<NotificationItem>
+        {
+            new() { Id = 1, Title = "SGK Bildirge Hatirlatmasi", Message = "Mart 2024 APHB son gonderim tarihi yaklasýyor", Type = "Warning", Priority = "High", CreatedAt = DateTime.Now.AddHours(-2), IsRead = false },
+            new() { Id = 2, Title = "Yeni Personel Eklendi", Message = "Zeynep Arslan sisteme eklendi", Type = "Info", Priority = "Normal", CreatedAt = DateTime.Now.AddHours(-5), IsRead = false },
+            new() { Id = 3, Title = "Fatura Onaylandi", Message = "2024-F-0125 numarali fatura onaylandi", Type = "Success", Priority = "Normal", CreatedAt = DateTime.Now.AddDays(-1), IsRead = true },
+            new() { Id = 4, Title = "Bordro Hazirlandi", Message = "Subat 2024 bordrosu hazirlandi", Type = "Info", Priority = "High", CreatedAt = DateTime.Now.AddDays(-1), IsRead = false },
+        };
+    }
+
+    private void LoadReminders()
+    {
+        _reminders = new List<ReminderItem>
+        {
+            new() { Title = "APHB Gonderimi", DueDate = DateTime.Now.AddDays(3) },
+            new() { Title = "Muhtasar Beyanname", DueDate = DateTime.Now.AddDays(7) },
+            new() { Title = "SGK Prim Odemesi", DueDate = DateTime.Now.AddDays(10) },
+        };
+    }
+
+    private Color GetTypeColor(string type) => type switch
+    {
+        "Success" => Color.Success,
+        "Warning" => Color.Warning,
+        "Error" => Color.Error,
+        _ => Color.Info
+    };
+
+    private string GetTypeIcon(string type) => type switch
+    {
+        "Success" => Icons.Material.Filled.CheckCircle,
+        "Warning" => Icons.Material.Filled.Warning,
+        "Error" => Icons.Material.Filled.Error,
+        _ => Icons.Material.Filled.Info
+    };
+
+    private string GetTimeAgo(DateTime dateTime)
+    {
+        var span = DateTime.Now - dateTime;
+        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes} dakika once";
+        if (span.TotalHours < 24) return $"{(int)span.TotalHours} saat once";
+        return $"{(int)span.TotalDays} gun once";
+    }
+
+    private Color GetReminderColor(DateTime dueDate)
+    {
+        var daysLeft = (dueDate - DateTime.Now).Days;
+        if (daysLeft <= 3) return Color.Error;
+        if (daysLeft <= 7) return Color.Warning;
+        return Color.Success;
+    }
+
+    private string GetDaysRemaining(DateTime dueDate)
+    {
+        var daysLeft = (dueDate - DateTime.Now).Days;
+        if (daysLeft < 0) return "Gecikti!";
+        if (daysLeft == 0) return "Bugun";
+        if (daysLeft == 1) return "Yarin";
+        return $"{daysLeft} gun kaldi";
+    }
+
+    private void MarkAllAsRead()
+    {
+        foreach (var n in _notifications)
+            n.IsRead = true;
+        Snackbar.Add("Tum bildirimler okundu olarak isaretlendi", Severity.Success);
+    }
+
+    private void OnNotificationRead(NotificationItem notification)
+    {
+        notification.IsRead = true;
+        StateHasChanged();
+    }
+
+    private void AddReminder()
+    {
+        Snackbar.Add("Yeni hatirlatici ekleme dialog'u acilacak", Severity.Info);
+    }
+
+    private void SaveSettings()
+    {
+        Snackbar.Add("Bildirim ayarlari kaydedildi", Severity.Success);
+    }
+
+    public class NotificationItem
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = "";
+        public string Message { get; set; } = "";
+        public string Type { get; set; } = "Info";
+        public string Priority { get; set; } = "Normal";
+        public DateTime CreatedAt { get; set; }
+        public bool IsRead { get; set; }
+    }
+
+    public class ReminderItem
+    {
+        public string Title { get; set; } = "";
+        public DateTime DueDate { get; set; }
+    }
+}

@@ -1,0 +1,152 @@
+@inject ISnackbar Snackbar
+
+<MudGrid>
+    <MudItem xs="12" md="6">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">KDV Raporlari</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudList T="string">
+                    <MudListItem Icon="@Icons.Material.Filled.Receipt" OnClick="@(() => GenerateReport("KDVBeyanname"))">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Style="width:100%">
+                            <MudText>KDV Beyannamesi</MudText>
+                            <MudSpacer />
+                            <MudChip T="string" Size="Size.Small" Color="Color.Info">XML</MudChip>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary">PDF</MudChip>
+                        </MudStack>
+                    </MudListItem>
+                    <MudListItem Icon="@Icons.Material.Filled.ArrowUpward" OnClick="@(() => GenerateReport("KDVAlislar"))">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Style="width:100%">
+                            <MudText>KDV Alislar Raporu</MudText>
+                            <MudSpacer />
+                            <MudChip T="string" Size="Size.Small" Color="Color.Success">Excel</MudChip>
+                        </MudStack>
+                    </MudListItem>
+                    <MudListItem Icon="@Icons.Material.Filled.ArrowDownward" OnClick="@(() => GenerateReport("KDVSatislar"))">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Style="width:100%">
+                            <MudText>KDV Satislar Raporu</MudText>
+                            <MudSpacer />
+                            <MudChip T="string" Size="Size.Small" Color="Color.Success">Excel</MudChip>
+                        </MudStack>
+                    </MudListItem>
+                </MudList>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" md="6">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Diger Vergi Raporlari</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudList T="string">
+                    <MudListItem Icon="@Icons.Material.Filled.Description" OnClick="@(() => GenerateReport("Muhtasar"))">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Style="width:100%">
+                            <MudText>Muhtasar Beyanname</MudText>
+                            <MudSpacer />
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary">PDF</MudChip>
+                        </MudStack>
+                    </MudListItem>
+                    <MudListItem Icon="@Icons.Material.Filled.AccountBalance" OnClick="@(() => GenerateReport("GeciciVergi"))">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Style="width:100%">
+                            <MudText>Gecici Vergi Beyannamesi</MudText>
+                            <MudSpacer />
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary">PDF</MudChip>
+                        </MudStack>
+                    </MudListItem>
+                </MudList>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Vergi Takvimi</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTable Items="_taxCalendar" Hover="true" Striped="true" Dense="true">
+                    <HeaderContent>
+                        <MudTh>Beyanname</MudTh>
+                        <MudTh>Donem</MudTh>
+                        <MudTh>Son Tarih</MudTh>
+                        <MudTh>Kalan Gun</MudTh>
+                        <MudTh>Durum</MudTh>
+                        <MudTh>Islem</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.Beyanname</MudTd>
+                        <MudTd>@context.Donem</MudTd>
+                        <MudTd>@context.SonTarih.ToString("dd.MM.yyyy")</MudTd>
+                        <MudTd>
+                            <MudChip T="string" Size="Size.Small" Color="@GetDaysColor(context.KalanGun)">
+                                @(context.KalanGun > 0 ? $"{context.KalanGun} gun" : "Gecikti")
+                            </MudChip>
+                        </MudTd>
+                        <MudTd>
+                            <MudChip T="string" Size="Size.Small" 
+                                     Color="@(context.Durum == "Tamamlandi" ? Color.Success : Color.Warning)">
+                                @context.Durum
+                            </MudChip>
+                        </MudTd>
+                        <MudTd>
+                            <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Primary"
+                                       OnClick="@(() => PrepareDeclaration(context.Beyanname))">
+                                Hazirla
+                            </MudButton>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private List<TaxCalendarItem> _taxCalendar = new();
+
+    protected override void OnInitialized()
+    {
+        _taxCalendar = new List<TaxCalendarItem>
+        {
+            new() { Beyanname = "KDV Beyannamesi", Donem = "Mart 2024", SonTarih = DateTime.Now.AddDays(15), KalanGun = 15, Durum = "Bekliyor" },
+            new() { Beyanname = "Muhtasar", Donem = "Subat 2024", SonTarih = DateTime.Now.AddDays(5), KalanGun = 5, Durum = "Bekliyor" },
+            new() { Beyanname = "SGK APHB", Donem = "Mart 2024", SonTarih = DateTime.Now.AddDays(3), KalanGun = 3, Durum = "Hazirlaniyor" },
+        };
+    }
+
+    private Color GetDaysColor(int days)
+    {
+        if (days < 0) return Color.Default;
+        if (days <= 3) return Color.Error;
+        if (days <= 7) return Color.Warning;
+        return Color.Success;
+    }
+
+    private void GenerateReport(string reportType)
+    {
+        Snackbar.Add($"{reportType} raporu olusturuluyor...", Severity.Info);
+    }
+
+    private void PrepareDeclaration(string beyanname)
+    {
+        Snackbar.Add($"{beyanname} hazirlaniyor...", Severity.Info);
+    }
+
+    public class TaxCalendarItem
+    {
+        public string Beyanname { get; set; } = "";
+        public string Donem { get; set; } = "";
+        public DateTime SonTarih { get; set; }
+        public int KalanGun { get; set; }
+        public string Durum { get; set; } = "";
+    }
+}

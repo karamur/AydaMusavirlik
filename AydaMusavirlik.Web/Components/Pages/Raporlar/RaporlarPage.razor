@@ -1,0 +1,30 @@
+@page "/raporlar"
+@inject ISnackbar Snackbar
+
+<PageTitle>Raporlar - AYDA Musavirlik</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">
+    <MudIcon Icon="@Icons.Material.Filled.Assessment" Class="mr-2" />
+    Raporlama Merkezi
+</MudText>
+
+<MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-4">
+    <MudTabPanel Text="Mali Raporlar" Icon="@Icons.Material.Filled.AccountBalance">
+        <MaliRaporlarPanel />
+    </MudTabPanel>
+
+    <MudTabPanel Text="Bordro Raporlari" Icon="@Icons.Material.Filled.People">
+        <BordroRaporlarPanel />
+    </MudTabPanel>
+
+    <MudTabPanel Text="Vergi Raporlari" Icon="@Icons.Material.Filled.Receipt">
+        <VergiRaporlarPanel />
+    </MudTabPanel>
+
+    <MudTabPanel Text="Ozel Raporlar" Icon="@Icons.Material.Filled.Dashboard">
+        <OzelRaporlarPanel />
+    </MudTabPanel>
+</MudTabs>
+
+@code {
+}

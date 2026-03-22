@@ -1,0 +1,149 @@
+@inject ISnackbar Snackbar
+
+<MudGrid>
+    <MudItem xs="12" md="6">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Bordro Raporlari</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudList T="string">
+                    <MudListItem Icon="@Icons.Material.Filled.ListAlt" OnClick="@(() => GenerateReport("BordroIcmal"))">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Style="width:100%">
+                            <MudText>Bordro Icmal Listesi</MudText>
+                            <MudSpacer />
+                            <MudChip T="string" Size="Size.Small" Color="Color.Success">Excel</MudChip>
+                        </MudStack>
+                    </MudListItem>
+                    <MudListItem Icon="@Icons.Material.Filled.Groups" OnClick="@(() => GenerateReport("PersonelListesi"))">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Style="width:100%">
+                            <MudText>Personel Listesi</MudText>
+                            <MudSpacer />
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary">PDF</MudChip>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Success">Excel</MudChip>
+                        </MudStack>
+                    </MudListItem>
+                    <MudListItem Icon="@Icons.Material.Filled.AttachMoney" OnClick="@(() => GenerateReport("MaasKarsilastirma"))">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Style="width:100%">
+                            <MudText>Maas Karsilastirma Raporu</MudText>
+                            <MudSpacer />
+                            <MudChip T="string" Size="Size.Small" Color="Color.Success">Excel</MudChip>
+                        </MudStack>
+                    </MudListItem>
+                    <MudListItem Icon="@Icons.Material.Filled.CalendarMonth" OnClick="@(() => GenerateReport("IzinRaporu"))">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Style="width:100%">
+                            <MudText>Izin Takip Raporu</MudText>
+                            <MudSpacer />
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary">PDF</MudChip>
+                        </MudStack>
+                    </MudListItem>
+                </MudList>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" md="6">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">SGK Raporlari</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudList T="string">
+                    <MudListItem Icon="@Icons.Material.Filled.Assignment" OnClick="@(() => GenerateReport("APHB"))">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Style="width:100%">
+                            <MudText>APHB Raporu</MudText>
+                            <MudSpacer />
+                            <MudChip T="string" Size="Size.Small" Color="Color.Info">XML</MudChip>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary">PDF</MudChip>
+                        </MudStack>
+                    </MudListItem>
+                    <MudListItem Icon="@Icons.Material.Filled.HealthAndSafety" OnClick="@(() => GenerateReport("SGKPrimRaporu"))">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Style="width:100%">
+                            <MudText>SGK Prim Raporu</MudText>
+                            <MudSpacer />
+                            <MudChip T="string" Size="Size.Small" Color="Color.Success">Excel</MudChip>
+                        </MudStack>
+                    </MudListItem>
+                    <MudListItem Icon="@Icons.Material.Filled.PersonOff" OnClick="@(() => GenerateReport("IssizlikRaporu"))">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Style="width:100%">
+                            <MudText>Issizlik Sigortasi Raporu</MudText>
+                            <MudSpacer />
+                            <MudChip T="string" Size="Size.Small" Color="Color.Success">Excel</MudChip>
+                        </MudStack>
+                    </MudListItem>
+                </MudList>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Donem Secimi</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudGrid>
+                    <MudItem xs="12" md="3">
+                        <MudSelect T="string" Label="Yil" @bind-Value="_selectedYear">
+                            <MudSelectItem Value="@("2024")">2024</MudSelectItem>
+                            <MudSelectItem Value="@("2023")">2023</MudSelectItem>
+                            <MudSelectItem Value="@("2022")">2022</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" md="3">
+                        <MudSelect T="string" Label="Ay" @bind-Value="_selectedMonth">
+                            @for (int i = 1; i <= 12; i++)
+                            {
+                                <MudSelectItem Value="@i.ToString()">@GetMonthName(i)</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" md="3">
+                        <MudSelect T="string" Label="Departman" @bind-Value="_selectedDepartment" Clearable="true">
+                            <MudSelectItem Value="@("Tum")">Tum Departmanlar</MudSelectItem>
+                            <MudSelectItem Value="@("Muhasebe")">Muhasebe</MudSelectItem>
+                            <MudSelectItem Value="@("Uretim")">Uretim</MudSelectItem>
+                            <MudSelectItem Value="@("Satis")">Satis</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" md="3">
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" 
+                                   OnClick="GenerateMonthlyReport" FullWidth="true" Class="mt-2"
+                                   StartIcon="@Icons.Material.Filled.FileDownload">
+                            Rapor Indir
+                        </MudButton>
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private string _selectedYear = "2024";
+    private string _selectedMonth = "3";
+    private string _selectedDepartment = "Tum";
+
+    private void GenerateReport(string reportType)
+    {
+        Snackbar.Add($"{reportType} raporu olusturuluyor...", Severity.Info);
+    }
+
+    private void GenerateMonthlyReport()
+    {
+        Snackbar.Add($"{GetMonthName(int.Parse(_selectedMonth))} {_selectedYear} bordro raporu olusturuluyor...", Severity.Info);
+    }
+
+    private string GetMonthName(int month)
+    {
+        var months = new[] { "Ocak", "Subat", "Mart", "Nisan", "Mayis", "Haziran", 
+                             "Temmuz", "Agustos", "Eylul", "Ekim", "Kasim", "Aralik" };
+        return months[month - 1];
+    }
+}
