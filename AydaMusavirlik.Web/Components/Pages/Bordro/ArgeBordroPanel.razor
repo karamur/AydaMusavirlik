@@ -1,0 +1,370 @@
+@inject ISnackbar Snackbar
+
+<MudGrid>
+    <MudItem xs="12" md="5">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudStack Row="true" AlignItems="AlignItems.Center">
+                        <MudIcon Icon="@Icons.Material.Filled.Science" Color="Color.Primary" />
+                        <MudText Typo="Typo.h6">Ar-Ge Personel Bordrosu</MudText>
+                    </MudStack>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudStack Spacing="3">
+                    <MudSelect T="string" Label="Personel" @bind-Value="_selectedPersonel">
+                        @foreach (var p in _argePersonelList)
+                        {
+                            <MudSelectItem Value="@p.SicilNo">@p.AdSoyad (@p.Proje)</MudSelectItem>
+                        }
+                    </MudSelect>
+
+                    <MudNumericField T="decimal" Label="Brut Maas (TL)" @bind-Value="_brutMaas" 
+                                    Format="N2" Min="0" />
+
+                    <MudNumericField T="int" Label="Ar-Ge Calisma Orani (%)" @bind-Value="_argeOrani" 
+                                    Min="0" Max="100" />
+
+                    <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2">
+                        <strong>Ar-Ge Tesvik:</strong> Ar-Ge personeli icin gelir vergisi stopaji %80 oraninda tesvikten yararlanir.
+                    </MudAlert>
+
+                    <MudSelect T="string" Label="Vergi Dilimi" @bind-Value="_vergiDilimi">
+                        <MudSelectItem Value="@("15")">%15 (0 - 110.000 TL)</MudSelectItem>
+                        <MudSelectItem Value="@("20")">%20 (110.001 - 230.000 TL)</MudSelectItem>
+                        <MudSelectItem Value="@("27")">%27 (230.001 - 580.000 TL)</MudSelectItem>
+                        <MudSelectItem Value="@("35")">%35 (580.001 - 3.000.000 TL)</MudSelectItem>
+                        <MudSelectItem Value="@("40")">%40 (3.000.000+ TL)</MudSelectItem>
+                    </MudSelect>
+
+                    <MudNumericField T="int" Label="AGI Kisi Sayisi" @bind-Value="_agiKisi" Min="0" Max="5" />
+
+                    <MudCheckBox @bind-Value="_doktoraDerecesi" Label="Doktora/Yuksek Lisans Derecesi" 
+                                 Color="Color.Primary" />
+
+                    <MudNumericField T="decimal" Label="Ar-Ge Primi (TL)" @bind-Value="_argePrimi" 
+                                    Format="N2" Min="0" />
+
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" 
+                               OnClick="HesaplaArgeBordro" FullWidth="true"
+                               StartIcon="@Icons.Material.Filled.Calculate">
+                        Ar-Ge Bordro Hesapla
+                    </MudButton>
+                </MudStack>
+            </MudCardContent>
+        </MudCard>
+
+        <MudCard Class="mt-4">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Ar-Ge Tesvik Oranlari (5746 Sayili Kanun)</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudSimpleTable Dense="true">
+                    <tbody>
+                        <tr><td>Gelir Vergisi Stopaj Tesvigi</td><td style="text-align:right"><strong>%80</strong></td></tr>
+                        <tr><td>Doktora Derecesi Ek Tesvik</td><td style="text-align:right"><strong>%90</strong></td></tr>
+                        <tr><td>SGK Isveren Payi Tesvigi</td><td style="text-align:right"><strong>%50</strong></td></tr>
+                        <tr><td>Damga Vergisi</td><td style="text-align:right"><strong>Muaf</strong></td></tr>
+                    </tbody>
+                </MudSimpleTable>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" md="7">
+        @if (_hesaplamaSonucu != null)
+        {
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudStack Row="true" AlignItems="AlignItems.Center">
+                            <MudIcon Icon="@Icons.Material.Filled.Receipt" Color="Color.Success" />
+                            <MudText Typo="Typo.h6">Ar-Ge Personel Bordro Hesaplama</MudText>
+                        </MudStack>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudButton Variant="Variant.Outlined" Size="Size.Small"
+                                   StartIcon="@Icons.Material.Filled.Print"
+                                   OnClick="PrintResult">Yazdir</MudButton>
+                        <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Success"
+                                   StartIcon="@Icons.Material.Filled.FileDownload"
+                                   OnClick="ExportExcel">Excel</MudButton>
+                    </CardHeaderActions>
+                </MudCardHeader>
+                <MudCardContent>
+                    <!-- Normal Bordro Bölümü -->
+                    <MudText Typo="Typo.subtitle1" Color="Color.Primary" Class="mb-2">
+                        <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" Class="mr-1" />
+                        NORMAL BORDRO
+                    </MudText>
+                    <MudSimpleTable Dense="true" Class="mb-4">
+                        <tbody>
+                            <tr style="background-color:#e3f2fd">
+                                <td><strong>BRUT MAAS</strong></td>
+                                <td style="text-align:right"><strong>@_hesaplamaSonucu.BrutMaas.ToString("N2") TL</strong></td>
+                            </tr>
+                            <tr><td>SGK Isci Payi (%14)</td><td style="text-align:right;color:red">- @_hesaplamaSonucu.SgkIsci.ToString("N2") TL</td></tr>
+                            <tr><td>Issizlik Sigortasi (%1)</td><td style="text-align:right;color:red">- @_hesaplamaSonucu.IssizlikIsci.ToString("N2") TL</td></tr>
+                            <tr><td>SGK Matrah</td><td style="text-align:right">@_hesaplamaSonucu.SgkMatrah.ToString("N2") TL</td></tr>
+                            <tr><td>Gelir Vergisi (Normal)</td><td style="text-align:right;color:red">- @_hesaplamaSonucu.NormalGelirVergisi.ToString("N2") TL</td></tr>
+                            <tr><td>Damga Vergisi</td><td style="text-align:right;color:red">- @_hesaplamaSonucu.NormalDamgaVergisi.ToString("N2") TL</td></tr>
+                            <tr><td>AGI</td><td style="text-align:right;color:green">+ @_hesaplamaSonucu.Agi.ToString("N2") TL</td></tr>
+                            <tr style="background-color:#ffebee">
+                                <td><strong>NORMAL NET MAAS</strong></td>
+                                <td style="text-align:right"><strong>@_hesaplamaSonucu.NormalNetMaas.ToString("N2") TL</strong></td>
+                            </tr>
+                        </tbody>
+                    </MudSimpleTable>
+
+                    <MudDivider Class="my-4" />
+
+                    <!-- Ar-Ge Teþvikli Bordro Bölümü -->
+                    <MudText Typo="Typo.subtitle1" Color="Color.Success" Class="mb-2">
+                        <MudIcon Icon="@Icons.Material.Filled.Science" Size="Size.Small" Class="mr-1" />
+                        AR-GE TESVIKLI BORDRO (@_argeOrani% Ar-Ge Orani)
+                    </MudText>
+                    <MudSimpleTable Dense="true" Class="mb-4">
+                        <tbody>
+                            <tr style="background-color:#e8f5e9">
+                                <td><strong>BRUT MAAS</strong></td>
+                                <td style="text-align:right"><strong>@_hesaplamaSonucu.BrutMaas.ToString("N2") TL</strong></td>
+                            </tr>
+                            <tr><td>SGK Isci Payi (%14)</td><td style="text-align:right;color:red">- @_hesaplamaSonucu.SgkIsci.ToString("N2") TL</td></tr>
+                            <tr><td>Issizlik Sigortasi (%1)</td><td style="text-align:right;color:red">- @_hesaplamaSonucu.IssizlikIsci.ToString("N2") TL</td></tr>
+                            <tr><td>SGK Matrah</td><td style="text-align:right">@_hesaplamaSonucu.SgkMatrah.ToString("N2") TL</td></tr>
+                            <tr style="background-color:#c8e6c9">
+                                <td>
+                                    Gelir Vergisi (Tesvikli)
+                                    <MudChip T="string" Size="Size.Small" Color="Color.Success">%@_hesaplamaSonucu.TesvikOrani Tesvik</MudChip>
+                                </td>
+                                <td style="text-align:right;color:red">- @_hesaplamaSonucu.ArgeGelirVergisi.ToString("N2") TL</td>
+                            </tr>
+                            <tr style="background-color:#c8e6c9">
+                                <td>Damga Vergisi (Muaf)</td>
+                                <td style="text-align:right;color:green">0,00 TL</td>
+                            </tr>
+                            <tr><td>AGI</td><td style="text-align:right;color:green">+ @_hesaplamaSonucu.Agi.ToString("N2") TL</td></tr>
+                            @if (_argePrimi > 0)
+                            {
+                                <tr><td>Ar-Ge Primi</td><td style="text-align:right;color:green">+ @_argePrimi.ToString("N2") TL</td></tr>
+                            }
+                            <tr style="background-color:#a5d6a7">
+                                <td><strong style="font-size:1.1em">AR-GE NET MAAS</strong></td>
+                                <td style="text-align:right"><strong style="font-size:1.2em;color:green">@_hesaplamaSonucu.ArgeNetMaas.ToString("N2") TL</strong></td>
+                            </tr>
+                        </tbody>
+                    </MudSimpleTable>
+
+                    <MudDivider Class="my-4" />
+
+                    <!-- Karþýlaþtýrma ve Kazanç -->
+                    <MudText Typo="Typo.subtitle1" Color="Color.Warning" Class="mb-2">
+                        <MudIcon Icon="@Icons.Material.Filled.Compare" Size="Size.Small" Class="mr-1" />
+                        KARSILASTIRMA VE KAZANC
+                    </MudText>
+                    <MudGrid>
+                        <MudItem xs="6">
+                            <MudPaper Class="pa-3" Elevation="2" Style="background-color:#fff3e0">
+                                <MudText Typo="Typo.caption">Personel Kazanci</MudText>
+                                <MudText Typo="Typo.h5" Color="Color.Success">
+                                    +@((_hesaplamaSonucu.ArgeNetMaas - _hesaplamaSonucu.NormalNetMaas).ToString("N2")) TL
+                                </MudText>
+                                <MudText Typo="Typo.caption">Aylik ek gelir</MudText>
+                            </MudPaper>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudPaper Class="pa-3" Elevation="2" Style="background-color:#e8f5e9">
+                                <MudText Typo="Typo.caption">Isveren Tasarrufu</MudText>
+                                <MudText Typo="Typo.h5" Color="Color.Primary">
+                                    +@_hesaplamaSonucu.IsverenTasarruf.ToString("N2") TL
+                                </MudText>
+                                <MudText Typo="Typo.caption">SGK tesvigi dahil</MudText>
+                            </MudPaper>
+                        </MudItem>
+                    </MudGrid>
+
+                    <MudDivider Class="my-4" />
+
+                    <!-- Ýþveren Maliyeti -->
+                    <MudText Typo="Typo.subtitle1" Class="mb-2">
+                        <MudIcon Icon="@Icons.Material.Filled.Business" Size="Size.Small" Class="mr-1" />
+                        ISVEREN MALIYETI
+                    </MudText>
+                    <MudSimpleTable Dense="true">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th style="text-align:right">Normal</th>
+                                <th style="text-align:right">Ar-Ge Tesvikli</th>
+                                <th style="text-align:right">Tasarruf</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>SGK Isveren (%20,5)</td>
+                                <td style="text-align:right">@_hesaplamaSonucu.NormalSgkIsveren.ToString("N2")</td>
+                                <td style="text-align:right">@_hesaplamaSonucu.ArgeSgkIsveren.ToString("N2")</td>
+                                <td style="text-align:right;color:green">@((_hesaplamaSonucu.NormalSgkIsveren - _hesaplamaSonucu.ArgeSgkIsveren).ToString("N2"))</td>
+                            </tr>
+                            <tr>
+                                <td>Issizlik Isveren (%2)</td>
+                                <td style="text-align:right">@_hesaplamaSonucu.IssizlikIsveren.ToString("N2")</td>
+                                <td style="text-align:right">@_hesaplamaSonucu.IssizlikIsveren.ToString("N2")</td>
+                                <td style="text-align:right">0,00</td>
+                            </tr>
+                            <tr style="background-color:#f5f5f5;font-weight:bold">
+                                <td>TOPLAM MALIYET</td>
+                                <td style="text-align:right">@_hesaplamaSonucu.NormalToplamMaliyet.ToString("N2")</td>
+                                <td style="text-align:right">@_hesaplamaSonucu.ArgeToplamMaliyet.ToString("N2")</td>
+                                <td style="text-align:right;color:green">@((_hesaplamaSonucu.NormalToplamMaliyet - _hesaplamaSonucu.ArgeToplamMaliyet).ToString("N2"))</td>
+                            </tr>
+                        </tbody>
+                    </MudSimpleTable>
+                </MudCardContent>
+            </MudCard>
+        }
+        else
+        {
+            <MudCard>
+                <MudCardContent Class="d-flex justify-center align-center" Style="min-height: 400px;">
+                    <MudStack AlignItems="AlignItems.Center">
+                        <MudIcon Icon="@Icons.Material.Filled.Science" Size="Size.Large" Color="Color.Secondary" />
+                        <MudText Typo="Typo.h6" Color="Color.Secondary">
+                            Ar-Ge personeli secin ve hesapla butonuna basin
+                        </MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                            5746 sayili kanun kapsaminda tesvik hesaplanacaktir
+                        </MudText>
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        }
+    </MudItem>
+</MudGrid>
+
+@code {
+    private string? _selectedPersonel;
+    private decimal _brutMaas = 45000;
+    private int _argeOrani = 100;
+    private string _vergiDilimi = "20";
+    private int _agiKisi = 0;
+    private bool _doktoraDerecesi = false;
+    private decimal _argePrimi = 0;
+    private ArgeHesaplamaSonuc? _hesaplamaSonucu;
+
+    private List<ArgePersonel> _argePersonelList = new()
+    {
+        new() { SicilNo = "001", AdSoyad = "Dr. Ahmet Yilmaz", Proje = "ARGE-2024-001" },
+        new() { SicilNo = "002", AdSoyad = "Ayse Kaya", Proje = "ARGE-2024-001" },
+        new() { SicilNo = "005", AdSoyad = "Mehmet Demir", Proje = "ARGE-2024-002" },
+        new() { SicilNo = "008", AdSoyad = "Zeynep Arslan", Proje = "ARGE-2024-002" },
+    };
+
+    private void HesaplaArgeBordro()
+    {
+        var sgkIsci = _brutMaas * 0.14m;
+        var issizlikIsci = _brutMaas * 0.01m;
+        var sgkMatrah = _brutMaas - sgkIsci - issizlikIsci;
+
+        var vergiOrani = decimal.Parse(_vergiDilimi) / 100m;
+        var normalGelirVergisi = sgkMatrah * vergiOrani;
+        var normalDamgaVergisi = _brutMaas * 0.00759m;
+
+        // Ar-Ge teþvik oraný (Doktora için %90, normal %80)
+        var tesvikOrani = _doktoraDerecesi ? 90 : 80;
+        var argeOranKatsayi = _argeOrani / 100m;
+
+        // Ar-Ge kýsmý için teþvikli vergi
+        var argeGelirVergisiTesvikli = normalGelirVergisi * argeOranKatsayi * (1 - tesvikOrani / 100m);
+        var normalKisimGelirVergisi = normalGelirVergisi * (1 - argeOranKatsayi);
+        var argeGelirVergisi = argeGelirVergisiTesvikli + normalKisimGelirVergisi;
+
+        // AGI
+        var agi = _agiKisi switch
+        {
+            0 => 0m,
+            1 => 1500m,
+            2 => 1800m,
+            3 => 2100m,
+            _ => 2400m
+        };
+
+        // Normal net maaþ
+        var normalNetMaas = sgkMatrah - normalGelirVergisi - normalDamgaVergisi + agi;
+
+        // Ar-Ge net maaþ (Damga vergisi muaf)
+        var argeNetMaas = sgkMatrah - argeGelirVergisi + agi + _argePrimi;
+
+        // Ýþveren maliyetleri
+        var normalSgkIsveren = _brutMaas * 0.205m;
+        var argeSgkIsveren = _brutMaas * 0.205m * (1 - 0.5m * argeOranKatsayi); // %50 teþvik
+        var issizlikIsveren = _brutMaas * 0.02m;
+
+        var normalToplamMaliyet = _brutMaas + normalSgkIsveren + issizlikIsveren;
+        var argeToplamMaliyet = _brutMaas + argeSgkIsveren + issizlikIsveren;
+
+        _hesaplamaSonucu = new ArgeHesaplamaSonuc
+        {
+            BrutMaas = _brutMaas,
+            SgkIsci = sgkIsci,
+            IssizlikIsci = issizlikIsci,
+            SgkMatrah = sgkMatrah,
+            NormalGelirVergisi = normalGelirVergisi,
+            NormalDamgaVergisi = normalDamgaVergisi,
+            ArgeGelirVergisi = argeGelirVergisi,
+            TesvikOrani = tesvikOrani,
+            Agi = agi,
+            NormalNetMaas = normalNetMaas,
+            ArgeNetMaas = argeNetMaas,
+            NormalSgkIsveren = normalSgkIsveren,
+            ArgeSgkIsveren = argeSgkIsveren,
+            IssizlikIsveren = issizlikIsveren,
+            NormalToplamMaliyet = normalToplamMaliyet,
+            ArgeToplamMaliyet = argeToplamMaliyet,
+            IsverenTasarruf = normalToplamMaliyet - argeToplamMaliyet
+        };
+
+        Snackbar.Add("Ar-Ge bordrosu hesaplandi", Severity.Success);
+    }
+
+    private void PrintResult()
+    {
+        Snackbar.Add("Ar-Ge bordrosu yazdiriliyor", Severity.Info);
+    }
+
+    private void ExportExcel()
+    {
+        Snackbar.Add("Ar-Ge bordrosu Excel'e aktariliyor", Severity.Info);
+    }
+
+    public class ArgePersonel
+    {
+        public string SicilNo { get; set; } = "";
+        public string AdSoyad { get; set; } = "";
+        public string Proje { get; set; } = "";
+    }
+
+    public class ArgeHesaplamaSonuc
+    {
+        public decimal BrutMaas { get; set; }
+        public decimal SgkIsci { get; set; }
+        public decimal IssizlikIsci { get; set; }
+        public decimal SgkMatrah { get; set; }
+        public decimal NormalGelirVergisi { get; set; }
+        public decimal NormalDamgaVergisi { get; set; }
+        public decimal ArgeGelirVergisi { get; set; }
+        public int TesvikOrani { get; set; }
+        public decimal Agi { get; set; }
+        public decimal NormalNetMaas { get; set; }
+        public decimal ArgeNetMaas { get; set; }
+        public decimal NormalSgkIsveren { get; set; }
+        public decimal ArgeSgkIsveren { get; set; }
+        public decimal IssizlikIsveren { get; set; }
+        public decimal NormalToplamMaliyet { get; set; }
+        public decimal ArgeToplamMaliyet { get; set; }
+        public decimal IsverenTasarruf { get; set; }
+    }
+}
