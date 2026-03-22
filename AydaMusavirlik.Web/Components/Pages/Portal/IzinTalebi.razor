@@ -1,0 +1,410 @@
+@page "/portal/personel/izin-talebi"
+@using MudBlazor
+@layout PortalLayout
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<PageTitle>Ýzin Talebi - AydaMüþavirlik</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <!-- Baþlýk ve Ýzin Bakiyesi -->
+    <MudGrid>
+        <MudItem xs="12" md="8">
+            <MudText Typo="Typo.h4" Class="mb-2">Ýzin Talebi Oluþtur</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary">Yeni izin talebinizi aþaðýdaki formu doldurarak oluþturabilirsiniz.</MudText>
+        </MudItem>
+        <MudItem xs="12" md="4">
+            <MudPaper Class="pa-4" Elevation="2" Style="background: linear-gradient(135deg, #1976D2, #1565C0); color: white;">
+                <MudText Typo="Typo.subtitle2">Kalan Yýllýk Ýzin</MudText>
+                <MudText Typo="Typo.h3">@_kalanIzin <span style="font-size: 1rem;">gün</span></MudText>
+                <MudText Typo="Typo.caption">Toplam: @_toplamIzin gün | Kullanýlan: @_kullanilanIzin gün</MudText>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    <MudDivider Class="my-4"/>
+
+    <!-- Ýzin Formu -->
+    <MudPaper Class="pa-6" Elevation="2">
+        <MudForm @ref="_form" @bind-IsValid="_formValid">
+            <MudGrid>
+                <!-- Ýzin Türü -->
+                <MudItem xs="12" md="6">
+                    <MudSelect T="string" Label="Ýzin Türü" @bind-Value="_izinTuru" Required="true"
+                               Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
+                        <MudSelectItem Value="@("Yýllýk Ýzin")">Yýllýk Ýzin</MudSelectItem>
+                        <MudSelectItem Value="@("Mazeret Ýzni")">Mazeret Ýzni</MudSelectItem>
+                        <MudSelectItem Value="@("Hastalýk Ýzni")">Hastalýk Ýzni</MudSelectItem>
+                        <MudSelectItem Value="@("Evlilik Ýzni")">Evlilik Ýzni</MudSelectItem>
+                        <MudSelectItem Value="@("Doðum Ýzni")">Doðum Ýzni</MudSelectItem>
+                        <MudSelectItem Value="@("Babalýk Ýzni")">Babalýk Ýzni</MudSelectItem>
+                        <MudSelectItem Value="@("Ölüm Ýzni")">Ölüm Ýzni</MudSelectItem>
+                        <MudSelectItem Value="@("Ýdari Ýzin")">Ýdari Ýzin</MudSelectItem>
+                        <MudSelectItem Value="@("Ücretsiz Ýzin")">Ücretsiz Ýzin</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+
+                <!-- Tarih Aralýðý -->
+                <MudItem xs="12" md="6">
+                    <MudDateRangePicker Label="Ýzin Tarihleri" @bind-DateRange="_tarihAraligi" 
+                                        Variant="Variant.Outlined" Required="true"
+                                        MinDate="DateTime.Today"/>
+                </MudItem>
+
+                <!-- Gün Sayýsý (Otomatik) -->
+                <MudItem xs="12" md="3">
+                    <MudTextField T="int" Label="Toplam Gün" Value="@_gunSayisi" ReadOnly="true"
+                                  Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentText="gün"/>
+                </MudItem>
+
+                <!-- Vekil Seçimi -->
+                <MudItem xs="12" md="9">
+                    <MudAutocomplete T="string" Label="Yerime Bakacak Kiþi (Vekil)" @bind-Value="_vekilAdi"
+                                     SearchFunc="@SearchVekil" Variant="Variant.Outlined"
+                                     AdornmentIcon="@Icons.Material.Filled.Person" AdornmentColor="Color.Primary"/>
+                </MudItem>
+
+                <!-- Ýletiþim Bilgileri -->
+                <MudItem xs="12" md="6">
+                    <MudTextField T="string" Label="Ýletiþim Telefonu" @bind-Value="_iletisimTelefon"
+                                  Variant="Variant.Outlined" InputType="InputType.Telephone"
+                                  Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Phone"/>
+                </MudItem>
+
+                <MudItem xs="12" md="6">
+                    <MudTextField T="string" Label="Ýzin Süresince Adres" @bind-Value="_iletisimAdres"
+                                  Variant="Variant.Outlined"
+                                  Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.LocationOn"/>
+                </MudItem>
+
+                <!-- Açýklama -->
+                <MudItem xs="12">
+                    <MudTextField T="string" Label="Ýzin Nedeni / Açýklama" @bind-Value="_aciklama"
+                                  Variant="Variant.Outlined" Lines="3"/>
+                </MudItem>
+
+                <!-- Uyarý -->
+                @if (_izinTuru == "Yýllýk Ýzin" && _gunSayisi > _kalanIzin)
+                {
+                    <MudItem xs="12">
+                        <MudAlert Severity="Severity.Warning">
+                            Talep ettiðiniz gün sayýsý (@_gunSayisi) kalan izin hakkýnýzdan (@_kalanIzin) fazladýr.
+                        </MudAlert>
+                    </MudItem>
+                }
+
+                <!-- Butonlar -->
+                <MudItem xs="12" Class="d-flex justify-end gap-2 mt-4">
+                    <MudButton Variant="Variant.Outlined" Color="Color.Default" 
+                               OnClick="Temizle">Temizle</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" 
+                               OnClick="TalepGonder" Disabled="@(!_formValid || _isLoading)">
+                        @if (_isLoading)
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2"/>
+                        }
+                        <MudIcon Icon="@Icons.Material.Filled.Send" Class="mr-2"/>
+                        Talep Gönder
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+    </MudPaper>
+
+    <!-- Mevcut Talepler -->
+    <MudText Typo="Typo.h5" Class="mt-6 mb-4">
+        <MudIcon Icon="@Icons.Material.Filled.History" Class="mr-2"/>
+        Ýzin Taleplerim
+    </MudText>
+
+    <MudPaper Elevation="2">
+        <MudTable Items="@_izinTalepleri" Hover="true" Dense="true" Striped="true">
+            <HeaderContent>
+                <MudTh>Form No</MudTh>
+                <MudTh>Ýzin Türü</MudTh>
+                <MudTh>Tarih Aralýðý</MudTh>
+                <MudTh>Gün</MudTh>
+                <MudTh>Durum</MudTh>
+                <MudTh>Talep Tarihi</MudTh>
+                <MudTh>Ýþlemler</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>@context.FormNo</MudTd>
+                <MudTd>@context.IzinTuru</MudTd>
+                <MudTd>@context.BaslangicTarihi.ToString("dd.MM.yyyy") - @context.BitisTarihi.ToString("dd.MM.yyyy")</MudTd>
+                <MudTd>@context.GunSayisi</MudTd>
+                <MudTd>
+                    <MudChip T="string" Color="@GetDurumColor(context.Durum)" Size="Size.Small">
+                        @context.Durum
+                    </MudChip>
+                </MudTd>
+                <MudTd>@context.TalepTarihi.ToString("dd.MM.yyyy")</MudTd>
+                <MudTd>
+                    @if (context.Durum == "Onaylandý")
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Print" Size="Size.Small" Color="Color.Primary"
+                                       OnClick="@(() => FormYazdir(context))" Title="Yazdýr"/>
+                        <MudIconButton Icon="@Icons.Material.Filled.Email" Size="Size.Small" Color="Color.Secondary"
+                                       OnClick="@(() => FormMailGonder(context))" Title="E-posta Gönder"/>
+                        <MudIconButton Icon="@Icons.Material.Filled.Share" Size="Size.Small" Color="Color.Info"
+                                       OnClick="@(() => FormPaylas(context))" Title="Paylaþ"/>
+                    }
+                    @if (context.Durum == "Bekliyor")
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Cancel" Size="Size.Small" Color="Color.Error"
+                                       OnClick="@(() => TalepIptal(context))" Title="Ýptal Et"/>
+                    }
+                    <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Default"
+                                   OnClick="@(() => TalepDetay(context))" Title="Detay"/>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudPaper>
+</MudContainer>
+
+<!-- Yazdýr/Mail/Paylaþ Dialog -->
+<MudDialog @bind-Visible="_showFormDialog">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Description" Class="mr-2"/>
+            Ýzin Formu - @_selectedTalep?.FormNo
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudPaper Class="pa-4" Style="background-color: #f5f5f5;">
+            <!-- Form Önizleme -->
+            <div id="izin-form-preview" style="background: white; padding: 20px; border: 1px solid #ddd;">
+                <div style="text-align: center; border-bottom: 2px solid #1976D2; padding-bottom: 10px; margin-bottom: 20px;">
+                    <h2 style="margin: 0; color: #1976D2;">ÝZÝN TALEBÝ FORMU</h2>
+                    <p style="margin: 5px 0 0 0; color: #666;">Form No: @_selectedTalep?.FormNo</p>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background: #f9f9f9; width: 30%;"><strong>Personel Adý</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">@_personelAdi</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background: #f9f9f9;"><strong>TC Kimlik No</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">12345678901</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background: #f9f9f9;"><strong>Departman</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">Muhasebe</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background: #f9f9f9;"><strong>Ýzin Türü</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">@_selectedTalep?.IzinTuru</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background: #f9f9f9;"><strong>Baþlangýç Tarihi</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">@_selectedTalep?.BaslangicTarihi.ToString("dd MMMM yyyy")</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background: #f9f9f9;"><strong>Bitiþ Tarihi</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">@_selectedTalep?.BitisTarihi.ToString("dd MMMM yyyy")</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background: #f9f9f9;"><strong>Toplam Gün</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">@_selectedTalep?.GunSayisi gün</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background: #f9f9f9;"><strong>Durum</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd; color: green;"><strong>@_selectedTalep?.Durum</strong></td>
+                    </tr>
+                </table>
+
+                <div style="display: flex; justify-content: space-between; margin-top: 40px;">
+                    <div style="text-align: center;">
+                        <div style="border-top: 1px solid #333; width: 150px; margin: 0 auto;"></div>
+                        <p style="margin: 5px 0;">Personel Ýmza</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="border-top: 1px solid #333; width: 150px; margin: 0 auto;"></div>
+                        <p style="margin: 5px 0;">Yönetici Onay</p>
+                    </div>
+                </div>
+            </div>
+        </MudPaper>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => _showFormDialog = false)">Kapat</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Print"
+                   OnClick="PrintForm">Yazdýr</MudButton>
+        <MudButton Color="Color.Secondary" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Email"
+                   OnClick="EmailForm">E-posta Gönder</MudButton>
+        <MudButton Color="Color.Info" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Download"
+                   OnClick="DownloadPdf">PDF Ýndir</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private MudForm? _form;
+    private bool _formValid;
+    private bool _isLoading;
+    private bool _showFormDialog;
+
+    private string _personelAdi = "Ahmet Yýlmaz";
+    private int _kalanIzin = 12;
+    private int _toplamIzin = 20;
+    private int _kullanilanIzin = 8;
+
+    private string _izinTuru = "";
+    private DateRange _tarihAraligi = new(DateTime.Today.AddDays(1), DateTime.Today.AddDays(2));
+    private int _gunSayisi => _tarihAraligi.End.HasValue && _tarihAraligi.Start.HasValue 
+        ? (_tarihAraligi.End.Value - _tarihAraligi.Start.Value).Days + 1 : 0;
+    private string _vekilAdi = "";
+    private string _iletisimTelefon = "";
+    private string _iletisimAdres = "";
+    private string _aciklama = "";
+
+    private List<IzinTalep> _izinTalepleri = new();
+    private IzinTalep? _selectedTalep;
+
+    protected override void OnInitialized()
+    {
+        _izinTalepleri = new List<IzinTalep>
+        {
+            new() { FormNo = "IZN-2025-001", IzinTuru = "Yýllýk Ýzin", BaslangicTarihi = DateTime.Now.AddDays(10), BitisTarihi = DateTime.Now.AddDays(14), GunSayisi = 5, Durum = "Onaylandý", TalepTarihi = DateTime.Now.AddDays(-5) },
+            new() { FormNo = "IZN-2025-002", IzinTuru = "Mazeret Ýzni", BaslangicTarihi = DateTime.Now.AddDays(2), BitisTarihi = DateTime.Now.AddDays(3), GunSayisi = 2, Durum = "Bekliyor", TalepTarihi = DateTime.Now.AddDays(-1) },
+            new() { FormNo = "IZN-2024-015", IzinTuru = "Yýllýk Ýzin", BaslangicTarihi = DateTime.Now.AddDays(-30), BitisTarihi = DateTime.Now.AddDays(-28), GunSayisi = 3, Durum = "Onaylandý", TalepTarihi = DateTime.Now.AddDays(-35) },
+        };
+    }
+
+    private async Task<IEnumerable<string>> SearchVekil(string value, CancellationToken token)
+    {
+        await Task.Delay(100, token);
+        var vekiller = new[] { "Mehmet Demir", "Ayþe Kaya", "Ali Yýldýz", "Fatma Çelik" };
+
+        if (string.IsNullOrEmpty(value))
+            return vekiller;
+
+        return vekiller.Where(v => v.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private Color GetDurumColor(string durum) => durum switch
+    {
+        "Onaylandý" => Color.Success,
+        "Bekliyor" => Color.Warning,
+        "Reddedildi" => Color.Error,
+        "Ýptal Edildi" => Color.Default,
+        _ => Color.Default
+    };
+
+    private async Task TalepGonder()
+    {
+        if (_form != null)
+        {
+            await _form.Validate();
+            if (!_formValid) return;
+        }
+
+        _isLoading = true;
+        StateHasChanged();
+
+        await Task.Delay(1500); // API çaðrýsý simülasyonu
+
+        var yeniTalep = new IzinTalep
+        {
+            FormNo = $"IZN-{DateTime.Now:yyyy}-{new Random().Next(100, 999):D3}",
+            IzinTuru = _izinTuru,
+            BaslangicTarihi = _tarihAraligi.Start ?? DateTime.Today,
+            BitisTarihi = _tarihAraligi.End ?? DateTime.Today,
+            GunSayisi = _gunSayisi,
+            Durum = "Bekliyor",
+            TalepTarihi = DateTime.Now
+        };
+
+        _izinTalepleri.Insert(0, yeniTalep);
+
+        Snackbar.Add($"Ýzin talebiniz baþarýyla oluþturuldu. Form No: {yeniTalep.FormNo}", Severity.Success);
+
+        Temizle();
+        _isLoading = false;
+    }
+
+    private void Temizle()
+    {
+        _izinTuru = "";
+        _tarihAraligi = new(DateTime.Today.AddDays(1), DateTime.Today.AddDays(2));
+        _vekilAdi = "";
+        _iletisimTelefon = "";
+        _iletisimAdres = "";
+        _aciklama = "";
+        _form?.ResetAsync();
+    }
+
+    private void FormYazdir(IzinTalep talep)
+    {
+        _selectedTalep = talep;
+        _showFormDialog = true;
+    }
+
+    private async Task FormMailGonder(IzinTalep talep)
+    {
+        var result = await DialogService.ShowMessageBox(
+            "E-posta Gönder",
+            $"Ýzin formu ({talep.FormNo}) kayýtlý e-posta adresinize gönderilsin mi?",
+            yesText: "Gönder", cancelText: "Ýptal");
+
+        if (result == true)
+        {
+            Snackbar.Add("Ýzin formu e-posta adresinize gönderildi.", Severity.Success);
+        }
+    }
+
+    private async Task FormPaylas(IzinTalep talep)
+    {
+        Snackbar.Add($"Paylaþým linki kopyalandý: https://ayda.com/izin/{talep.FormNo}", Severity.Info);
+    }
+
+    private async Task TalepIptal(IzinTalep talep)
+    {
+        var result = await DialogService.ShowMessageBox(
+            "Ýzin Talebi Ýptali",
+            $"{talep.FormNo} numaralý izin talebinizi iptal etmek istediðinize emin misiniz?",
+            yesText: "Evet, Ýptal Et", cancelText: "Vazgeç");
+
+        if (result == true)
+        {
+            talep.Durum = "Ýptal Edildi";
+            Snackbar.Add("Ýzin talebiniz iptal edildi.", Severity.Warning);
+            StateHasChanged();
+        }
+    }
+
+    private void TalepDetay(IzinTalep talep)
+    {
+        _selectedTalep = talep;
+        _showFormDialog = true;
+    }
+
+    private void PrintForm()
+    {
+        // JavaScript ile yazdýrma
+        Snackbar.Add("Yazdýrma penceresi açýlýyor...", Severity.Info);
+    }
+
+    private async Task EmailForm()
+    {
+        Snackbar.Add("Form e-posta olarak gönderildi.", Severity.Success);
+        _showFormDialog = false;
+    }
+
+    private void DownloadPdf()
+    {
+        Snackbar.Add("PDF indiriliyor...", Severity.Info);
+    }
+
+    private class IzinTalep
+    {
+        public string FormNo { get; set; } = "";
+        public string IzinTuru { get; set; } = "";
+        public DateTime BaslangicTarihi { get; set; }
+        public DateTime BitisTarihi { get; set; }
+        public int GunSayisi { get; set; }
+        public string Durum { get; set; } = "";
+        public DateTime TalepTarihi { get; set; }
+    }
+}

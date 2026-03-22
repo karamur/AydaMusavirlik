@@ -1,0 +1,118 @@
+<Window x:Class="AydaMusavirlik.Desktop.Views.Payroll.LeaveDetailWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Ýzin Talebi Detayý" Height="550" Width="500"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Background="#1976D2" Padding="20">
+            <StackPanel>
+                <TextBlock x:Name="txtFormNo" Text="IZN-2025-001" FontSize="20" FontWeight="Bold" Foreground="White"/>
+                <TextBlock x:Name="txtDurum" Text="Bekliyor" FontSize="12" Foreground="White" Opacity="0.8" Margin="0,5,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Ýçerik -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="20">
+                <!-- Personel Bilgileri -->
+                <TextBlock Text="PERSONEL BÝLGÝLERÝ" FontWeight="Bold" FontSize="12" Foreground="#1976D2" Margin="0,0,0,10"/>
+                <Border Background="#F5F5F5" Padding="15" CornerRadius="4" Margin="0,0,0,20">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="130"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="Adý Soyadý:" FontWeight="SemiBold" Margin="0,3"/>
+                        <TextBlock x:Name="txtPersonelAdi" Grid.Column="1" Margin="0,3"/>
+
+                        <TextBlock Text="Departman:" FontWeight="SemiBold" Grid.Row="1" Margin="0,3"/>
+                        <TextBlock x:Name="txtDepartman" Grid.Row="1" Grid.Column="1" Margin="0,3"/>
+
+                        <TextBlock Text="Pozisyon:" FontWeight="SemiBold" Grid.Row="2" Margin="0,3"/>
+                        <TextBlock x:Name="txtPozisyon" Grid.Row="2" Grid.Column="1" Margin="0,3"/>
+                    </Grid>
+                </Border>
+
+                <!-- Ýzin Bilgileri -->
+                <TextBlock Text="ÝZÝN BÝLGÝLERÝ" FontWeight="Bold" FontSize="12" Foreground="#1976D2" Margin="0,0,0,10"/>
+                <Border Background="#F5F5F5" Padding="15" CornerRadius="4" Margin="0,0,0,20">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="130"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="Ýzin Türü:" FontWeight="SemiBold" Margin="0,3"/>
+                        <TextBlock x:Name="txtIzinTuru" Grid.Column="1" Margin="0,3"/>
+
+                        <TextBlock Text="Baþlangýç:" FontWeight="SemiBold" Grid.Row="1" Margin="0,3"/>
+                        <TextBlock x:Name="txtBaslangic" Grid.Row="1" Grid.Column="1" Margin="0,3"/>
+
+                        <TextBlock Text="Bitiþ:" FontWeight="SemiBold" Grid.Row="2" Margin="0,3"/>
+                        <TextBlock x:Name="txtBitis" Grid.Row="2" Grid.Column="1" Margin="0,3"/>
+
+                        <TextBlock Text="Toplam Gün:" FontWeight="SemiBold" Grid.Row="3" Margin="0,3"/>
+                        <TextBlock x:Name="txtGunSayisi" Grid.Row="3" Grid.Column="1" Margin="0,3" FontWeight="Bold" Foreground="#1976D2"/>
+
+                        <TextBlock Text="Talep Tarihi:" FontWeight="SemiBold" Grid.Row="4" Margin="0,3"/>
+                        <TextBlock x:Name="txtTalepTarihi" Grid.Row="4" Grid.Column="1" Margin="0,3"/>
+                    </Grid>
+                </Border>
+
+                <!-- Onay Bilgileri -->
+                <TextBlock Text="ONAY BÝLGÝLERÝ" FontWeight="Bold" FontSize="12" Foreground="#1976D2" Margin="0,0,0,10"/>
+                <Border x:Name="brdOnay" Background="#FFF3E0" Padding="15" CornerRadius="4" Margin="0,0,0,20">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="130"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="Durum:" FontWeight="SemiBold" Margin="0,3"/>
+                        <TextBlock x:Name="txtOnayDurum" Grid.Column="1" Margin="0,3" FontWeight="Bold"/>
+
+                        <TextBlock Text="Onaylayan:" FontWeight="SemiBold" Grid.Row="1" Margin="0,3"/>
+                        <TextBlock x:Name="txtOnaylayan" Grid.Row="1" Grid.Column="1" Margin="0,3"/>
+
+                        <TextBlock Text="Onay Tarihi:" FontWeight="SemiBold" Grid.Row="2" Margin="0,3"/>
+                        <TextBlock x:Name="txtOnayTarihi" Grid.Row="2" Grid.Column="1" Margin="0,3"/>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer -->
+        <Border Grid.Row="2" Background="#F5F5F5" Padding="15">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Kapat" Padding="20,10" Click="BtnKapat_Click"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

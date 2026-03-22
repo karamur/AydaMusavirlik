@@ -22,6 +22,7 @@ builder.Services.AddScoped<IAccountingRecordRepository, AccountingRecordReposito
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IPayrollRecordRepository, PayrollRecordRepository>();
 builder.Services.AddScoped<IArGeProjectRepository, ArGeProjectRepository>();
+builder.Services.AddScoped<ILeaveRequestRepository, LeaveRequestRepository>();
 
 // JWT Authentication
 var jwtKey = "AydaMusavirlikSecretKey2024SuperSecure!";
