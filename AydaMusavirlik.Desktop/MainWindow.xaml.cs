@@ -83,7 +83,7 @@ public partial class MainWindow : Window
     {
         if (MessageBox.Show("Programdan çıkmak istediğinizden emin misiniz?", "Çıkış", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
         {
-            Application.Current.Shutdown();
+            System.Windows.Application.Current.Shutdown();
         }
     }
     #endregion

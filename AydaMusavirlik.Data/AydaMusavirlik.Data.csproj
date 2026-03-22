@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AydaMusavirlik.Core\AydaMusavirlik.Core.csproj" />
+    <ProjectReference Include="..\AydaMusavirlik.Application\AydaMusavirlik.Application.csproj" />
   </ItemGroup>
 
 </Project>

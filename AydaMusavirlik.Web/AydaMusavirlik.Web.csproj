@@ -7,11 +7,11 @@
     <RootNamespace>AydaMusavirlik</RootNamespace>
     <AssemblyName>AydaMusavirlik</AssemblyName>
     <Version>1.0.0</Version>
-    <Authors>AYDA Müþavirlik</Authors>
-    <Company>AYDA Müþavirlik</Company>
-    <Product>AYDA Müþavirlik - Profesyonel Mali Müþavirlik Yazýlýmý</Product>
-    <Description>Mali müþavirlik ofisleri için geliþtirilmiþ modern muhasebe ve finansal analiz yazýlýmý</Description>
-    <Copyright>Copyright © 2024 AYDA Müþavirlik</Copyright>
+    <Authors>AYDA Mï¿½ï¿½avirlik</Authors>
+    <Company>AYDA Mï¿½ï¿½avirlik</Company>
+    <Product>AYDA Mï¿½ï¿½avirlik - Profesyonel Mali Mï¿½ï¿½avirlik Yazï¿½lï¿½mï¿½</Product>
+    <Description>Mali mï¿½ï¿½avirlik ofisleri iï¿½in geliï¿½tirilmiï¿½ modern muhasebe ve finansal analiz yazï¿½lï¿½mï¿½</Description>
+    <Copyright>Copyright ï¿½ 2024 AYDA Mï¿½ï¿½avirlik</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,11 +20,13 @@
     <PackageReference Include="Blazored.LocalStorage" Version="4.*" />
     <PackageReference Include="MudBlazor" Version="7.*" />
     <PackageReference Include="Serilog.AspNetCore" Version="8.*" />
-    <PackageReference Include="Serilog.Sinks.File" Version="6.*" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\AydaMusavirlik.Core\AydaMusavirlik.Core.csproj" />
+    <ProjectReference Include="..\AydaMusavirlik.Application\AydaMusavirlik.Application.csproj" />
+    <ProjectReference Include="..\AydaMusavirlik.Infrastructure\AydaMusavirlik.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
