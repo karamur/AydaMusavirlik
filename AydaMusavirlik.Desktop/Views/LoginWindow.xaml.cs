@@ -1,65 +1,63 @@
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Net.Http;
 using AydaMusavirlik.Desktop.Services;
-using AydaMusavirlik.Data;
-using AydaMusavirlik.Data.Services;
 
 namespace AydaMusavirlik.Desktop.Views;
 
 public partial class LoginWindow : Window
 {
     private readonly IAuthService _authService;
-    private readonly ISettingsService _settingsService;
+    private bool _isApiOnline = false;
 
     public LoginWindow()
     {
         InitializeComponent();
         _authService = App.GetService<IAuthService>();
-        _settingsService = App.GetService<ISettingsService>();
 
         Loaded += LoginWindow_Loaded;
-        
-        // Pencereyi sürüklenebilir yap
-        MouseLeftButtonDown += (s, e) => { if (e.LeftButton == MouseButtonState.Pressed) DragMove(); };
     }
 
     private async void LoginWindow_Loaded(object sender, RoutedEventArgs e)
     {
-        await CheckDatabaseStatus();
         txtUsername.Focus();
+        await CheckApiStatus();
     }
 
-    private async Task CheckDatabaseStatus()
+    private async Task CheckApiStatus()
     {
         try
         {
-            var dbSettings = _settingsService.Settings.Database;
-            var info = await DatabaseFactory.GetDatabaseInfoAsync(dbSettings);
+            statusIndicator.Fill = new SolidColorBrush(Colors.Orange);
+            txtStatus.Text = "API kontrol ediliyor...";
 
-            if (info.IsConnected)
+            using var client = new System.Net.Http.HttpClient();
+            client.Timeout = TimeSpan.FromSeconds(3);
+
+            var response = await client.GetAsync("http://localhost:5000/swagger/index.html");
+
+            if (response.IsSuccessStatusCode)
             {
-                dbStatusIndicator.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4CAF50"));
-                txtDbStatus.Text = $"Veritabaný baðlý ({dbSettings.Provider})";
-                txtDbInfo.Text = $"{info.CompanyCount} kullanýcý, {info.AccountCount} hesap";
-                brdDbStatus.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E8F5E9"));
+                _isApiOnline = true;
+                statusIndicator.Fill = new SolidColorBrush(Colors.LimeGreen);
+                txtStatus.Text = "API Bagli (Online)";
             }
             else
             {
-                dbStatusIndicator.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF9800"));
-                txtDbStatus.Text = "Veritabaný baðlý deðil";
-                txtDbInfo.Text = "Demo mod aktif";
-                brdDbStatus.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF3E0"));
+                SetOfflineMode();
             }
         }
-        catch (Exception ex)
+        catch
         {
-            dbStatusIndicator.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F44336"));
-            txtDbStatus.Text = "Veritabaný hatasý";
-            txtDbInfo.Text = ex.Message.Length > 40 ? ex.Message.Substring(0, 40) + "..." : ex.Message;
-            brdDbStatus.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFEBEE"));
+            SetOfflineMode();
         }
+    }
+
+    private void SetOfflineMode()
+    {
+        _isApiOnline = false;
+        statusIndicator.Fill = new SolidColorBrush(Colors.Gray);
+        txtStatus.Text = "Offline Mod";
     }
 
     private async void BtnLogin_Click(object sender, RoutedEventArgs e)
@@ -75,11 +73,6 @@ public partial class LoginWindow : Window
         }
     }
 
-    private void BtnClose_Click(object sender, RoutedEventArgs e)
-    {
-        System.Windows.Application.Current.Shutdown();
-    }
-
     private async Task DoLogin()
     {
         var username = txtUsername.Text.Trim();
@@ -87,13 +80,12 @@ public partial class LoginWindow : Window
 
         if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
         {
-            ShowError("Kullanýcý adý ve þifre giriniz.");
+            ShowError("Kullanici adi ve sifre giriniz.");
             return;
         }
 
         btnLogin.IsEnabled = false;
-        btnLogin.Content = "GÝRÝÞ YAPILIYOR...";
-        HideError();
+        txtError.Visibility = Visibility.Collapsed;
 
         try
         {
@@ -107,28 +99,22 @@ public partial class LoginWindow : Window
             }
             else
             {
-                ShowError(result.Error ?? "Giriþ baþarýsýz. Kullanýcý adý veya þifre hatalý.");
+                ShowError(result.Error ?? "Giris basarisiz.");
             }
         }
         catch (Exception ex)
         {
-            ShowError($"Baðlantý hatasý: {ex.Message}");
+            ShowError($"Hata: {ex.Message}");
         }
         finally
         {
             btnLogin.IsEnabled = true;
-            btnLogin.Content = "GÝRÝÞ YAP";
         }
     }
 
     private void ShowError(string message)
     {
         txtError.Text = message;
-        brdError.Visibility = Visibility.Visible;
-    }
-
-    private void HideError()
-    {
-        brdError.Visibility = Visibility.Collapsed;
+        txtError.Visibility = Visibility.Visible;
     }
 }

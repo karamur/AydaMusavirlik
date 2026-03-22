@@ -71,7 +71,23 @@ public partial class CompanyEditWindow : Window
             bool success;
             if (_isEditMode && _company != null)
             {
-                success = await _companyService.UpdateAsync(_company.Id, dto);
+                var updatedCompany = new CompanyDto
+                {
+                    Id = _company.Id,
+                    Name = dto.Name,
+                    TaxNumber = dto.TaxNumber,
+                    TaxOffice = dto.TaxOffice,
+                    TradeRegistryNumber = dto.TradeRegistryNumber,
+                    MersisNumber = dto.MersisNumber,
+                    Address = dto.Address,
+                    City = dto.City,
+                    District = dto.District,
+                    Phone = dto.Phone,
+                    Email = dto.Email,
+                    Capital = dto.Capital
+                };
+                var result = await _companyService.UpdateAsync(updatedCompany);
+                success = result != null;
             }
             else
             {
@@ -81,13 +97,13 @@ public partial class CompanyEditWindow : Window
 
             if (success)
             {
-                MessageBox.Show("Firma baþarýyla kaydedildi.", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Firma basariyla kaydedildi.", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
                 DialogResult = true;
                 Close();
             }
             else
             {
-                MessageBox.Show("Firma kaydedilirken hata oluþtu.", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Firma kaydedilirken hata olustu.", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         catch (Exception ex)

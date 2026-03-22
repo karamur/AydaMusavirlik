@@ -1,10 +1,6 @@
 ﻿using System.Windows;
-using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
 using AydaMusavirlik.Desktop.Services;
-using AydaMusavirlik.Desktop.Services.Reports;
-using AydaMusavirlik.Desktop.Views;
-using AydaMusavirlik.Data.Services;
 
 namespace AydaMusavirlik.Desktop;
 
@@ -16,23 +12,13 @@ public partial class App : System.Windows.Application
     {
         base.OnStartup(e);
 
-        // Servisleri senkron olarak yapılandır
         var services = new ServiceCollection();
         ConfigureServices(services);
         Services = services.BuildServiceProvider();
-
-        // Login penceresi aç
-        var loginWindow = new LoginWindow();
-        loginWindow.Show();
     }
 
     private void ConfigureServices(IServiceCollection services)
     {
-        // Settings Service - Singleton
-        var settingsService = new SettingsService();
-        settingsService.LoadAsync().GetAwaiter().GetResult();
-        services.AddSingleton<ISettingsService>(settingsService);
-
         // API Settings
         var apiSettings = new ApiSettings
         {
@@ -45,52 +31,18 @@ public partial class App : System.Windows.Application
         services.AddSingleton<AuthTokenStore>();
 
         // HttpClient for API
-        services.AddHttpClient<ApiClient>(client =>
+        services.AddHttpClient<ApiClient>((sp, client) =>
         {
-            client.BaseAddress = new Uri(apiSettings.BaseUrl);
-            client.Timeout = TimeSpan.FromSeconds(apiSettings.TimeoutSeconds);
+            var settings = sp.GetRequiredService<ApiSettings>();
+            client.BaseAddress = new Uri(settings.BaseUrl);
+            client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
             client.DefaultRequestHeaders.Add("Accept", "application/json");
         });
 
-        // API Services - AuthService with SettingsService
-        services.AddSingleton<IAuthService>(sp => new AuthService(
-            sp.GetRequiredService<AuthTokenStore>(),
-            sp.GetRequiredService<ISettingsService>(),
-            sp.GetService<ApiClient>()
-        ));
-        
-        // Company Service with SettingsService
-        services.AddTransient<ICompanyService>(sp => new CompanyService(
-            sp.GetRequiredService<ISettingsService>(),
-            sp.GetService<ApiClient>()
-        ));
-        
-        // Account Service with SettingsService
-        services.AddTransient<IAccountService>(sp => new AccountService(
-            sp.GetRequiredService<ISettingsService>(),
-            sp.GetService<ApiClient>()
-        ));
-        
-        // Accounting Record Service
-        services.AddTransient<IAccountingRecordService>(sp => new AccountingRecordService(
-            sp.GetRequiredService<ISettingsService>()
-        ));
-        
-        // Employee Service
-        services.AddTransient<IEmployeeService>(sp => new EmployeeService(
-            sp.GetRequiredService<ISettingsService>()
-        ));
-        
-        // Payroll Service
-        services.AddTransient<IPayrollService>(sp => new PayrollService(
-            sp.GetRequiredService<ISettingsService>()
-        ));
-
-        // Report Services
-        services.AddTransient<IFinancialAnalysisService, FinancialAnalysisService>();
-        services.AddTransient<IReportGeneratorService, ReportGeneratorService>();
-        services.AddTransient<IExcelExportService, ExcelExportService>();
-        services.AddTransient<IPdfExportService, PdfExportService>();
+        // Services
+        services.AddSingleton<IAuthService, AuthService>();
+        services.AddTransient<ICompanyService, CompanyService>();
+        services.AddTransient<IEmployeeService, EmployeeService>();
     }
 
     public static T GetService<T>() where T : class

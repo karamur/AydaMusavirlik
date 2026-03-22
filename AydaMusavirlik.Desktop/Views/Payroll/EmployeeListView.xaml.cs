@@ -34,11 +34,11 @@ public partial class EmployeeListView : UserControl
         }
         catch
         {
-            // API'den veri gelmezse örnek veri göster
+            // API'den veri gelmezse ornek veri goster
             _employees = new ObservableCollection<Services.EmployeeDto>
             {
-                new Services.EmployeeDto { Id = 1, EmployeeNumber = "001", FirstName = "Ahmet", LastName = "Yýlmaz", FullName = "Ahmet Yýlmaz", TcKimlikNo = "12345678901", Department = "Muhasebe", Position = "Müdür", HireDate = new DateTime(2020, 3, 15), GrossSalary = 45000, IsActive = true },
-                new Services.EmployeeDto { Id = 2, EmployeeNumber = "002", FirstName = "Ayþe", LastName = "Kaya", FullName = "Ayþe Kaya", TcKimlikNo = "23456789012", Department = "ÝK", Position = "Uzman", HireDate = new DateTime(2021, 6, 1), GrossSalary = 32000, IsActive = true },
+                new Services.EmployeeDto { Id = 1, EmployeeNumber = "001", FirstName = "Ahmet", LastName = "Yilmaz", TcKimlikNo = "12345678901", Department = "Muhasebe", Position = "Mudur", HireDate = new DateTime(2020, 3, 15), GrossSalary = 45000, IsActive = true },
+                new Services.EmployeeDto { Id = 2, EmployeeNumber = "002", FirstName = "Ayse", LastName = "Kaya", TcKimlikNo = "23456789012", Department = "IK", Position = "Uzman", HireDate = new DateTime(2021, 6, 1), GrossSalary = 32000, IsActive = true },
             };
             dgEmployees.ItemsSource = _employees;
             UpdateStats();
@@ -56,7 +56,7 @@ public partial class EmployeeListView : UserControl
 
     private void YeniPersonel_Click(object sender, RoutedEventArgs e)
     {
-        MessageBox.Show("Yeni personel ekleme formu açýlacak.", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBox.Show("Yeni personel ekleme formu acilacak.", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private async void Yenile_Click(object sender, RoutedEventArgs e)

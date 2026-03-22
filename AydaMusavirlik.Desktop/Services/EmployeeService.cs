@@ -7,209 +7,70 @@ namespace AydaMusavirlik.Desktop.Services;
 
 public interface IEmployeeService
 {
-    Task<IEnumerable<EmployeeDto>> GetByCompanyAsync(int companyId);
-    Task<IEnumerable<EmployeeDto>> GetActiveByCompanyAsync(int companyId);
+    Task<List<EmployeeDto>> GetAllAsync();
+    Task<List<EmployeeDto>> GetByCompanyAsync(int companyId);
+    Task<List<EmployeeDto>> GetActiveByCompanyAsync(int companyId);
     Task<EmployeeDto?> GetByIdAsync(int id);
-    Task<EmployeeDto?> CreateAsync(CreateEmployeeDto dto);
-    Task<bool> UpdateAsync(int id, UpdateEmployeeDto dto);
+    Task<EmployeeDto?> CreateAsync(EmployeeDto employee);
+    Task<EmployeeDto?> UpdateAsync(EmployeeDto employee);
     Task<bool> DeleteAsync(int id);
 }
 
 public class EmployeeService : IEmployeeService
 {
-    private readonly ISettingsService _settingsService;
+    private readonly ApiClient _apiClient;
 
-    public EmployeeService(ISettingsService settingsService)
+    public EmployeeService(ApiClient apiClient)
     {
-        _settingsService = settingsService;
+        _apiClient = apiClient;
     }
 
-    public async Task<IEnumerable<EmployeeDto>> GetByCompanyAsync(int companyId)
+    public async Task<List<EmployeeDto>> GetAllAsync()
     {
-        try
-        {
-            using var context = DatabaseFactory.CreateContext(_settingsService.Settings.Database);
-            var employees = await context.Employees
-                .Where(e => e.CompanyId == companyId && !e.IsDeleted)
-                .OrderBy(e => e.LastName)
-                .ThenBy(e => e.FirstName)
-                .ToListAsync();
-
-            return employees.Select(MapToDto);
-        }
-        catch
-        {
-            return Enumerable.Empty<EmployeeDto>();
-        }
+        var response = await _apiClient.GetAsync<List<EmployeeDto>>("api/employees");
+        return response.Data ?? new List<EmployeeDto>();
     }
 
-    public async Task<IEnumerable<EmployeeDto>> GetActiveByCompanyAsync(int companyId)
+    public async Task<List<EmployeeDto>> GetByCompanyAsync(int companyId)
     {
-        try
-        {
-            using var context = DatabaseFactory.CreateContext(_settingsService.Settings.Database);
-            var employees = await context.Employees
-                .Where(e => e.CompanyId == companyId && !e.IsDeleted && e.IsActive && e.TerminationDate == null)
-                .OrderBy(e => e.LastName)
-                .ThenBy(e => e.FirstName)
-                .ToListAsync();
+        var response = await _apiClient.GetAsync<List<EmployeeDto>>($"api/employees/company/{companyId}");
+        return response.Data ?? new List<EmployeeDto>();
+    }
 
-            return employees.Select(MapToDto);
-        }
-        catch
-        {
-            return Enumerable.Empty<EmployeeDto>();
-        }
+    public async Task<List<EmployeeDto>> GetActiveByCompanyAsync(int companyId)
+    {
+        var response = await _apiClient.GetAsync<List<EmployeeDto>>($"api/employees/company/{companyId}/active");
+        if (response.Success && response.Data != null)
+            return response.Data;
+        
+        // API yoksa tum listeyi getir ve filtrele
+        var all = await GetByCompanyAsync(companyId);
+        return all.Where(e => e.IsActive).ToList();
     }
 
     public async Task<EmployeeDto?> GetByIdAsync(int id)
     {
-        try
-        {
-            using var context = DatabaseFactory.CreateContext(_settingsService.Settings.Database);
-            var employee = await context.Employees.FindAsync(id);
-            
-            if (employee == null || employee.IsDeleted)
-                return null;
-
-            return MapToDto(employee);
-        }
-        catch
-        {
-            return null;
-        }
+        var response = await _apiClient.GetAsync<EmployeeDto>($"api/employees/{id}");
+        return response.Data;
     }
 
-    public async Task<EmployeeDto?> CreateAsync(CreateEmployeeDto dto)
+    public async Task<EmployeeDto?> CreateAsync(EmployeeDto employee)
     {
-        try
-        {
-            using var context = DatabaseFactory.CreateContext(_settingsService.Settings.Database);
-            
-            // Sicil numarasi olustur
-            var employeeNumber = await GenerateEmployeeNumberAsync(context, dto.CompanyId);
-
-            var employee = new Employee
-            {
-                CompanyId = dto.CompanyId,
-                EmployeeNumber = employeeNumber,
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                TcKimlikNo = dto.TcKimlikNo,
-                SgkNumber = dto.SgkNumber,
-                Department = dto.Department,
-                Position = dto.Position,
-                HireDate = dto.HireDate,
-                GrossSalary = dto.GrossSalary,
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            context.Employees.Add(employee);
-            await context.SaveChangesAsync();
-
-            return MapToDto(employee);
-        }
-        catch
-        {
-            return null;
-        }
+        var response = await _apiClient.PostAsync<EmployeeDto>("api/employees", employee);
+        return response.Data;
     }
 
-    public async Task<bool> UpdateAsync(int id, UpdateEmployeeDto dto)
+    public async Task<EmployeeDto?> UpdateAsync(EmployeeDto employee)
     {
-        try
-        {
-            using var context = DatabaseFactory.CreateContext(_settingsService.Settings.Database);
-            var employee = await context.Employees.FindAsync(id);
-            
-            if (employee == null)
-                return false;
-
-            employee.FirstName = dto.FirstName;
-            employee.LastName = dto.LastName;
-            employee.TcKimlikNo = dto.TcKimlikNo;
-            employee.SgkNumber = dto.SgkNumber;
-            employee.Department = dto.Department;
-            employee.Position = dto.Position;
-            employee.GrossSalary = dto.GrossSalary;
-            employee.TerminationDate = dto.TerminationDate;
-            employee.UpdatedAt = DateTime.UtcNow;
-
-            if (dto.TerminationDate.HasValue)
-            {
-                employee.IsActive = false;
-            }
-
-            await context.SaveChangesAsync();
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        var response = await _apiClient.PutAsync<EmployeeDto>($"api/employees/{employee.Id}", employee);
+        return response.Data;
     }
 
     public async Task<bool> DeleteAsync(int id)
     {
-        try
-        {
-            using var context = DatabaseFactory.CreateContext(_settingsService.Settings.Database);
-            var employee = await context.Employees.FindAsync(id);
-            
-            if (employee == null)
-                return false;
-
-            employee.IsDeleted = true;
-            employee.DeletedAt = DateTime.UtcNow;
-
-            await context.SaveChangesAsync();
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        var response = await _apiClient.DeleteAsync($"api/employees/{id}");
+        return response.Success;
     }
-
-    private async Task<string> GenerateEmployeeNumberAsync(AppDbContext context, int companyId)
-    {
-        var year = DateTime.Now.Year;
-        var lastEmployee = await context.Employees
-            .Where(e => e.CompanyId == companyId && e.EmployeeNumber.StartsWith($"P{year}"))
-            .OrderByDescending(e => e.EmployeeNumber)
-            .FirstOrDefaultAsync();
-
-        int nextNumber = 1;
-        if (lastEmployee != null)
-        {
-            var parts = lastEmployee.EmployeeNumber.Split('-');
-            if (parts.Length >= 2 && int.TryParse(parts[1], out int lastNumber))
-            {
-                nextNumber = lastNumber + 1;
-            }
-        }
-
-        return $"P{year}-{nextNumber:D4}";
-    }
-
-    private static EmployeeDto MapToDto(Employee e) => new()
-    {
-        Id = e.Id,
-        CompanyId = e.CompanyId,
-        EmployeeNumber = e.EmployeeNumber,
-        FirstName = e.FirstName,
-        LastName = e.LastName,
-        FullName = $"{e.FirstName} {e.LastName}",
-        TcKimlikNo = e.TcKimlikNo,
-        SgkNumber = e.SgkNumber,
-        Department = e.Department,
-        Position = e.Position,
-        HireDate = e.HireDate,
-        TerminationDate = e.TerminationDate,
-        GrossSalary = e.GrossSalary,
-        IsActive = e.IsActive
-    };
 }
 
 public class EmployeeDto
@@ -219,38 +80,17 @@ public class EmployeeDto
     public string EmployeeNumber { get; set; } = string.Empty;
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
-    public string FullName { get; set; } = string.Empty;
-    public string TcKimlikNo { get; set; } = string.Empty;
-    public string? SgkNumber { get; set; }
+    public string? TcKimlikNo { get; set; }
+    public string? IdentityNumber { get; set; }
     public string? Department { get; set; }
     public string? Position { get; set; }
     public DateTime HireDate { get; set; }
     public DateTime? TerminationDate { get; set; }
     public decimal GrossSalary { get; set; }
-    public bool IsActive { get; set; }
-}
+    public decimal? Salary { get; set; }
+    public string? Email { get; set; }
+    public string? Phone { get; set; }
+    public bool IsActive { get; set; } = true;
 
-public class CreateEmployeeDto
-{
-    public int CompanyId { get; set; }
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-    public string TcKimlikNo { get; set; } = string.Empty;
-    public string? SgkNumber { get; set; }
-    public string? Department { get; set; }
-    public string? Position { get; set; }
-    public DateTime HireDate { get; set; }
-    public decimal GrossSalary { get; set; }
-}
-
-public class UpdateEmployeeDto
-{
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-    public string TcKimlikNo { get; set; } = string.Empty;
-    public string? SgkNumber { get; set; }
-    public string? Department { get; set; }
-    public string? Position { get; set; }
-    public decimal GrossSalary { get; set; }
-    public DateTime? TerminationDate { get; set; }
+    public string FullName => $"{FirstName} {LastName}";
 }

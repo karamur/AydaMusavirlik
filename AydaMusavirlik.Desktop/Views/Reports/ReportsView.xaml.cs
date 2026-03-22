@@ -413,11 +413,11 @@ public partial class ReportsView : UserControl
 
             foreach (var emp in employees)
             {
-                ws.Cell(row, 1).Value = emp.EmployeeNumber;
+                ws.Cell(row, 1).Value = emp.EmployeeNumber ?? "";
                 ws.Cell(row, 2).Value = emp.FullName;
-                ws.Cell(row, 3).Value = emp.TcKimlikNo;
-                ws.Cell(row, 4).Value = emp.Department;
-                ws.Cell(row, 5).Value = emp.Position;
+                ws.Cell(row, 3).Value = emp.TcKimlikNo ?? "";
+                ws.Cell(row, 4).Value = emp.Department ?? "";
+                ws.Cell(row, 5).Value = emp.Position ?? "";
                 ws.Cell(row, 6).Value = emp.HireDate.ToString("dd.MM.yyyy");
                 ws.Cell(row, 7).Value = emp.GrossSalary;
                 ws.Cell(row, 7).Style.NumberFormat.Format = "#,##0.00";
