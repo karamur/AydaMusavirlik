@@ -148,7 +148,7 @@ public partial class MainWindow : Window
 
     private void BordroListesi_Click(object sender, RoutedEventArgs e)
     {
-        OpenTab("Bordro Listesi", "📋 Bordro listesi burada görünecek.");
+        OpenTabWithControl("Puantaj Girisi", new PuantajView());
     }
 
     private void IzinTakibi_Click(object sender, RoutedEventArgs e)
@@ -332,7 +332,7 @@ public partial class MainWindow : Window
         pnlWelcome.Visibility = Visibility.Collapsed;
     }
 
-    private void OpenTabWithControl(string header, UserControl control)
+    public void OpenTabWithControl(string header, UserControl control)
     {
         // Aynı tab açık mı kontrol et
         foreach (TabItem existingTab in tabControl.Items)

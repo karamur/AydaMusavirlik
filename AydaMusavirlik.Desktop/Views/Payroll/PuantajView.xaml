@@ -1,0 +1,86 @@
+<UserControl x:Class="AydaMusavirlik.Desktop.Views.Payroll.PuantajView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1200"
+             Background="#1E1E1E">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Baslik -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,15">
+            <TextBlock Text="Puantaj Girisi" FontSize="24" Foreground="White" FontWeight="Bold"/>
+            <TextBlock Text="Aylik calisma gun ve mesai bilgilerini girin" Foreground="Gray" Margin="0,5,0,0"/>
+        </StackPanel>
+
+        <!-- Donem Secimi -->
+        <Border Grid.Row="1" Background="#2D2D30" CornerRadius="8" Padding="15" Margin="0,0,0,15">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Donem:" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <ComboBox x:Name="cmbYil" Width="100" Margin="0,0,10,0"/>
+                <ComboBox x:Name="cmbAy" Width="120" Margin="0,0,20,0"/>
+                <Button x:Name="btnYukle" Content="Yukle" Width="100" Click="BtnYukle_Click"
+                        Background="#007ACC" Foreground="White"/>
+                <Separator Width="20" Background="Transparent"/>
+                <TextBlock Text="Firma:" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <ComboBox x:Name="cmbFirma" Width="250" DisplayMemberPath="Name"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Puantaj Tablosu -->
+        <DataGrid x:Name="dgPuantaj" Grid.Row="2" 
+                  AutoGenerateColumns="False" 
+                  CanUserAddRows="False"
+                  Background="#252526" 
+                  Foreground="White"
+                  GridLinesVisibility="All"
+                  BorderThickness="1"
+                  BorderBrush="#3E3E42"
+                  RowBackground="#2D2D30"
+                  AlternatingRowBackground="#252526"
+                  HeadersVisibility="Column">
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="#007ACC"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="Padding" Value="10,8"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Sicil No" Binding="{Binding EmployeeNumber}" Width="100" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Ad Soyad" Binding="{Binding EmployeeName}" Width="180" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Calisan Gun" Binding="{Binding ToplamCalisilanGun, Mode=TwoWay}" Width="100"/>
+                <DataGridTextColumn Header="HaftaSonu" Binding="{Binding HaftaSonuCalisilanGun, Mode=TwoWay}" Width="90"/>
+                <DataGridTextColumn Header="Tatil" Binding="{Binding ResmiTatilCalisilanGun, Mode=TwoWay}" Width="80"/>
+                <DataGridTextColumn Header="Ucretli Izin" Binding="{Binding UcretliIzinGun, Mode=TwoWay}" Width="90"/>
+                <DataGridTextColumn Header="Ucretsiz Izin" Binding="{Binding UcretsizIzinGun, Mode=TwoWay}" Width="95"/>
+                <DataGridTextColumn Header="Rapor" Binding="{Binding RaporluGun, Mode=TwoWay}" Width="70"/>
+                <DataGridTextColumn Header="Devamsiz" Binding="{Binding DevamsizlikGun, Mode=TwoWay}" Width="80"/>
+                <DataGridTextColumn Header="F.Mesai HI" Binding="{Binding FazlaMesaiHaftaIci, Mode=TwoWay}" Width="90"/>
+                <DataGridTextColumn Header="F.Mesai HS" Binding="{Binding FazlaMesaiHaftaSonu, Mode=TwoWay}" Width="90"/>
+                <DataGridTextColumn Header="F.Mesai Tatil" Binding="{Binding FazlaMesaiTatil, Mode=TwoWay}" Width="95"/>
+                <DataGridTextColumn Header="SGK Gun" Binding="{Binding SgkPrimGunu, Mode=TwoWay}" Width="80"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Alt Butonlar -->
+        <Border Grid.Row="3" Background="#2D2D30" CornerRadius="8" Padding="15" Margin="0,15,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="btnTumunuDoldur" Content="30 Gun Doldur" Width="120" Margin="0,0,10,0"
+                        Click="BtnTumunuDoldur_Click" Background="#4CAF50" Foreground="White"/>
+                <Button x:Name="btnKaydet" Content="Kaydet" Width="100" Margin="0,0,10,0"
+                        Click="BtnKaydet_Click" Background="#007ACC" Foreground="White"/>
+                <Button x:Name="btnBordroHesapla" Content="Bordro Hesapla" Width="130"
+                        Click="BtnBordroHesapla_Click" Background="#FF9800" Foreground="White"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

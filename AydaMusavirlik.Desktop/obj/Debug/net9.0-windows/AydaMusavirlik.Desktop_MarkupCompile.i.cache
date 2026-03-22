@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET9_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NET9_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WİNDOWS7_0_OR_GREATER
 D:\calisma\Claude-Code\AydaMusavirlik\AydaMusavirlik.Desktop\App.xaml
-14449807953
+161526697326
 22-2078937735
-32112694425
+34587374384
 272449166798
-MainWindow.xaml;Views\Accounting\AccountPlanView.xaml;Views\Accounting\TrialBalanceView.xaml;Views\Accounting\VoucherEntryView.xaml;Views\ArGe\ArGeProjectListView.xaml;Views\Companies\CompanyEditWindow.xaml;Views\Companies\CompanyListView.xaml;Views\Dashboard\DashboardView.xaml;Views\LoginWindow.xaml;Views\Payroll\EmployeeListView.xaml;Views\Payroll\PayrollCalculationView.xaml;Views\Reports\FinancialAnalysisView.xaml;Views\Reports\ReportsView.xaml;Views\Settings\DatabaseSettingsView.xaml;
+MainWindow.xaml;Views\Accounting\AccountPlanView.xaml;Views\Accounting\TrialBalanceView.xaml;Views\Accounting\VoucherEntryView.xaml;Views\ArGe\ArGeProjectListView.xaml;Views\Companies\CompanyEditWindow.xaml;Views\Companies\CompanyListView.xaml;Views\Dashboard\DashboardView.xaml;Views\LoginWindow.xaml;Views\Payroll\BordroDetayView.xaml;Views\Payroll\EmployeeListView.xaml;Views\Payroll\PayrollCalculationView.xaml;Views\Payroll\PuantajView.xaml;Views\Reports\FinancialAnalysisView.xaml;Views\Reports\ReportsView.xaml;Views\Settings\DatabaseSettingsView.xaml;
 
 False
 

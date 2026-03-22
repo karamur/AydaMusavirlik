@@ -194,7 +194,8 @@ public class PayrollService : IPayrollService
                 TotalSgkWorker = records.Sum(r => r.SgkWorkerDeduction),
                 TotalSgkEmployer = records.Sum(r => r.SgkEmployerCost),
                 TotalIncomeTax = records.Sum(r => r.IncomeTax),
-                TotalCost = records.Sum(r => r.GrossSalary + r.SgkEmployerCost)
+                TotalCost = records.Sum(r => r.GrossSalary + r.SgkEmployerCost),
+                Payrolls = records.Select(MapToDto).ToList()
             };
         }
         catch
@@ -324,4 +325,5 @@ public class PayrollSummaryDto
     public decimal TotalSgkEmployer { get; set; }
     public decimal TotalIncomeTax { get; set; }
     public decimal TotalCost { get; set; }
+    public List<PayrollRecordDto> Payrolls { get; set; } = new();
 }
