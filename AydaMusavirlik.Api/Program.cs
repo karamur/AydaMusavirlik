@@ -28,6 +28,7 @@ builder.Services.AddScoped<ILeaveRequestRepository, LeaveRequestRepository>();
 // Services
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<ILeaveFormPdfService, LeaveFormPdfService>();
+builder.Services.AddScoped<IBalanceSheetReportService, BalanceSheetReportService>();
 
 // JWT Authentication
 var jwtKey = "AydaMusavirlikSecretKey2024SuperSecure!";

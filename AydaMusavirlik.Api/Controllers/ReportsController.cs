@@ -11,10 +11,12 @@ namespace AydaMusavirlik.Api.Controllers;
 public class ReportsController : ControllerBase
 {
     private readonly IReportService _reportService;
+    private readonly IBalanceSheetReportService _balanceSheetService;
 
-    public ReportsController(IReportService reportService)
+    public ReportsController(IReportService reportService, IBalanceSheetReportService balanceSheetService)
     {
         _reportService = reportService;
+        _balanceSheetService = balanceSheetService;
     }
 
     /// <summary>
@@ -167,6 +169,75 @@ public class ReportsController : ControllerBase
             new { Id = "financial-summary", Name = "Mali Ozet", Category = "Mali" },
             new { Id = "monthly-report", Name = "Aylik Rapor", Category = "Genel" }
         });
+    }
+
+    /// <summary>
+    /// Bilanco raporu - Formul ve aciklamali (Excel)
+    /// </summary>
+    [HttpGet("balance-sheet/excel")]
+    public ActionResult GetBalanceSheetExcel([FromQuery] string? companyName = "Demo Firma")
+    {
+        var data = GenerateDemoBalanceSheetData(companyName ?? "Demo Firma");
+        var excelBytes = _balanceSheetService.GenerateBalanceSheetWithFormulasExcel(data);
+        
+        return File(excelBytes,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            $"Bilanco_Formul_{DateTime.Now:yyyyMMdd}.xlsx");
+    }
+
+    /// <summary>
+    /// Bilanco raporu - Formul ve aciklamali (PDF)
+    /// </summary>
+    [HttpGet("balance-sheet/pdf")]
+    public ActionResult GetBalanceSheetPdf([FromQuery] string? companyName = "Demo Firma")
+    {
+        var data = GenerateDemoBalanceSheetData(companyName ?? "Demo Firma");
+        var pdfBytes = _balanceSheetService.GenerateBalanceSheetWithFormulasPdf(data);
+        
+        return File(pdfBytes, "application/pdf", $"Bilanco_Formul_{DateTime.Now:yyyyMMdd}.pdf");
+    }
+
+    private BalanceSheetData GenerateDemoBalanceSheetData(string companyName)
+    {
+        return new BalanceSheetData
+        {
+            FirmaAdi = companyName,
+            BilancoTarihi = DateTime.Now,
+            DonenVarliklar = new List<BilancoKalemi>
+            {
+                new() { HesapKodu = "100", HesapAdi = "Kasa", Tutar = 25000, Aciklama = "Kasada bulunan nakit", Formul = "Borc - Alacak", VeriKaynagi = "Kasa sayimi" },
+                new() { HesapKodu = "102", HesapAdi = "Bankalar", Tutar = 485000, Aciklama = "Banka hesap bakiyeleri", Formul = "Ekstre bakiyesi", VeriKaynagi = "Banka ekstreleri" },
+                new() { HesapKodu = "120", HesapAdi = "Alicilar", Tutar = 320000, Aciklama = "Musterilerden alacaklar", Formul = "Satis - Tahsilat", VeriKaynagi = "Satis faturalari" },
+                new() { HesapKodu = "150", HesapAdi = "Stoklar", Tutar = 175000, Aciklama = "Ticari mal stoklari", Formul = "Giris - Cikis", VeriKaynagi = "Stok sayimi" },
+                new() { HesapKodu = "180", HesapAdi = "Gelecek Aylara Ait Giderler", Tutar = 45000, Aciklama = "Pesin odemeler", Formul = "Odenen - Donemsellestirilen", VeriKaynagi = "Faturalar" }
+            },
+            DuranVarliklar = new List<BilancoKalemi>
+            {
+                new() { HesapKodu = "252", HesapAdi = "Binalar", Tutar = 850000, Aciklama = "Sirket binasi", Formul = "Maliyet - Amortisman", VeriKaynagi = "Tapu / Amortisman tablosu" },
+                new() { HesapKodu = "253", HesapAdi = "Makine ve Cihazlar", Tutar = 320000, Aciklama = "Uretim makineleri", Formul = "Maliyet - Amortisman", VeriKaynagi = "Fatura / Amortisman tablosu" },
+                new() { HesapKodu = "254", HesapAdi = "Tasitlar", Tutar = 180000, Aciklama = "Sirket araclari", Formul = "Maliyet - Amortisman", VeriKaynagi = "Fatura / Ruhsat" },
+                new() { HesapKodu = "255", HesapAdi = "Demirbaslar", Tutar = 75000, Aciklama = "Ofis mobilya ve ekipman", Formul = "Maliyet - Amortisman", VeriKaynagi = "Faturalar" }
+            },
+            KisaVadeliBorclar = new List<BilancoKalemi>
+            {
+                new() { HesapKodu = "300", HesapAdi = "Banka Kredileri", Tutar = 150000, Aciklama = "1 yildan kisa vadeli krediler", Formul = "Kullanilan - Odenen", VeriKaynagi = "Kredi sozlesmesi" },
+                new() { HesapKodu = "320", HesapAdi = "Saticilar", Tutar = 285000, Aciklama = "Tedarikci borclari", Formul = "Alis - Odeme", VeriKaynagi = "Alis faturalari" },
+                new() { HesapKodu = "360", HesapAdi = "Odenecek Vergiler", Tutar = 95000, Aciklama = "KDV, Stopaj vs.", Formul = "Tahakkuk - Odeme", VeriKaynagi = "Beyannameler" },
+                new() { HesapKodu = "361", HesapAdi = "Odenecek SGK Primleri", Tutar = 65000, Aciklama = "SGK isciveren paylari", Formul = "Bordro hesaplama", VeriKaynagi = "Bordro" }
+            },
+            UzunVadeliBorclar = new List<BilancoKalemi>
+            {
+                new() { HesapKodu = "400", HesapAdi = "Banka Kredileri (UV)", Tutar = 450000, Aciklama = "1 yildan uzun vadeli krediler", Formul = "Kullanilan - Odenen - KV aktarma", VeriKaynagi = "Kredi sozlesmesi" },
+                new() { HesapKodu = "472", HesapAdi = "Kidem Tazminati Karsiligi", Tutar = 125000, Aciklama = "Calisanlara karsilik", Formul = "Kidem gunu x Brut", VeriKaynagi = "Personel hesaplama" }
+            },
+            OzKaynaklar = new List<BilancoKalemi>
+            {
+                new() { HesapKodu = "500", HesapAdi = "Sermaye", Tutar = 1000000, Aciklama = "Odenmis sermaye", Formul = "Ana sozlesme tutari", VeriKaynagi = "Ticaret sicil" },
+                new() { HesapKodu = "540", HesapAdi = "Yasal Yedekler", Tutar = 85000, Aciklama = "1. tertip yasal yedek", Formul = "Net Kar x %5", VeriKaynagi = "Kar dagitim karari" },
+                new() { HesapKodu = "570", HesapAdi = "Gecmis Yillar Karlari", Tutar = 155000, Aciklama = "Dagitilmayan karlar", Formul = "Onceki donem netleri", VeriKaynagi = "Onceki bilancolar" },
+                new() { HesapKodu = "590", HesapAdi = "Donem Net Kari", Tutar = 65000, Aciklama = "Bu donem kar/zarar", Formul = "Gelirler - Giderler", VeriKaynagi = "Gelir Tablosu" }
+            }
+        };
     }
 
     #region Demo Data Generators
