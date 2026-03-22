@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "pmu+CA5Qqgc=",
+  "dgSpecHash": "cMyH53y5igE=",
   "success": true,
   "projectFilePath": "D:\\calisma\\Claude-Code\\AydaMusavirlik\\AydaMusavirlik.Desktop\\AydaMusavirlik.Desktop.csproj",
   "expectedPackageFiles": [
@@ -16,6 +16,12 @@
     "C:\\Users\\muratk\\.nuget\\packages\\excelnumberformat\\1.1.0\\excelnumberformat.1.1.0.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\fluentvalidation\\12.1.1\\fluentvalidation.12.1.1.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\fluentvalidation.dependencyinjectionextensions\\12.1.1\\fluentvalidation.dependencyinjectionextensions.12.1.1.nupkg.sha512",
+    "C:\\Users\\muratk\\.nuget\\packages\\harfbuzzsharp\\7.3.0.2\\harfbuzzsharp.7.3.0.2.nupkg.sha512",
+    "C:\\Users\\muratk\\.nuget\\packages\\harfbuzzsharp.nativeassets.macos\\7.3.0.2\\harfbuzzsharp.nativeassets.macos.7.3.0.2.nupkg.sha512",
+    "C:\\Users\\muratk\\.nuget\\packages\\harfbuzzsharp.nativeassets.win32\\7.3.0.2\\harfbuzzsharp.nativeassets.win32.7.3.0.2.nupkg.sha512",
+    "C:\\Users\\muratk\\.nuget\\packages\\livechartscore\\2.0.0-rc4.5\\livechartscore.2.0.0-rc4.5.nupkg.sha512",
+    "C:\\Users\\muratk\\.nuget\\packages\\livechartscore.skiasharpview\\2.0.0-rc4.5\\livechartscore.skiasharpview.2.0.0-rc4.5.nupkg.sha512",
+    "C:\\Users\\muratk\\.nuget\\packages\\livechartscore.skiasharpview.wpf\\2.0.0-rc4.5\\livechartscore.skiasharpview.wpf.2.0.0-rc4.5.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\materialdesigncolors\\5.3.1\\materialdesigncolors.5.3.1.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\materialdesignthemes\\5.3.1\\materialdesignthemes.5.3.1.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\mediatr\\14.1.0\\mediatr.14.1.0.nupkg.sha512",
@@ -75,9 +81,17 @@
     "C:\\Users\\muratk\\.nuget\\packages\\microsoft.xaml.behaviors.wpf\\1.1.77\\microsoft.xaml.behaviors.wpf.1.1.77.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\npgsql\\9.0.0\\npgsql.9.0.0.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\npgsql.entityframeworkcore.postgresql\\9.0.0\\npgsql.entityframeworkcore.postgresql.9.0.0.nupkg.sha512",
+    "C:\\Users\\muratk\\.nuget\\packages\\opentk\\3.3.1\\opentk.3.3.1.nupkg.sha512",
+    "C:\\Users\\muratk\\.nuget\\packages\\opentk.glwpfcontrol\\3.3.0\\opentk.glwpfcontrol.3.3.0.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\questpdf\\2024.12.3\\questpdf.2024.12.3.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\rbush\\4.0.0\\rbush.4.0.0.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\sixlabors.fonts\\1.0.0\\sixlabors.fonts.1.0.0.nupkg.sha512",
+    "C:\\Users\\muratk\\.nuget\\packages\\skiasharp\\3.0.0-preview.4.1\\skiasharp.3.0.0-preview.4.1.nupkg.sha512",
+    "C:\\Users\\muratk\\.nuget\\packages\\skiasharp.harfbuzz\\2.88.8\\skiasharp.harfbuzz.2.88.8.nupkg.sha512",
+    "C:\\Users\\muratk\\.nuget\\packages\\skiasharp.nativeassets.macos\\3.0.0-preview.4.1\\skiasharp.nativeassets.macos.3.0.0-preview.4.1.nupkg.sha512",
+    "C:\\Users\\muratk\\.nuget\\packages\\skiasharp.nativeassets.win32\\3.0.0-preview.4.1\\skiasharp.nativeassets.win32.3.0.0-preview.4.1.nupkg.sha512",
+    "C:\\Users\\muratk\\.nuget\\packages\\skiasharp.views.desktop.common\\3.0.0-preview.4.1\\skiasharp.views.desktop.common.3.0.0-preview.4.1.nupkg.sha512",
+    "C:\\Users\\muratk\\.nuget\\packages\\skiasharp.views.wpf\\3.0.0-preview.4.1\\skiasharp.views.wpf.3.0.0-preview.4.1.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\sqlitepclraw.bundle_e_sqlite3\\2.1.10\\sqlitepclraw.bundle_e_sqlite3.2.1.10.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\sqlitepclraw.core\\2.1.10\\sqlitepclraw.core.2.1.10.nupkg.sha512",
     "C:\\Users\\muratk\\.nuget\\packages\\sqlitepclraw.lib.e_sqlite3\\2.1.10\\sqlitepclraw.lib.e_sqlite3.2.1.10.nupkg.sha512",
@@ -115,6 +129,42 @@
       "warningLevel": 1,
       "filePath": "D:\\calisma\\Claude-Code\\AydaMusavirlik\\AydaMusavirlik.Desktop\\AydaMusavirlik.Desktop.csproj",
       "libraryId": "AutoMapper",
+      "targetGraphs": [
+        "net9.0-windows7.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "Package 'OpenTK 3.3.1' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net9.0-windows7.0'. This package may not be fully compatible with your project.",
+      "projectPath": "D:\\calisma\\Claude-Code\\AydaMusavirlik\\AydaMusavirlik.Desktop\\AydaMusavirlik.Desktop.csproj",
+      "warningLevel": 1,
+      "filePath": "D:\\calisma\\Claude-Code\\AydaMusavirlik\\AydaMusavirlik.Desktop\\AydaMusavirlik.Desktop.csproj",
+      "libraryId": "OpenTK",
+      "targetGraphs": [
+        "net9.0-windows7.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "Package 'OpenTK.GLWpfControl 3.3.0' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net9.0-windows7.0'. This package may not be fully compatible with your project.",
+      "projectPath": "D:\\calisma\\Claude-Code\\AydaMusavirlik\\AydaMusavirlik.Desktop\\AydaMusavirlik.Desktop.csproj",
+      "warningLevel": 1,
+      "filePath": "D:\\calisma\\Claude-Code\\AydaMusavirlik\\AydaMusavirlik.Desktop\\AydaMusavirlik.Desktop.csproj",
+      "libraryId": "OpenTK.GLWpfControl",
+      "targetGraphs": [
+        "net9.0-windows7.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "Package 'SkiaSharp.Views.WPF 3.0.0-preview.4.1' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net9.0-windows7.0'. This package may not be fully compatible with your project.",
+      "projectPath": "D:\\calisma\\Claude-Code\\AydaMusavirlik\\AydaMusavirlik.Desktop\\AydaMusavirlik.Desktop.csproj",
+      "warningLevel": 1,
+      "filePath": "D:\\calisma\\Claude-Code\\AydaMusavirlik\\AydaMusavirlik.Desktop\\AydaMusavirlik.Desktop.csproj",
+      "libraryId": "SkiaSharp.Views.WPF",
       "targetGraphs": [
         "net9.0-windows7.0"
       ]

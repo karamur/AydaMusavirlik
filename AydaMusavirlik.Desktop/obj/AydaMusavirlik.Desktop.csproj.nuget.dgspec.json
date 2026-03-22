@@ -332,6 +332,10 @@
               "target": "Package",
               "version": "[8.4.0, )"
             },
+            "LiveChartsCore.SkiaSharpView.WPF": {
+              "target": "Package",
+              "version": "[2.0.0-rc4.5, )"
+            },
             "MaterialDesignColors": {
               "target": "Package",
               "version": "[5.3.1, )"
