@@ -229,12 +229,12 @@ public partial class MainWindow : Window
 
     private void FinansalAnaliz_Click(object sender, RoutedEventArgs e)
     {
-        OpenTabWithControl("Mali Analiz", new FinancialAnalysisView());
+        OpenTabWithControl("Mali Analiz", new MaliAnalizView());
     }
 
     private void OranAnalizi_Click(object sender, RoutedEventArgs e)
     {
-        OpenTabWithControl("Mali Analiz", new FinancialAnalysisView());
+        OpenTabWithControl("Mali Analiz", new MaliAnalizView());
     }
 
     private void Dashboard_Click(object sender, RoutedEventArgs e)

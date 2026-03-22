@@ -42,6 +42,7 @@ public static class DependencyInjection
         // Services
         services.AddScoped<IDateTimeService, DateTimeService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<IFinancialAnalysisService, FinancialAnalysisService>();
 
         return services;
     }
@@ -68,6 +69,7 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IDateTimeService, DateTimeService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<IFinancialAnalysisService, FinancialAnalysisService>();
 
         return services;
     }
