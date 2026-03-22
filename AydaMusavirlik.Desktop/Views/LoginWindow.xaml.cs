@@ -20,39 +20,15 @@ public partial class LoginWindow : Window
         _settingsService = App.GetService<ISettingsService>();
 
         Loaded += LoginWindow_Loaded;
+        
+        // Pencereyi sürüklenebilir yap
+        MouseLeftButtonDown += (s, e) => { if (e.LeftButton == MouseButtonState.Pressed) DragMove(); };
     }
 
     private async void LoginWindow_Loaded(object sender, RoutedEventArgs e)
     {
-        await CheckApiStatus();
         await CheckDatabaseStatus();
         txtUsername.Focus();
-    }
-
-    private async Task CheckApiStatus()
-    {
-        try
-        {
-            using var client = new HttpClient();
-            client.Timeout = TimeSpan.FromSeconds(3);
-            var response = await client.GetAsync("http://localhost:5000/swagger/index.html");
-            
-            if (response.IsSuccessStatusCode)
-            {
-                statusIndicator.Fill = new SolidColorBrush(Colors.Green);
-                txtStatus.Text = "Bagli";
-            }
-            else
-            {
-                statusIndicator.Fill = new SolidColorBrush(Colors.Orange);
-                txtStatus.Text = "Offline";
-            }
-        }
-        catch
-        {
-            statusIndicator.Fill = new SolidColorBrush(Colors.Orange);
-            txtStatus.Text = "Offline";
-        }
     }
 
     private async Task CheckDatabaseStatus()
@@ -64,25 +40,25 @@ public partial class LoginWindow : Window
 
             if (info.IsConnected)
             {
-                dbStatusIndicator.Fill = new SolidColorBrush(Colors.Green);
-                txtDbStatus.Text = $"Veritabani bagli ({dbSettings.Provider})";
-                txtDbInfo.Text = $"Kullanici: {info.CompanyCount}, Firma: {info.AccountCount} hesap";
-                brdDbStatus.Background = new SolidColorBrush(Color.FromRgb(232, 245, 233)); // Acik yesil
+                dbStatusIndicator.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4CAF50"));
+                txtDbStatus.Text = $"Veritabaný baðlý ({dbSettings.Provider})";
+                txtDbInfo.Text = $"{info.CompanyCount} kullanýcý, {info.AccountCount} hesap";
+                brdDbStatus.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E8F5E9"));
             }
             else
             {
-                dbStatusIndicator.Fill = new SolidColorBrush(Colors.Orange);
-                txtDbStatus.Text = "Veritabani bagli degil";
-                txtDbInfo.Text = "Yedek kullanicilar aktif";
-                brdDbStatus.Background = new SolidColorBrush(Color.FromRgb(255, 243, 224)); // Acik turuncu
+                dbStatusIndicator.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF9800"));
+                txtDbStatus.Text = "Veritabaný baðlý deðil";
+                txtDbInfo.Text = "Demo mod aktif";
+                brdDbStatus.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF3E0"));
             }
         }
         catch (Exception ex)
         {
-            dbStatusIndicator.Fill = new SolidColorBrush(Colors.Red);
-            txtDbStatus.Text = "Veritabani hatasi";
-            txtDbInfo.Text = ex.Message.Length > 50 ? ex.Message.Substring(0, 50) + "..." : ex.Message;
-            brdDbStatus.Background = new SolidColorBrush(Color.FromRgb(255, 235, 238)); // Acik kirmizi
+            dbStatusIndicator.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F44336"));
+            txtDbStatus.Text = "Veritabaný hatasý";
+            txtDbInfo.Text = ex.Message.Length > 40 ? ex.Message.Substring(0, 40) + "..." : ex.Message;
+            brdDbStatus.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFEBEE"));
         }
     }
 
@@ -99,6 +75,11 @@ public partial class LoginWindow : Window
         }
     }
 
+    private void BtnClose_Click(object sender, RoutedEventArgs e)
+    {
+        System.Windows.Application.Current.Shutdown();
+    }
+
     private async Task DoLogin()
     {
         var username = txtUsername.Text.Trim();
@@ -106,13 +87,13 @@ public partial class LoginWindow : Window
 
         if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
         {
-            ShowError("Kullanici adi ve sifre giriniz.");
+            ShowError("Kullanýcý adý ve þifre giriniz.");
             return;
         }
 
         btnLogin.IsEnabled = false;
-        btnLogin.Content = "GIRIS YAPILIYOR...";
-        txtError.Visibility = Visibility.Collapsed;
+        btnLogin.Content = "GÝRÝÞ YAPILIYOR...";
+        HideError();
 
         try
         {
@@ -126,23 +107,28 @@ public partial class LoginWindow : Window
             }
             else
             {
-                ShowError(result.Error ?? "Giris basarisiz.");
+                ShowError(result.Error ?? "Giriþ baþarýsýz. Kullanýcý adý veya þifre hatalý.");
             }
         }
         catch (Exception ex)
         {
-            ShowError($"Hata: {ex.Message}");
+            ShowError($"Baðlantý hatasý: {ex.Message}");
         }
         finally
         {
             btnLogin.IsEnabled = true;
-            btnLogin.Content = "GIRIS YAP";
+            btnLogin.Content = "GÝRÝÞ YAP";
         }
     }
 
     private void ShowError(string message)
     {
         txtError.Text = message;
-        txtError.Visibility = Visibility.Visible;
+        brdError.Visibility = Visibility.Visible;
+    }
+
+    private void HideError()
+    {
+        brdError.Visibility = Visibility.Collapsed;
     }
 }

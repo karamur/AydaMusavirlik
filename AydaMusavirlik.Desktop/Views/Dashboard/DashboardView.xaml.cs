@@ -107,7 +107,7 @@ public partial class DashboardView : UserControl
 
     private void LoadGelirGiderChart()
     {
-        var aylar = new[] { "Oca", "Sub", "Mar", "Nis", "May", "Haz", "Tem", "Agu", "Eyl", "Eki", "Kas", "Ara" };
+        var aylar = new[] { "Oca", "Þub", "Mar", "Nis", "May", "Haz", "Tem", "Aðu", "Eyl", "Eki", "Kas", "Ara" };
         var gelirler = new double[] { 95, 102, 98, 110, 105, 115, 108, 120, 118, 125, 130, 128 };
         var giderler = new double[] { 75, 80, 78, 85, 82, 88, 84, 92, 90, 95, 98, 96 };
 
@@ -117,19 +117,19 @@ public partial class DashboardView : UserControl
             {
                 Values = gelirler,
                 Name = "Gelir (x1000)",
-                Stroke = new SolidColorPaint(SKColors.LightGreen) { StrokeThickness = 3 },
+                Stroke = new SolidColorPaint(new SKColor(76, 175, 80)) { StrokeThickness = 3 }, // Yeþil
                 Fill = null,
                 GeometrySize = 8,
-                GeometryStroke = new SolidColorPaint(SKColors.LightGreen) { StrokeThickness = 2 }
+                GeometryStroke = new SolidColorPaint(new SKColor(76, 175, 80)) { StrokeThickness = 2 }
             },
             new LineSeries<double>
             {
                 Values = giderler,
                 Name = "Gider (x1000)",
-                Stroke = new SolidColorPaint(SKColors.Salmon) { StrokeThickness = 3 },
+                Stroke = new SolidColorPaint(new SKColor(244, 67, 54)) { StrokeThickness = 3 }, // Kýrmýzý
                 Fill = null,
                 GeometrySize = 8,
-                GeometryStroke = new SolidColorPaint(SKColors.Salmon) { StrokeThickness = 2 }
+                GeometryStroke = new SolidColorPaint(new SKColor(244, 67, 54)) { StrokeThickness = 2 }
             }
         };
 
@@ -138,8 +138,8 @@ public partial class DashboardView : UserControl
             new Axis
             {
                 Labels = aylar,
-                LabelsPaint = new SolidColorPaint(SKColors.White),
-                TextSize = 10
+                LabelsPaint = new SolidColorPaint(new SKColor(97, 97, 97)), // Koyu gri
+                TextSize = 11
             }
         };
 
@@ -147,8 +147,8 @@ public partial class DashboardView : UserControl
         {
             new Axis
             {
-                LabelsPaint = new SolidColorPaint(SKColors.White),
-                TextSize = 10
+                LabelsPaint = new SolidColorPaint(new SKColor(97, 97, 97)),
+                TextSize = 11
             }
         };
     }
@@ -157,12 +157,12 @@ public partial class DashboardView : UserControl
     {
         chartGiderDagilimi.Series = new ISeries[]
         {
-            new PieSeries<double> { Values = new double[] { 35 }, Name = "Personel", Fill = new SolidColorPaint(SKColors.DodgerBlue) },
-            new PieSeries<double> { Values = new double[] { 20 }, Name = "Kira", Fill = new SolidColorPaint(SKColors.Orange) },
-            new PieSeries<double> { Values = new double[] { 15 }, Name = "Enerji", Fill = new SolidColorPaint(SKColors.MediumPurple) },
-            new PieSeries<double> { Values = new double[] { 12 }, Name = "Hammadde", Fill = new SolidColorPaint(SKColors.LimeGreen) },
-            new PieSeries<double> { Values = new double[] { 10 }, Name = "Pazarlama", Fill = new SolidColorPaint(SKColors.Crimson) },
-            new PieSeries<double> { Values = new double[] { 8 }, Name = "Diger", Fill = new SolidColorPaint(SKColors.Gray) }
+            new PieSeries<double> { Values = new double[] { 35 }, Name = "Personel", Fill = new SolidColorPaint(new SKColor(33, 150, 243)) },
+            new PieSeries<double> { Values = new double[] { 20 }, Name = "Kira", Fill = new SolidColorPaint(new SKColor(255, 152, 0)) },
+            new PieSeries<double> { Values = new double[] { 15 }, Name = "Enerji", Fill = new SolidColorPaint(new SKColor(156, 39, 176)) },
+            new PieSeries<double> { Values = new double[] { 12 }, Name = "Hammadde", Fill = new SolidColorPaint(new SKColor(76, 175, 80)) },
+            new PieSeries<double> { Values = new double[] { 10 }, Name = "Pazarlama", Fill = new SolidColorPaint(new SKColor(244, 67, 54)) },
+            new PieSeries<double> { Values = new double[] { 8 }, Name = "Diðer", Fill = new SolidColorPaint(new SKColor(158, 158, 158)) }
         };
     }
 
@@ -170,11 +170,11 @@ public partial class DashboardView : UserControl
     {
         var islemler = new List<SonIslem>
         {
-            new SonIslem { Aciklama = "Personel maas odemesi", Tarih = "Bugun 14:30", Tutar = "-125.000 TL", TutarRenk = Brushes.Salmon },
-            new SonIslem { Aciklama = "ABC Ltd. tahsilat", Tarih = "Dun 16:45", Tutar = "+45.000 TL", TutarRenk = Brushes.LightGreen },
-            new SonIslem { Aciklama = "Kira odemesi", Tarih = "22.03.2025", Tutar = "-35.000 TL", TutarRenk = Brushes.Salmon },
-            new SonIslem { Aciklama = "XYZ A.S. fatura", Tarih = "21.03.2025", Tutar = "+78.500 TL", TutarRenk = Brushes.LightGreen },
-            new SonIslem { Aciklama = "SGK odemesi", Tarih = "20.03.2025", Tutar = "-42.000 TL", TutarRenk = Brushes.Salmon }
+            new SonIslem { Aciklama = "Personel maaþ ödemesi", Tarih = "Bugün 14:30", Tutar = "-125.000 TL", TutarRenk = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F44336")) },
+            new SonIslem { Aciklama = "ABC Ltd. tahsilat", Tarih = "Dün 16:45", Tutar = "+45.000 TL", TutarRenk = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4CAF50")) },
+            new SonIslem { Aciklama = "Kira ödemesi", Tarih = "22.03.2025", Tutar = "-35.000 TL", TutarRenk = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F44336")) },
+            new SonIslem { Aciklama = "XYZ A.Þ. fatura", Tarih = "21.03.2025", Tutar = "+78.500 TL", TutarRenk = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4CAF50")) },
+            new SonIslem { Aciklama = "SGK ödemesi", Tarih = "20.03.2025", Tutar = "-42.000 TL", TutarRenk = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F44336")) }
         };
         lstSonIslemler.ItemsSource = islemler;
     }
