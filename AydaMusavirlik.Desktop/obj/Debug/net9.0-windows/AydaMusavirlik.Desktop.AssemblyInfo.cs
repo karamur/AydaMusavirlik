@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AydaMusavirlik.Desktop")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cf31ca6c4f367c64a80512cb8fcae13e38bf6f9b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+384e333e65d7c60d28c5a8f8d09caa72de317f42")]
 [assembly: System.Reflection.AssemblyProductAttribute("AydaMusavirlik.Desktop")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AydaMusavirlik.Desktop")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

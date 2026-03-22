@@ -22,6 +22,11 @@ public class Employee : SoftDeleteEntity
     public string? IbanNumber { get; set; }
     public string? SgkNumber { get; set; }
 
+    // SGK Bilgileri
+    public int? SgkBelgeTuruId { get; set; }                  // SGK Belge Turu (01, 02, vb.)
+    public string? SgkIsyeriSicilNo { get; set; }             // Isyeri sicil no
+    public DateTime? SgkIseGirisTarihi { get; set; }          // SGK ise giris
+
     // Ýþ bilgileri
     public DateTime HireDate { get; set; }
     public DateTime? TerminationDate { get; set; }
@@ -33,16 +38,24 @@ public class Employee : SoftDeleteEntity
     // Ücret bilgileri
     public decimal GrossSalary { get; set; }
     public SalaryType SalaryType { get; set; }
-    public bool IsMinimumWageExempt { get; set; }  // Asgari ücret istisnasý
+    public bool IsMinimumWageExempt { get; set; }             // Asgari ucret istisnasi
     public bool IsDisabled { get; set; }
     public int? DisabilityDegree { get; set; }
+
+    // Ek Bilgiler
+    public bool SendikaUyesi { get; set; }
+    public decimal? SendikaAidatOrani { get; set; }
+    public bool IcraKesintisiVar { get; set; }
+    public decimal? IcraKesintisiTutari { get; set; }
 
     public string FullName => $"{FirstName} {LastName}";
 
     // Navigation
     public virtual Company Company { get; set; } = null!;
+    public virtual SgkBelgeTuru? SgkBelgeTuru { get; set; }
     public virtual ICollection<PayrollRecord> PayrollRecords { get; set; } = new List<PayrollRecord>();
     public virtual ICollection<LeaveRecord> LeaveRecords { get; set; } = new List<LeaveRecord>();
+    public virtual ICollection<Puantaj> Puantajlar { get; set; } = new List<Puantaj>();
 }
 
 public enum Gender
@@ -55,15 +68,15 @@ public enum MaritalStatus
 {
     Single = 1,       // Bekar
     Married = 2,      // Evli
-    Divorced = 3,     // Boþanmýþ
+    Divorced = 3,     // Bosanmis
     Widowed = 4       // Dul
 }
 
 public enum EmploymentType
 {
     Permanent = 1,        // Daimi
-    Contract = 2,         // Sözleþmeli
-    PartTime = 3,         // Yarý zamanlý
+    Contract = 2,         // Sozlesmeli
+    PartTime = 3,         // Yari zamanli
     Intern = 4            // Stajyer
 }
 
@@ -77,7 +90,7 @@ public enum WorkType
 
 public enum SalaryType
 {
-    Monthly = 1,          // Aylýk
-    Daily = 2,            // Günlük
+    Monthly = 1,          // Aylik
+    Daily = 2,            // Gunluk
     Hourly = 3            // Saatlik
 }
