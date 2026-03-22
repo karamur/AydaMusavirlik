@@ -445,6 +445,10 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "dependencies": {
+            "ClosedXML": {
+              "target": "Package",
+              "version": "[0.104.2, )"
+            },
             "MailKit": {
               "target": "Package",
               "version": "[4.9.0, )"

@@ -2570,6 +2570,7 @@
         "dependencies": {
           "AydaMusavirlik.Application": "1.0.0",
           "AydaMusavirlik.Core": "1.0.0",
+          "ClosedXML": "0.104.2",
           "MailKit": "4.9.0",
           "Microsoft.EntityFrameworkCore": "9.0.0",
           "Microsoft.EntityFrameworkCore.SqlServer": "9.0.0",

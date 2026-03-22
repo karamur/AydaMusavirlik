@@ -1,5 +1,6 @@
 using AydaMusavirlik.Data;
 using AydaMusavirlik.Data.Repositories;
+using AydaMusavirlik.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -23,6 +24,10 @@ builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IPayrollRecordRepository, PayrollRecordRepository>();
 builder.Services.AddScoped<IArGeProjectRepository, ArGeProjectRepository>();
 builder.Services.AddScoped<ILeaveRequestRepository, LeaveRequestRepository>();
+
+// Services
+builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddScoped<ILeaveFormPdfService, LeaveFormPdfService>();
 
 // JWT Authentication
 var jwtKey = "AydaMusavirlikSecretKey2024SuperSecure!";
