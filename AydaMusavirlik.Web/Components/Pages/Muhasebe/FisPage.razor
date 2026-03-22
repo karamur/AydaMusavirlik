@@ -1,0 +1,359 @@
+@page "/muhasebe/fisler"
+@page "/muhasebe/fis/{Id:int?}"
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+<PageTitle>@(_isEditMode ? "Fis Duzenle" : "Yeni Fis") - AYDA Musavirlik</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">
+    <MudIcon Icon="@Icons.Material.Filled.Receipt" Class="mr-2" />
+    @(_isEditMode ? $"Fis Duzenle: {_voucher.VoucherNo}" : "Yeni Fis Olustur")
+</MudText>
+
+<MudGrid>
+    <MudItem xs="12" md="8">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Fis Bilgileri</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudGrid>
+                    <MudItem xs="12" md="3">
+                        <MudTextField T="string" Label="Fis No" @bind-Value="_voucher.VoucherNo" 
+                                      ReadOnly="@_isEditMode" />
+                    </MudItem>
+                    <MudItem xs="12" md="3">
+                        <MudDatePicker Label="Tarih" @bind-Date="_voucher.Date" />
+                    </MudItem>
+                    <MudItem xs="12" md="3">
+                        <MudSelect T="string" Label="Fis Tipi" @bind-Value="_voucher.Type">
+                            <MudSelectItem Value="@("Mahsup")">Mahsup Fisi</MudSelectItem>
+                            <MudSelectItem Value="@("Tahsilat")">Tahsilat Fisi</MudSelectItem>
+                            <MudSelectItem Value="@("Tediye")">Tediye Fisi</MudSelectItem>
+                            <MudSelectItem Value="@("Acilis")">Acilis Fisi</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" md="3">
+                        <MudTextField T="string" Label="Referans No" @bind-Value="_voucher.ReferenceNo" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField T="string" Label="Aciklama" @bind-Value="_voucher.Description" />
+                    </MudItem>
+                </MudGrid>
+
+                <MudDivider Class="my-4" />
+
+                <MudStack Row="true" Class="mb-2">
+                    <MudText Typo="Typo.h6">Fis Satirlari</MudText>
+                    <MudSpacer />
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" Size="Size.Small"
+                               StartIcon="@Icons.Material.Filled.Add" OnClick="AddLine">
+                        Satir Ekle
+                    </MudButton>
+                </MudStack>
+
+                <MudTable Items="_voucher.Lines" Hover="true" Dense="true">
+                    <HeaderContent>
+                        <MudTh Style="width:150px">Hesap Kodu</MudTh>
+                        <MudTh>Hesap Adi</MudTh>
+                        <MudTh Style="width:200px">Aciklama</MudTh>
+                        <MudTh Style="width:120px;text-align:right">Borc</MudTh>
+                        <MudTh Style="width:120px;text-align:right">Alacak</MudTh>
+                        <MudTh Style="width:50px"></MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>
+                            <MudAutocomplete T="string" @bind-Value="context.AccountCode"
+                                            SearchFunc="SearchAccounts" Dense="true"
+                                            ResetValueOnEmptyText="true"
+                                            CoerceText="true" CoerceValue="true" />
+                        </MudTd>
+                        <MudTd>
+                            <MudText>@GetAccountName(context.AccountCode)</MudText>
+                        </MudTd>
+                        <MudTd>
+                            <MudTextField T="string" @bind-Value="context.Description" Dense="true" />
+                        </MudTd>
+                        <MudTd>
+                            <MudNumericField T="decimal" @bind-Value="context.Debit" 
+                                            Format="N2" HideSpinButtons="true" />
+                        </MudTd>
+                        <MudTd>
+                            <MudNumericField T="decimal" @bind-Value="context.Credit" 
+                                            Format="N2" HideSpinButtons="true" />
+                        </MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" 
+                                           Color="Color.Error" OnClick="@(() => RemoveLine(context))" />
+                        </MudTd>
+                    </RowTemplate>
+                    <FooterContent>
+                        <MudTd colspan="3"><strong>TOPLAM</strong></MudTd>
+                        <MudTd Style="text-align:right">
+                            <strong>@_voucher.Lines.Sum(l => l.Debit).ToString("N2")</strong>
+                        </MudTd>
+                        <MudTd Style="text-align:right">
+                            <strong>@_voucher.Lines.Sum(l => l.Credit).ToString("N2")</strong>
+                        </MudTd>
+                        <MudTd></MudTd>
+                    </FooterContent>
+                </MudTable>
+
+                @if (!IsBalanced)
+                {
+                    <MudAlert Severity="Severity.Error" Class="mt-3">
+                        <strong>Fis dengesiz!</strong> Borc ve Alacak toplamlari esit olmalidir.
+                        <br/>
+                        Fark: @Math.Abs(_voucher.Lines.Sum(l => l.Debit) - _voucher.Lines.Sum(l => l.Credit)).ToString("N2") TL
+                    </MudAlert>
+                }
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton Variant="Variant.Outlined" OnClick="Cancel">Iptal</MudButton>
+                <MudSpacer />
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" 
+                           OnClick="SaveDraft" StartIcon="@Icons.Material.Filled.Save">
+                    Taslak Kaydet
+                </MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Success" 
+                           OnClick="SaveAndPost" Disabled="@(!IsBalanced)"
+                           StartIcon="@Icons.Material.Filled.Check">
+                    Kaydet ve Onayla
+                </MudButton>
+            </MudCardActions>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" md="4">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Hizli Hesap Secimi</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudList T="string" Dense="true" Class="cursor-pointer">
+                    <MudListSubheader>Sik Kullanilan Hesaplar</MudListSubheader>
+                    @foreach (var acc in _frequentAccounts)
+                    {
+                        <MudListItem OnClick="@(() => QuickAddAccount(acc.Code))">
+                            <MudText>@acc.Code - @acc.Name</MudText>
+                        </MudListItem>
+                    }
+                </MudList>
+
+                <MudDivider Class="my-3" />
+
+                <MudList T="string" Dense="true" Class="cursor-pointer">
+                    <MudListSubheader>Hazir Sablonlar</MudListSubheader>
+                    <MudListItem OnClick="@(() => ApplyTemplate("satis"))">
+                        <MudIcon Icon="@Icons.Material.Filled.ShoppingCart" Class="mr-2" />
+                        Satis Faturasi
+                    </MudListItem>
+                    <MudListItem OnClick="@(() => ApplyTemplate("alis"))">
+                        <MudIcon Icon="@Icons.Material.Filled.LocalShipping" Class="mr-2" />
+                        Alis Faturasi
+                    </MudListItem>
+                    <MudListItem OnClick="@(() => ApplyTemplate("tahsilat"))">
+                        <MudIcon Icon="@Icons.Material.Filled.Payments" Class="mr-2" />
+                        Tahsilat
+                    </MudListItem>
+                    <MudListItem OnClick="@(() => ApplyTemplate("odeme"))">
+                        <MudIcon Icon="@Icons.Material.Filled.AccountBalanceWallet" Class="mr-2" />
+                        Odeme
+                    </MudListItem>
+                </MudList>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    [Parameter] public int? Id { get; set; }
+
+    private bool _isEditMode => Id.HasValue;
+    private VoucherModel _voucher = new();
+    private bool IsBalanced => _voucher.Lines.Sum(l => l.Debit) == _voucher.Lines.Sum(l => l.Credit) 
+                               && _voucher.Lines.Any();
+
+    private List<(string Code, string Name)> _frequentAccounts = new()
+    {
+        ("100", "KASA"),
+        ("102", "BANKALAR"),
+        ("120", "ALICILAR"),
+        ("320", "SATICILAR"),
+        ("600", "YURTICI SATISLAR"),
+        ("391", "HESAPLANAN KDV"),
+        ("191", "INDIRILECEK KDV"),
+    };
+
+    private Dictionary<string, string> _accountNames = new()
+    {
+        ["100"] = "KASA",
+        ["102"] = "BANKALAR",
+        ["120"] = "ALICILAR",
+        ["320"] = "SATICILAR",
+        ["391"] = "HESAPLANAN KDV",
+        ["191"] = "INDIRILECEK KDV",
+        ["600"] = "YURTICI SATISLAR",
+        ["621"] = "SATILAN MAMULLER MALIYETI",
+        ["153"] = "TICARI MALLAR",
+    };
+
+    protected override void OnInitialized()
+    {
+        if (_isEditMode)
+        {
+            LoadVoucher(Id!.Value);
+        }
+        else
+        {
+            _voucher = new VoucherModel
+            {
+                VoucherNo = $"YV-{DateTime.Now:yyyy}-{new Random().Next(100, 999)}",
+                Date = DateTime.Today,
+                Type = "Mahsup",
+                Lines = new List<VoucherLine> { new(), new() }
+            };
+        }
+    }
+
+    private void LoadVoucher(int id)
+    {
+        _voucher = new VoucherModel
+        {
+            VoucherNo = "YV-2024-001",
+            Date = DateTime.Today,
+            Type = "Mahsup",
+            Description = "Ornek fis",
+            Lines = new List<VoucherLine>
+            {
+                new() { AccountCode = "120", Description = "Musteri alacak", Debit = 11800, Credit = 0 },
+                new() { AccountCode = "600", Description = "Satis", Debit = 0, Credit = 10000 },
+                new() { AccountCode = "391", Description = "KDV %18", Debit = 0, Credit = 1800 },
+            }
+        };
+    }
+
+    private Task<IEnumerable<string>> SearchAccounts(string value, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(value))
+            return Task.FromResult(_accountNames.Keys.Take(10).AsEnumerable());
+
+        var results = _accountNames
+            .Where(x => x.Key.Contains(value) || x.Value.Contains(value.ToUpperInvariant()))
+            .Take(10)
+            .Select(x => x.Key);
+
+        return Task.FromResult(results);
+    }
+
+    private string GetAccountName(string code)
+    {
+        return _accountNames.TryGetValue(code ?? "", out var name) ? name : "";
+    }
+
+    private void AddLine()
+    {
+        _voucher.Lines.Add(new VoucherLine());
+    }
+
+    private void RemoveLine(VoucherLine line)
+    {
+        _voucher.Lines.Remove(line);
+    }
+
+    private void QuickAddAccount(string code)
+    {
+        var emptyLine = _voucher.Lines.FirstOrDefault(l => string.IsNullOrEmpty(l.AccountCode));
+        if (emptyLine != null)
+        {
+            emptyLine.AccountCode = code;
+        }
+        else
+        {
+            _voucher.Lines.Add(new VoucherLine { AccountCode = code });
+        }
+        StateHasChanged();
+    }
+
+    private void ApplyTemplate(string template)
+    {
+        _voucher.Lines.Clear();
+
+        switch (template)
+        {
+            case "satis":
+                _voucher.Type = "Mahsup";
+                _voucher.Description = "Satis Faturasi";
+                _voucher.Lines.Add(new() { AccountCode = "120", Description = "Musteri alacak", Debit = 11800 });
+                _voucher.Lines.Add(new() { AccountCode = "600", Description = "Satis geliri", Credit = 10000 });
+                _voucher.Lines.Add(new() { AccountCode = "391", Description = "KDV %18", Credit = 1800 });
+                break;
+            case "alis":
+                _voucher.Type = "Mahsup";
+                _voucher.Description = "Alis Faturasi";
+                _voucher.Lines.Add(new() { AccountCode = "153", Description = "Mal alisi", Debit = 10000 });
+                _voucher.Lines.Add(new() { AccountCode = "191", Description = "KDV %18", Debit = 1800 });
+                _voucher.Lines.Add(new() { AccountCode = "320", Description = "Tedarikci borc", Credit = 11800 });
+                break;
+            case "tahsilat":
+                _voucher.Type = "Tahsilat";
+                _voucher.Description = "Musteri Tahsilati";
+                _voucher.Lines.Add(new() { AccountCode = "100", Description = "Nakit tahsilat", Debit = 5000 });
+                _voucher.Lines.Add(new() { AccountCode = "120", Description = "Alici hesabi", Credit = 5000 });
+                break;
+            case "odeme":
+                _voucher.Type = "Tediye";
+                _voucher.Description = "Tedarikci Odemesi";
+                _voucher.Lines.Add(new() { AccountCode = "320", Description = "Tedarikci hesabi", Debit = 5000 });
+                _voucher.Lines.Add(new() { AccountCode = "102", Description = "Banka hesabi", Credit = 5000 });
+                break;
+        }
+
+        Snackbar.Add($"{template.ToUpperInvariant()} sablonu uygulandi", Severity.Info);
+        StateHasChanged();
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/muhasebe/yevmiye");
+    }
+
+    private void SaveDraft()
+    {
+        Snackbar.Add("Fis taslak olarak kaydedildi", Severity.Success);
+    }
+
+    private void SaveAndPost()
+    {
+        if (!IsBalanced)
+        {
+            Snackbar.Add("Fis dengesiz! Kayit yapilamaz.", Severity.Error);
+            return;
+        }
+
+        Snackbar.Add("Fis kaydedildi ve onaylandi", Severity.Success);
+        Navigation.NavigateTo("/muhasebe/yevmiye");
+    }
+
+    public class VoucherModel
+    {
+        public string VoucherNo { get; set; } = "";
+        public DateTime? Date { get; set; }
+        public string Type { get; set; } = "";
+        public string? ReferenceNo { get; set; }
+        public string? Description { get; set; }
+        public List<VoucherLine> Lines { get; set; } = new();
+    }
+
+    public class VoucherLine
+    {
+        public string AccountCode { get; set; } = "";
+        public string? Description { get; set; }
+        public decimal Debit { get; set; }
+        public decimal Credit { get; set; }
+    }
+}

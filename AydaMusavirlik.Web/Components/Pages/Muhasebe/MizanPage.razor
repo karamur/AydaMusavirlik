@@ -1,0 +1,220 @@
+@page "/muhasebe/mizan"
+@inject ISnackbar Snackbar
+@inject IJSRuntime JS
+
+<PageTitle>Mizan - AYDA Musavirlik</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">
+    <MudIcon Icon="@Icons.Material.Filled.TableChart" Class="mr-2" />
+    Mizan
+</MudText>
+
+<MudCard Class="mb-4">
+    <MudCardContent>
+        <MudGrid>
+            <MudItem xs="12" md="2">
+                <MudSelect T="string" Label="Donem" @bind-Value="_selectedPeriod">
+                    <MudSelectItem Value="@("2024-01")">Ocak 2024</MudSelectItem>
+                    <MudSelectItem Value="@("2024-02")">Subat 2024</MudSelectItem>
+                    <MudSelectItem Value="@("2024-03")">Mart 2024</MudSelectItem>
+                    <MudSelectItem Value="@("2024-Q1")">1. Ceyrek 2024</MudSelectItem>
+                    <MudSelectItem Value="@("2024")">2024 Yili</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" md="2">
+                <MudSelect T="int" Label="Hesap Seviyesi" @bind-Value="_accountLevel">
+                    <MudSelectItem Value="1">Ana Hesaplar (1)</MudSelectItem>
+                    <MudSelectItem Value="2">Alt Hesaplar (2)</MudSelectItem>
+                    <MudSelectItem Value="3">Detay Hesaplar (3)</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" md="2">
+                <MudCheckBox @bind-Value="_showZeroBalances" Label="Sifir bakiyeleri goster" />
+            </MudItem>
+            <MudItem xs="12" md="2">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" 
+                           OnClick="GenerateMizan" FullWidth="true" Class="mt-2">
+                    Mizan Olustur
+                </MudButton>
+            </MudItem>
+            <MudItem xs="12" md="2">
+                <MudButton Variant="Variant.Outlined" Color="Color.Success" 
+                           StartIcon="@Icons.Material.Filled.FileDownload"
+                           OnClick="ExportExcel" FullWidth="true" Class="mt-2">
+                    Excel
+                </MudButton>
+            </MudItem>
+            <MudItem xs="12" md="2">
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" 
+                           StartIcon="@Icons.Material.Filled.PictureAsPdf"
+                           OnClick="ExportPdf" FullWidth="true" Class="mt-2">
+                    PDF
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudCardContent>
+</MudCard>
+
+<!-- Ozet Kartlar -->
+<MudGrid Class="mb-4">
+    <MudItem xs="12" md="3">
+        <MudPaper Class="pa-4" Elevation="2">
+            <MudText Typo="Typo.caption" Color="Color.Secondary">Toplam Borc</MudText>
+            <MudText Typo="Typo.h5">@_totalDebit.ToString("N2") TL</MudText>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" md="3">
+        <MudPaper Class="pa-4" Elevation="2">
+            <MudText Typo="Typo.caption" Color="Color.Secondary">Toplam Alacak</MudText>
+            <MudText Typo="Typo.h5">@_totalCredit.ToString("N2") TL</MudText>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" md="3">
+        <MudPaper Class="pa-4" Elevation="2">
+            <MudText Typo="Typo.caption" Color="Color.Secondary">Borc Bakiye</MudText>
+            <MudText Typo="Typo.h5" Color="Color.Success">@_totalDebitBalance.ToString("N2") TL</MudText>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" md="3">
+        <MudPaper Class="pa-4" Elevation="2">
+            <MudText Typo="Typo.caption" Color="Color.Secondary">Alacak Bakiye</MudText>
+            <MudText Typo="Typo.h5" Color="Color.Error">@_totalCreditBalance.ToString("N2") TL</MudText>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+<MudCard>
+    <MudCardContent>
+        <MudTable Items="_mizanItems" Hover="true" Striped="true" Dense="true" FixedHeader="true" Height="500px">
+            <HeaderContent>
+                <MudTh Style="width:100px">Hesap Kodu</MudTh>
+                <MudTh>Hesap Adi</MudTh>
+                <MudTh Style="text-align:right;width:120px">Borc</MudTh>
+                <MudTh Style="text-align:right;width:120px">Alacak</MudTh>
+                <MudTh Style="text-align:right;width:120px">Borc Bakiye</MudTh>
+                <MudTh Style="text-align:right;width:120px">Alacak Bakiye</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>
+                    <MudText Style="@GetTextStyle(context.Level)">
+                        @context.Code
+                    </MudText>
+                </MudTd>
+                <MudTd>
+                    <MudText Style="@GetTextStyle(context.Level)">
+                        @context.Name
+                    </MudText>
+                </MudTd>
+                <MudTd Style="text-align:right">
+                    @if (context.Debit > 0)
+                    {
+                        <MudText>@context.Debit.ToString("N2")</MudText>
+                    }
+                </MudTd>
+                <MudTd Style="text-align:right">
+                    @if (context.Credit > 0)
+                    {
+                        <MudText>@context.Credit.ToString("N2")</MudText>
+                    }
+                </MudTd>
+                <MudTd Style="text-align:right">
+                    @if (context.DebitBalance > 0)
+                    {
+                        <MudText Color="Color.Success">@context.DebitBalance.ToString("N2")</MudText>
+                    }
+                </MudTd>
+                <MudTd Style="text-align:right">
+                    @if (context.CreditBalance > 0)
+                    {
+                        <MudText Color="Color.Error">@context.CreditBalance.ToString("N2")</MudText>
+                    }
+                </MudTd>
+            </RowTemplate>
+            <FooterContent>
+                <MudTd colspan="2"><strong>TOPLAM</strong></MudTd>
+                <MudTd Style="text-align:right"><strong>@_totalDebit.ToString("N2")</strong></MudTd>
+                <MudTd Style="text-align:right"><strong>@_totalCredit.ToString("N2")</strong></MudTd>
+                <MudTd Style="text-align:right"><strong>@_totalDebitBalance.ToString("N2")</strong></MudTd>
+                <MudTd Style="text-align:right"><strong>@_totalCreditBalance.ToString("N2")</strong></MudTd>
+            </FooterContent>
+        </MudTable>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    private string _selectedPeriod = "2024-03";
+    private int _accountLevel = 3;
+    private bool _showZeroBalances = false;
+    private List<MizanItem> _mizanItems = new();
+
+    private decimal _totalDebit => _mizanItems.Sum(m => m.Debit);
+    private decimal _totalCredit => _mizanItems.Sum(m => m.Credit);
+    private decimal _totalDebitBalance => _mizanItems.Sum(m => m.DebitBalance);
+    private decimal _totalCreditBalance => _mizanItems.Sum(m => m.CreditBalance);
+
+    protected override void OnInitialized()
+    {
+        GenerateMizan();
+    }
+
+    private void GenerateMizan()
+    {
+        _mizanItems = new List<MizanItem>
+        {
+            // Aktif Hesaplar
+            new() { Code = "1", Name = "DONEN VARLIKLAR", Level = 1, Debit = 560000, Credit = 85000, DebitBalance = 475000, CreditBalance = 0 },
+            new() { Code = "100", Name = "KASA", Level = 3, Debit = 125000, Credit = 109580, DebitBalance = 15420, CreditBalance = 0 },
+            new() { Code = "102", Name = "BANKALAR", Level = 3, Debit = 350000, Credit = 104320, DebitBalance = 245680, CreditBalance = 0 },
+            new() { Code = "120", Name = "ALICILAR", Level = 3, Debit = 285000, Credit = 100000, DebitBalance = 185000, CreditBalance = 0 },
+            new() { Code = "153", Name = "TICARI MALLAR", Level = 3, Debit = 180000, Credit = 152000, DebitBalance = 28000, CreditBalance = 0 },
+
+            // Pasif Hesaplar
+            new() { Code = "3", Name = "KISA VADELI YABANCI KAYNAKLAR", Level = 1, Debit = 95000, Credit = 255000, DebitBalance = 0, CreditBalance = 160000 },
+            new() { Code = "320", Name = "SATICILAR", Level = 3, Debit = 75000, Credit = 200000, DebitBalance = 0, CreditBalance = 125000 },
+            new() { Code = "360", Name = "ODENECEK VERGI VE FONLAR", Level = 3, Debit = 20000, Credit = 55000, DebitBalance = 0, CreditBalance = 35000 },
+
+            // Oz Kaynaklar
+            new() { Code = "5", Name = "OZ KAYNAKLAR", Level = 1, Debit = 0, Credit = 200000, DebitBalance = 0, CreditBalance = 200000 },
+            new() { Code = "500", Name = "SERMAYE", Level = 3, Debit = 0, Credit = 200000, DebitBalance = 0, CreditBalance = 200000 },
+
+            // Gelirler
+            new() { Code = "6", Name = "GELIR TABLOSU HESAPLARI", Level = 1, Debit = 0, Credit = 975000, DebitBalance = 0, CreditBalance = 975000 },
+            new() { Code = "600", Name = "YURTICI SATISLAR", Level = 3, Debit = 0, Credit = 850000, DebitBalance = 0, CreditBalance = 850000 },
+            new() { Code = "601", Name = "YURTDISI SATISLAR", Level = 3, Debit = 0, Credit = 125000, DebitBalance = 0, CreditBalance = 125000 },
+
+            // Giderler
+            new() { Code = "7", Name = "MALIYET HESAPLARI", Level = 1, Debit = 860000, Credit = 0, DebitBalance = 860000, CreditBalance = 0 },
+            new() { Code = "710", Name = "DIREKT ILKMADDE VE MALZEME GID.", Level = 3, Debit = 450000, Credit = 0, DebitBalance = 450000, CreditBalance = 0 },
+            new() { Code = "720", Name = "DIREKT ISCILIK GIDERLERI", Level = 3, Debit = 280000, Credit = 0, DebitBalance = 280000, CreditBalance = 0 },
+            new() { Code = "730", Name = "GENEL URETIM GIDERLERI", Level = 3, Debit = 130000, Credit = 0, DebitBalance = 130000, CreditBalance = 0 },
+        };
+
+        Snackbar.Add("Mizan olusturuldu", Severity.Success);
+    }
+
+    private string GetTextStyle(int level)
+    {
+        return level == 1 ? "font-weight:bold" : "";
+    }
+
+    private void ExportExcel()
+    {
+        Snackbar.Add("Excel dosyasi indiriliyor...", Severity.Info);
+    }
+
+    private void ExportPdf()
+    {
+        Snackbar.Add("PDF dosyasi indiriliyor...", Severity.Info);
+    }
+
+    public class MizanItem
+    {
+        public string Code { get; set; } = "";
+        public string Name { get; set; } = "";
+        public int Level { get; set; }
+        public decimal Debit { get; set; }
+        public decimal Credit { get; set; }
+        public decimal DebitBalance { get; set; }
+        public decimal CreditBalance { get; set; }
+    }
+}

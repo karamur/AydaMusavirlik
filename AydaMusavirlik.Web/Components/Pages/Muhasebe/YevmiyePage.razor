@@ -1,0 +1,194 @@
+@page "/muhasebe/yevmiye"
+@inject ISnackbar Snackbar
+
+<PageTitle>Yevmiye Defteri - AYDA Musavirlik</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">
+    <MudIcon Icon="@Icons.Material.Filled.ListAlt" Class="mr-2" />
+    Yevmiye Defteri
+</MudText>
+
+<MudCard Class="mb-4">
+    <MudCardContent>
+        <MudGrid>
+            <MudItem xs="12" md="2">
+                <MudDatePicker Label="Baslangic Tarihi" @bind-Date="_startDate" />
+            </MudItem>
+            <MudItem xs="12" md="2">
+                <MudDatePicker Label="Bitis Tarihi" @bind-Date="_endDate" />
+            </MudItem>
+            <MudItem xs="12" md="2">
+                <MudTextField T="string" Label="Fis No" @bind-Value="_voucherNoFilter" />
+            </MudItem>
+            <MudItem xs="12" md="2">
+                <MudSelect T="string" Label="Fis Tipi" @bind-Value="_voucherTypeFilter" Clearable="true">
+                    <MudSelectItem Value="@("Mahsup")">Mahsup Fisi</MudSelectItem>
+                    <MudSelectItem Value="@("Tahsilat")">Tahsilat Fisi</MudSelectItem>
+                    <MudSelectItem Value="@("Tediye")">Tediye Fisi</MudSelectItem>
+                    <MudSelectItem Value="@("Acilis")">Acilis Fisi</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" md="2">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" 
+                           OnClick="SearchVouchers" FullWidth="true" Class="mt-2">
+                    Ara
+                </MudButton>
+            </MudItem>
+            <MudItem xs="12" md="2">
+                <MudButton Variant="Variant.Filled" Color="Color.Success" 
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="AddNewVoucher" FullWidth="true" Class="mt-2">
+                    Yeni Fis
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudCardContent>
+</MudCard>
+
+<MudCard>
+    <MudCardContent>
+        <MudTable Items="_vouchers" Hover="true" Striped="true" Dense="true"
+                  OnRowClick="OnVoucherClick" T="VoucherSummary">
+            <HeaderContent>
+                <MudTh>Fis No</MudTh>
+                <MudTh>Tarih</MudTh>
+                <MudTh>Tip</MudTh>
+                <MudTh>Aciklama</MudTh>
+                <MudTh Style="text-align:right">Borc</MudTh>
+                <MudTh Style="text-align:right">Alacak</MudTh>
+                <MudTh>Durum</MudTh>
+                <MudTh>Islemler</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>
+                    <MudLink Href="@($"/muhasebe/fis/{context.Id}")">@context.VoucherNo</MudLink>
+                </MudTd>
+                <MudTd>@context.Date.ToString("dd.MM.yyyy")</MudTd>
+                <MudTd>
+                    <MudChip T="string" Size="Size.Small" Color="@GetVoucherTypeColor(context.Type)">
+                        @context.Type
+                    </MudChip>
+                </MudTd>
+                <MudTd>@context.Description</MudTd>
+                <MudTd Style="text-align:right">@context.TotalDebit.ToString("N2")</MudTd>
+                <MudTd Style="text-align:right">@context.TotalCredit.ToString("N2")</MudTd>
+                <MudTd>
+                    @if (context.IsBalanced)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Small" />
+                    }
+                    else
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Error" Color="Color.Error" Size="Size.Small" />
+                    }
+                </MudTd>
+                <MudTd>
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" 
+                                   OnClick="@(() => EditVoucher(context))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Size="Size.Small" 
+                                   OnClick="@(() => CopyVoucher(context))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                                   OnClick="@(() => DeleteVoucher(context))" />
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+
+        <MudGrid Class="mt-4">
+            <MudItem xs="12" md="4">
+                <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+                    <strong>Toplam Fis:</strong> @_vouchers.Count
+                </MudAlert>
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudAlert Severity="Severity.Success" Variant="Variant.Outlined">
+                    <strong>Toplam Borc:</strong> @_vouchers.Sum(v => v.TotalDebit).ToString("N2") TL
+                </MudAlert>
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined">
+                    <strong>Toplam Alacak:</strong> @_vouchers.Sum(v => v.TotalCredit).ToString("N2") TL
+                </MudAlert>
+            </MudItem>
+        </MudGrid>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    private DateTime? _startDate = DateTime.Now.AddMonths(-1);
+    private DateTime? _endDate = DateTime.Now;
+    private string? _voucherNoFilter;
+    private string? _voucherTypeFilter;
+    private List<VoucherSummary> _vouchers = new();
+
+    protected override void OnInitialized()
+    {
+        LoadVouchers();
+    }
+
+    private void LoadVouchers()
+    {
+        _vouchers = new List<VoucherSummary>
+        {
+            new() { Id = 1, VoucherNo = "YV-2024-001", Date = DateTime.Now.AddDays(-10), Type = "Mahsup", Description = "Satis faturasi kaydý", TotalDebit = 11800, TotalCredit = 11800, IsBalanced = true },
+            new() { Id = 2, VoucherNo = "YV-2024-002", Date = DateTime.Now.AddDays(-8), Type = "Tahsilat", Description = "Musteri tahsilati", TotalDebit = 5000, TotalCredit = 5000, IsBalanced = true },
+            new() { Id = 3, VoucherNo = "YV-2024-003", Date = DateTime.Now.AddDays(-6), Type = "Tediye", Description = "Tedarikci odemesi", TotalDebit = 8500, TotalCredit = 8500, IsBalanced = true },
+            new() { Id = 4, VoucherNo = "YV-2024-004", Date = DateTime.Now.AddDays(-4), Type = "Mahsup", Description = "Gider kaydý", TotalDebit = 2500, TotalCredit = 2500, IsBalanced = true },
+            new() { Id = 5, VoucherNo = "YV-2024-005", Date = DateTime.Now.AddDays(-2), Type = "Mahsup", Description = "Maas tahakkuku", TotalDebit = 45000, TotalCredit = 45000, IsBalanced = true },
+            new() { Id = 6, VoucherNo = "YV-2024-006", Date = DateTime.Now.AddDays(-1), Type = "Tediye", Description = "Maas odemesi", TotalDebit = 38500, TotalCredit = 38500, IsBalanced = true },
+        };
+    }
+
+    private Color GetVoucherTypeColor(string type)
+    {
+        return type switch
+        {
+            "Mahsup" => Color.Primary,
+            "Tahsilat" => Color.Success,
+            "Tediye" => Color.Warning,
+            "Acilis" => Color.Info,
+            _ => Color.Default
+        };
+    }
+
+    private void SearchVouchers()
+    {
+        Snackbar.Add("Arama yapiliyor...", Severity.Info);
+    }
+
+    private void AddNewVoucher()
+    {
+        Snackbar.Add("Yeni fis ekleme sayfasýna yonlendiriliyor", Severity.Info);
+    }
+
+    private void OnVoucherClick(TableRowClickEventArgs<VoucherSummary> args)
+    {
+        Snackbar.Add($"Fis detayi: {args.Item.VoucherNo}", Severity.Info);
+    }
+
+    private void EditVoucher(VoucherSummary voucher)
+    {
+        Snackbar.Add($"{voucher.VoucherNo} duzenleniyor", Severity.Info);
+    }
+
+    private void CopyVoucher(VoucherSummary voucher)
+    {
+        Snackbar.Add($"{voucher.VoucherNo} kopyalaniyor", Severity.Info);
+    }
+
+    private void DeleteVoucher(VoucherSummary voucher)
+    {
+        Snackbar.Add($"{voucher.VoucherNo} siliniyor", Severity.Warning);
+    }
+
+    public class VoucherSummary
+    {
+        public int Id { get; set; }
+        public string VoucherNo { get; set; } = "";
+        public DateTime Date { get; set; }
+        public string Type { get; set; } = "";
+        public string Description { get; set; } = "";
+        public decimal TotalDebit { get; set; }
+        public decimal TotalCredit { get; set; }
+        public bool IsBalanced { get; set; }
+    }
+}

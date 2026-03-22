@@ -1,0 +1,244 @@
+@page "/muhasebe/hesap-plani"
+@inject ISnackbar Snackbar
+
+<PageTitle>Hesap Plani - AYDA Musavirlik</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">
+    <MudIcon Icon="@Icons.Material.Filled.AccountTree" Class="mr-2" />
+    Hesap Plani
+</MudText>
+
+<MudGrid>
+    <MudItem xs="12" md="4">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Hesap Agaci</MudText>
+                </CardHeaderContent>
+                <CardHeaderActions>
+                    <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Success" 
+                                   OnClick="AddNewAccount" Title="Yeni Hesap" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Refresh" 
+                                   OnClick="LoadAccounts" Title="Yenile" />
+                </CardHeaderActions>
+            </MudCardHeader>
+            <MudCardContent Style="max-height: 600px; overflow-y: auto;">
+                <MudList T="string" Dense="true">
+                    @foreach (var acc in _flatAccountList)
+                    {
+                        <MudListItem OnClick="@(() => OnAccountSelected(acc))"
+                                     Style="@($"padding-left: {acc.Level * 16}px")">
+                            <MudStack Row="true" AlignItems="AlignItems.Center">
+                                <MudIcon Icon="@(acc.IsHeader ? Icons.Material.Filled.Folder : Icons.Material.Filled.Article)" 
+                                         Size="Size.Small" Class="mr-2" />
+                                <MudText>@acc.Code - @acc.Name</MudText>
+                                @if (!acc.IsHeader)
+                                {
+                                    <MudSpacer />
+                                    <MudText Typo="Typo.caption">@acc.Balance.ToString("N0")</MudText>
+                                }
+                            </MudStack>
+                        </MudListItem>
+                    }
+                </MudList>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" md="8">
+        @if (_selectedAccount != null)
+        {
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">@_selectedAccount.Code - @_selectedAccount.Name</MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Primary" 
+                                   StartIcon="@Icons.Material.Filled.Edit"
+                                   OnClick="EditAccount">Duzenle</MudButton>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Error" 
+                                   StartIcon="@Icons.Material.Filled.Delete"
+                                   OnClick="DeleteAccount">Sil</MudButton>
+                    </CardHeaderActions>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudGrid>
+                        <MudItem xs="6">
+                            <MudText Typo="Typo.caption">Hesap Tipi</MudText>
+                            <MudText>@_selectedAccount.AccountType</MudText>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudText Typo="Typo.caption">Hesap Yapisi</MudText>
+                            <MudText>@(_selectedAccount.Nature == "Debit" ? "Borc" : "Alacak")</MudText>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudText Typo="Typo.caption">Seviye</MudText>
+                            <MudText>@_selectedAccount.Level</MudText>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudText Typo="Typo.caption">Kayit Yapilabilir</MudText>
+                            <MudText>@(_selectedAccount.AllowPosting ? "Evet" : "Hayir")</MudText>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudText Typo="Typo.caption">Acilis Bakiyesi</MudText>
+                            <MudText>@_selectedAccount.OpeningBalance.ToString("N2") TL</MudText>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudText Typo="Typo.caption">Guncel Bakiye</MudText>
+                            <MudText Typo="Typo.h6" Color="@(_selectedAccount.Balance >= 0 ? Color.Success : Color.Error)">
+                                @_selectedAccount.Balance.ToString("N2") TL
+                            </MudText>
+                        </MudItem>
+                    </MudGrid>
+
+                    <MudDivider Class="my-4" />
+
+                    <MudText Typo="Typo.subtitle1" Class="mb-2">Son Hareketler</MudText>
+                    <MudTable Items="_accountMovements" Dense="true" Hover="true">
+                        <HeaderContent>
+                            <MudTh>Tarih</MudTh>
+                            <MudTh>Fis No</MudTh>
+                            <MudTh>Aciklama</MudTh>
+                            <MudTh Style="text-align:right">Borc</MudTh>
+                            <MudTh Style="text-align:right">Alacak</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@context.Date.ToString("dd.MM.yyyy")</MudTd>
+                            <MudTd>@context.VoucherNo</MudTd>
+                            <MudTd>@context.Description</MudTd>
+                            <MudTd Style="text-align:right">@context.Debit.ToString("N2")</MudTd>
+                            <MudTd Style="text-align:right">@context.Credit.ToString("N2")</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudCardContent>
+            </MudCard>
+        }
+        else
+        {
+            <MudCard>
+                <MudCardContent Class="d-flex justify-center align-center" Style="min-height: 400px;">
+                    <MudText Typo="Typo.h6" Color="Color.Secondary">
+                        Sol taraftan bir hesap secin
+                    </MudText>
+                </MudCardContent>
+            </MudCard>
+        }
+    </MudItem>
+</MudGrid>
+
+@code {
+    private List<AccountItem> _flatAccountList = new();
+    private AccountDetail? _selectedAccount;
+    private List<AccountMovement> _accountMovements = new();
+
+    protected override void OnInitialized()
+    {
+        LoadAccounts();
+    }
+
+    private void LoadAccounts()
+    {
+        _flatAccountList = new List<AccountItem>
+        {
+            new() { Code = "1", Name = "DONEN VARLIKLAR", Level = 1, IsHeader = true },
+            new() { Code = "10", Name = "HAZIR DEGERLER", Level = 2, IsHeader = true },
+            new() { Code = "100", Name = "KASA", Level = 3, Balance = 15420.50m },
+            new() { Code = "101", Name = "ALINAN CEKLER", Level = 3, Balance = 8500 },
+            new() { Code = "102", Name = "BANKALAR", Level = 3, Balance = 245680.75m },
+            new() { Code = "12", Name = "TICARI ALACAKLAR", Level = 2, IsHeader = true },
+            new() { Code = "120", Name = "ALICILAR", Level = 3, Balance = 185000 },
+            new() { Code = "121", Name = "ALACAK SENETLERI", Level = 3, Balance = 45000 },
+            new() { Code = "3", Name = "KISA VADELI YABANCI KAYNAKLAR", Level = 1, IsHeader = true },
+            new() { Code = "32", Name = "TICARI BORCLAR", Level = 2, IsHeader = true },
+            new() { Code = "320", Name = "SATICILAR", Level = 3, Balance = 125000 },
+            new() { Code = "321", Name = "BORC SENETLERI", Level = 3, Balance = 35000 },
+            new() { Code = "6", Name = "GELIR TABLOSU HESAPLARI", Level = 1, IsHeader = true },
+            new() { Code = "60", Name = "BRUT SATISLAR", Level = 2, IsHeader = true },
+            new() { Code = "600", Name = "YURTICI SATISLAR", Level = 3, Balance = 850000 },
+            new() { Code = "601", Name = "YURTDISI SATISLAR", Level = 3, Balance = 125000 },
+        };
+    }
+
+    private void OnAccountSelected(AccountItem item)
+    {
+        if (item.IsHeader) return;
+
+        _selectedAccount = new AccountDetail
+        {
+            Code = item.Code,
+            Name = item.Name,
+            AccountType = GetAccountType(item.Code),
+            Nature = int.Parse(item.Code.Substring(0, 1)) <= 2 ? "Debit" : "Credit",
+            Level = item.Level,
+            AllowPosting = true,
+            OpeningBalance = 0,
+            Balance = item.Balance
+        };
+
+        _accountMovements = new List<AccountMovement>
+        {
+            new() { Date = DateTime.Now.AddDays(-5), VoucherNo = "YV-001", Description = "Satis faturasi", Debit = 5000, Credit = 0 },
+            new() { Date = DateTime.Now.AddDays(-3), VoucherNo = "YV-002", Description = "Tahsilat", Debit = 0, Credit = 3500 },
+            new() { Date = DateTime.Now.AddDays(-1), VoucherNo = "YV-003", Description = "Satis iadesi", Debit = 0, Credit = 500 },
+        };
+    }
+
+    private string GetAccountType(string code)
+    {
+        return code[0] switch
+        {
+            '1' or '2' => "Aktif",
+            '3' or '4' or '5' => "Pasif",
+            '6' => "Gelir",
+            '7' => "Gider/Maliyet",
+            '9' => "Nazim",
+            _ => "Diger"
+        };
+    }
+
+    private void AddNewAccount()
+    {
+        Snackbar.Add("Yeni hesap ekleme dialog'u acilacak", Severity.Info);
+    }
+
+    private void EditAccount()
+    {
+        Snackbar.Add($"{_selectedAccount?.Code} hesabi duzenleniyor", Severity.Info);
+    }
+
+    private void DeleteAccount()
+    {
+        Snackbar.Add($"{_selectedAccount?.Code} hesabi siliniyor", Severity.Warning);
+    }
+
+    public class AccountItem
+    {
+        public string Code { get; set; } = "";
+        public string Name { get; set; } = "";
+        public int Level { get; set; }
+        public bool IsHeader { get; set; }
+        public decimal Balance { get; set; }
+    }
+
+    public class AccountDetail
+    {
+        public string Code { get; set; } = "";
+        public string Name { get; set; } = "";
+        public string AccountType { get; set; } = "";
+        public string Nature { get; set; } = "";
+        public int Level { get; set; }
+        public bool AllowPosting { get; set; }
+        public decimal OpeningBalance { get; set; }
+        public decimal Balance { get; set; }
+    }
+
+    public class AccountMovement
+    {
+        public DateTime Date { get; set; }
+        public string VoucherNo { get; set; } = "";
+        public string Description { get; set; } = "";
+        public decimal Debit { get; set; }
+        public decimal Credit { get; set; }
+    }
+}
