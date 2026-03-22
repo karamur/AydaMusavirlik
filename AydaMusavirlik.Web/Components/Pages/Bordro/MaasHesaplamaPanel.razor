@@ -1,0 +1,225 @@
+@inject ISnackbar Snackbar
+
+<MudGrid>
+    <MudItem xs="12" md="5">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Maas Hesaplama</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudStack Spacing="3">
+                    <MudNumericField T="decimal" Label="Brut Maas (TL)" @bind-Value="_brutMaas" 
+                                    Format="N2" Min="0" />
+
+                    <MudSelect T="string" Label="Vergi Dilimi" @bind-Value="_vergiDilimi">
+                        <MudSelectItem Value="@("15")">%15 (0 - 110.000 TL)</MudSelectItem>
+                        <MudSelectItem Value="@("20")">%20 (110.001 - 230.000 TL)</MudSelectItem>
+                        <MudSelectItem Value="@("27")">%27 (230.001 - 580.000 TL)</MudSelectItem>
+                        <MudSelectItem Value="@("35")">%35 (580.001 - 3.000.000 TL)</MudSelectItem>
+                        <MudSelectItem Value="@("40")">%40 (3.000.000+ TL)</MudSelectItem>
+                    </MudSelect>
+
+                    <MudNumericField T="int" Label="AGI Kisi Sayisi" @bind-Value="_agiKisi" Min="0" Max="5" />
+
+                    <MudCheckBox @bind-Value="_engelliIndirimi" Label="Engelli Indirimi" />
+
+                    <MudNumericField T="decimal" Label="Ek Odeme (TL)" @bind-Value="_ekOdeme" 
+                                    Format="N2" Min="0" />
+
+                    <MudNumericField T="decimal" Label="Kesinti (TL)" @bind-Value="_kesinti" 
+                                    Format="N2" Min="0" />
+
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" 
+                               OnClick="HesaplaMaas" FullWidth="true"
+                               StartIcon="@Icons.Material.Filled.Calculate">
+                        Hesapla
+                    </MudButton>
+                </MudStack>
+            </MudCardContent>
+        </MudCard>
+
+        <MudCard Class="mt-4">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">2024 SGK Parametreleri</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudSimpleTable Dense="true">
+                    <tbody>
+                        <tr><td>Asgari Ucret</td><td style="text-align:right"><strong>20.002,50 TL</strong></td></tr>
+                        <tr><td>SGK Tavan</td><td style="text-align:right"><strong>150.018,90 TL</strong></td></tr>
+                        <tr><td>SGK Isci %</td><td style="text-align:right"><strong>%14</strong></td></tr>
+                        <tr><td>SGK Isveren %</td><td style="text-align:right"><strong>%20,5</strong></td></tr>
+                        <tr><td>Issizlik Isci %</td><td style="text-align:right"><strong>%1</strong></td></tr>
+                        <tr><td>Issizlik Isveren %</td><td style="text-align:right"><strong>%2</strong></td></tr>
+                        <tr><td>Damga Vergisi %</td><td style="text-align:right"><strong>%0,759</strong></td></tr>
+                    </tbody>
+                </MudSimpleTable>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" md="7">
+        @if (_hesaplamaSonucu != null)
+        {
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Hesaplama Sonucu</MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudButton Variant="Variant.Outlined" Size="Size.Small"
+                                   StartIcon="@Icons.Material.Filled.Print"
+                                   OnClick="PrintResult">Yazdir</MudButton>
+                    </CardHeaderActions>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudSimpleTable>
+                        <tbody>
+                            <tr class="mud-table-row">
+                                <td><strong>BRUT MAAS</strong></td>
+                                <td style="text-align:right"><strong>@_hesaplamaSonucu.BrutMaas.ToString("N2") TL</strong></td>
+                            </tr>
+                            <tr><td colspan="2"><MudDivider /></td></tr>
+
+                            <tr><td>SGK Isci Payi (%14)</td><td style="text-align:right; color:red">- @_hesaplamaSonucu.SgkIsci.ToString("N2") TL</td></tr>
+                            <tr><td>Issizlik Sigortasi Isci (%1)</td><td style="text-align:right; color:red">- @_hesaplamaSonucu.IssizlikIsci.ToString("N2") TL</td></tr>
+                            <tr><td><strong>SGK Matrah</strong></td><td style="text-align:right"><strong>@_hesaplamaSonucu.SgkMatrah.ToString("N2") TL</strong></td></tr>
+
+                            <tr><td colspan="2"><MudDivider /></td></tr>
+
+                            <tr><td>Kumülatif Vergi Matrahi</td><td style="text-align:right">@_hesaplamaSonucu.KumulatifMatrah.ToString("N2") TL</td></tr>
+                            <tr><td>Gelir Vergisi (@_vergiDilimi%)</td><td style="text-align:right; color:red">- @_hesaplamaSonucu.GelirVergisi.ToString("N2") TL</td></tr>
+                            <tr><td>Damga Vergisi (%0,759)</td><td style="text-align:right; color:red">- @_hesaplamaSonucu.DamgaVergisi.ToString("N2") TL</td></tr>
+
+                            <tr><td colspan="2"><MudDivider /></td></tr>
+
+                            <tr><td>AGI (@_agiKisi kisi)</td><td style="text-align:right; color:green">+ @_hesaplamaSonucu.Agi.ToString("N2") TL</td></tr>
+                            @if (_ekOdeme > 0)
+                            {
+                                <tr><td>Ek Odeme</td><td style="text-align:right; color:green">+ @_ekOdeme.ToString("N2") TL</td></tr>
+                            }
+                            @if (_kesinti > 0)
+                            {
+                                <tr><td>Kesinti</td><td style="text-align:right; color:red">- @_kesinti.ToString("N2") TL</td></tr>
+                            }
+
+                            <tr><td colspan="2"><MudDivider /></td></tr>
+
+                            <tr class="mud-table-row" style="background-color: #e8f5e9">
+                                <td><strong style="font-size:1.2em">NET MAAS</strong></td>
+                                <td style="text-align:right"><strong style="font-size:1.3em; color:green">@_hesaplamaSonucu.NetMaas.ToString("N2") TL</strong></td>
+                            </tr>
+                        </tbody>
+                    </MudSimpleTable>
+
+                    <MudDivider Class="my-4" />
+
+                    <MudText Typo="Typo.subtitle1" Class="mb-2">Isveren Maliyeti</MudText>
+                    <MudSimpleTable Dense="true">
+                        <tbody>
+                            <tr><td>SGK Isveren Payi (%20,5)</td><td style="text-align:right">@_hesaplamaSonucu.SgkIsveren.ToString("N2") TL</td></tr>
+                            <tr><td>Issizlik Sigortasi Isveren (%2)</td><td style="text-align:right">@_hesaplamaSonucu.IssizlikIsveren.ToString("N2") TL</td></tr>
+                            <tr style="background-color: #fff3e0">
+                                <td><strong>TOPLAM ISVEREN MALIYETI</strong></td>
+                                <td style="text-align:right"><strong>@_hesaplamaSonucu.ToplamMaliyet.ToString("N2") TL</strong></td>
+                            </tr>
+                        </tbody>
+                    </MudSimpleTable>
+                </MudCardContent>
+            </MudCard>
+        }
+        else
+        {
+            <MudCard>
+                <MudCardContent Class="d-flex justify-center align-center" Style="min-height: 400px;">
+                    <MudStack AlignItems="AlignItems.Center">
+                        <MudIcon Icon="@Icons.Material.Filled.Calculate" Size="Size.Large" Color="Color.Secondary" />
+                        <MudText Typo="Typo.h6" Color="Color.Secondary">
+                            Brut maas girin ve hesapla butonuna basin
+                        </MudText>
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        }
+    </MudItem>
+</MudGrid>
+
+@code {
+    private decimal _brutMaas = 35000;
+    private string _vergiDilimi = "15";
+    private int _agiKisi = 0;
+    private bool _engelliIndirimi = false;
+    private decimal _ekOdeme = 0;
+    private decimal _kesinti = 0;
+    private HesaplamaSonuc? _hesaplamaSonucu;
+
+    private void HesaplaMaas()
+    {
+        var sgkIsci = _brutMaas * 0.14m;
+        var issizlikIsci = _brutMaas * 0.01m;
+        var sgkMatrah = _brutMaas - sgkIsci - issizlikIsci;
+
+        var vergiOrani = decimal.Parse(_vergiDilimi) / 100m;
+        var gelirVergisi = sgkMatrah * vergiOrani;
+        var damgaVergisi = _brutMaas * 0.00759m;
+
+        // AGI hesaplama (basitleþtirilmiþ)
+        var agiTutar = _agiKisi switch
+        {
+            0 => 0m,
+            1 => 1500m,
+            2 => 1800m,
+            3 => 2100m,
+            _ => 2400m
+        };
+
+        var netMaas = sgkMatrah - gelirVergisi - damgaVergisi + agiTutar + _ekOdeme - _kesinti;
+
+        var sgkIsveren = _brutMaas * 0.205m;
+        var issizlikIsveren = _brutMaas * 0.02m;
+        var toplamMaliyet = _brutMaas + sgkIsveren + issizlikIsveren;
+
+        _hesaplamaSonucu = new HesaplamaSonuc
+        {
+            BrutMaas = _brutMaas,
+            SgkIsci = sgkIsci,
+            IssizlikIsci = issizlikIsci,
+            SgkMatrah = sgkMatrah,
+            KumulatifMatrah = sgkMatrah,
+            GelirVergisi = gelirVergisi,
+            DamgaVergisi = damgaVergisi,
+            Agi = agiTutar,
+            NetMaas = netMaas,
+            SgkIsveren = sgkIsveren,
+            IssizlikIsveren = issizlikIsveren,
+            ToplamMaliyet = toplamMaliyet
+        };
+
+        Snackbar.Add("Maas hesaplandi", Severity.Success);
+    }
+
+    private void PrintResult()
+    {
+        Snackbar.Add("Yazdirilacak...", Severity.Info);
+    }
+
+    public class HesaplamaSonuc
+    {
+        public decimal BrutMaas { get; set; }
+        public decimal SgkIsci { get; set; }
+        public decimal IssizlikIsci { get; set; }
+        public decimal SgkMatrah { get; set; }
+        public decimal KumulatifMatrah { get; set; }
+        public decimal GelirVergisi { get; set; }
+        public decimal DamgaVergisi { get; set; }
+        public decimal Agi { get; set; }
+        public decimal NetMaas { get; set; }
+        public decimal SgkIsveren { get; set; }
+        public decimal IssizlikIsveren { get; set; }
+        public decimal ToplamMaliyet { get; set; }
+    }
+}

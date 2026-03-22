@@ -1,0 +1,153 @@
+@inject ISnackbar Snackbar
+
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">Personel Listesi</MudText>
+        </CardHeaderContent>
+        <CardHeaderActions>
+            <MudButton Variant="Variant.Filled" Color="Color.Success" 
+                       StartIcon="@Icons.Material.Filled.PersonAdd"
+                       OnClick="AddEmployee">
+                Yeni Personel
+            </MudButton>
+        </CardHeaderActions>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudGrid Class="mb-4">
+            <MudItem xs="12" md="3">
+                <MudTextField T="string" Label="Ara..." @bind-Value="_searchText" 
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" />
+            </MudItem>
+            <MudItem xs="12" md="2">
+                <MudSelect T="string" Label="Departman" @bind-Value="_departmentFilter" Clearable="true">
+                    <MudSelectItem Value="@("Muhasebe")">Muhasebe</MudSelectItem>
+                    <MudSelectItem Value="@("Uretim")">Uretim</MudSelectItem>
+                    <MudSelectItem Value="@("Satis")">Satis</MudSelectItem>
+                    <MudSelectItem Value="@("IK")">Insan Kaynaklari</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" md="2">
+                <MudSelect T="string" Label="Durum" @bind-Value="_statusFilter" Clearable="true">
+                    <MudSelectItem Value="@("Aktif")">Aktif</MudSelectItem>
+                    <MudSelectItem Value="@("Pasif")">Pasif</MudSelectItem>
+                    <MudSelectItem Value="@("Izinli")">Izinli</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+        </MudGrid>
+
+        <MudTable Items="_employees" Hover="true" Striped="true" Dense="true">
+            <HeaderContent>
+                <MudTh>Sicil No</MudTh>
+                <MudTh>Ad Soyad</MudTh>
+                <MudTh>TC Kimlik</MudTh>
+                <MudTh>Departman</MudTh>
+                <MudTh>Gorev</MudTh>
+                <MudTh>Ise Giris</MudTh>
+                <MudTh Style="text-align:right">Brut Maas</MudTh>
+                <MudTh>Durum</MudTh>
+                <MudTh>Islemler</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>@context.SicilNo</MudTd>
+                <MudTd>@context.AdSoyad</MudTd>
+                <MudTd>@context.TcKimlik</MudTd>
+                <MudTd>@context.Departman</MudTd>
+                <MudTd>@context.Gorev</MudTd>
+                <MudTd>@context.IseGiris.ToString("dd.MM.yyyy")</MudTd>
+                <MudTd Style="text-align:right">@context.BrutMaas.ToString("N2") TL</MudTd>
+                <MudTd>
+                    <MudChip T="string" Size="Size.Small" 
+                             Color="@(context.Durum == "Aktif" ? Color.Success : Color.Default)">
+                        @context.Durum
+                    </MudChip>
+                </MudTd>
+                <MudTd>
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" 
+                                   OnClick="@(() => EditEmployee(context))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" 
+                                   OnClick="@(() => ViewEmployee(context))" />
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+
+        <MudGrid Class="mt-4">
+            <MudItem xs="12" md="3">
+                <MudPaper Class="pa-3" Elevation="1">
+                    <MudText Typo="Typo.caption">Toplam Personel</MudText>
+                    <MudText Typo="Typo.h5">@_employees.Count</MudText>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" md="3">
+                <MudPaper Class="pa-3" Elevation="1">
+                    <MudText Typo="Typo.caption">Aktif Personel</MudText>
+                    <MudText Typo="Typo.h5" Color="Color.Success">@_employees.Count(e => e.Durum == "Aktif")</MudText>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" md="3">
+                <MudPaper Class="pa-3" Elevation="1">
+                    <MudText Typo="Typo.caption">Toplam Brut Maas</MudText>
+                    <MudText Typo="Typo.h5">@_employees.Sum(e => e.BrutMaas).ToString("N0") TL</MudText>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" md="3">
+                <MudPaper Class="pa-3" Elevation="1">
+                    <MudText Typo="Typo.caption">Ortalama Maas</MudText>
+                    <MudText Typo="Typo.h5">@(_employees.Any() ? _employees.Average(e => e.BrutMaas).ToString("N0") : "0") TL</MudText>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    private string? _searchText;
+    private string? _departmentFilter;
+    private string? _statusFilter;
+    private List<PersonelItem> _employees = new();
+
+    protected override void OnInitialized()
+    {
+        LoadEmployees();
+    }
+
+    private void LoadEmployees()
+    {
+        _employees = new List<PersonelItem>
+        {
+            new() { SicilNo = "001", AdSoyad = "Ahmet Yilmaz", TcKimlik = "12345678901", Departman = "Muhasebe", Gorev = "Mudur", IseGiris = new DateTime(2018, 3, 15), BrutMaas = 55000, Durum = "Aktif" },
+            new() { SicilNo = "002", AdSoyad = "Ayse Kaya", TcKimlik = "23456789012", Departman = "IK", Gorev = "Uzman", IseGiris = new DateTime(2020, 6, 1), BrutMaas = 38000, Durum = "Aktif" },
+            new() { SicilNo = "003", AdSoyad = "Mehmet Demir", TcKimlik = "34567890123", Departman = "Satis", Gorev = "Temsilci", IseGiris = new DateTime(2021, 9, 15), BrutMaas = 32000, Durum = "Aktif" },
+            new() { SicilNo = "004", AdSoyad = "Fatma Ozturk", TcKimlik = "45678901234", Departman = "Muhasebe", Gorev = "Muhasebeci", IseGiris = new DateTime(2019, 1, 10), BrutMaas = 35000, Durum = "Aktif" },
+            new() { SicilNo = "005", AdSoyad = "Ali Celik", TcKimlik = "56789012345", Departman = "Uretim", Gorev = "Operasyon Sefi", IseGiris = new DateTime(2017, 5, 20), BrutMaas = 42000, Durum = "Aktif" },
+            new() { SicilNo = "006", AdSoyad = "Zeynep Arslan", TcKimlik = "67890123456", Departman = "IK", Gorev = "Asistan", IseGiris = new DateTime(2022, 2, 1), BrutMaas = 25000, Durum = "Izinli" },
+        };
+    }
+
+    private void AddEmployee()
+    {
+        Snackbar.Add("Yeni personel ekleme formu acilacak", Severity.Info);
+    }
+
+    private void EditEmployee(PersonelItem emp)
+    {
+        Snackbar.Add($"{emp.AdSoyad} duzenleniyor", Severity.Info);
+    }
+
+    private void ViewEmployee(PersonelItem emp)
+    {
+        Snackbar.Add($"{emp.AdSoyad} detaylari goruntuleniyor", Severity.Info);
+    }
+
+    public class PersonelItem
+    {
+        public string SicilNo { get; set; } = "";
+        public string AdSoyad { get; set; } = "";
+        public string TcKimlik { get; set; } = "";
+        public string Departman { get; set; } = "";
+        public string Gorev { get; set; } = "";
+        public DateTime IseGiris { get; set; }
+        public decimal BrutMaas { get; set; }
+        public string Durum { get; set; } = "Aktif";
+    }
+}

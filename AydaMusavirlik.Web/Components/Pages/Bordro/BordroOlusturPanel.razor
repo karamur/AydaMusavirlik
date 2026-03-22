@@ -1,0 +1,180 @@
+@inject ISnackbar Snackbar
+
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">Bordro Olustur</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudGrid Class="mb-4">
+            <MudItem xs="12" md="3">
+                <MudSelect T="string" Label="Donem" @bind-Value="_selectedPeriod">
+                    <MudSelectItem Value="@("2024-01")">Ocak 2024</MudSelectItem>
+                    <MudSelectItem Value="@("2024-02")">Subat 2024</MudSelectItem>
+                    <MudSelectItem Value="@("2024-03")">Mart 2024</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" md="3">
+                <MudSelect T="string" Label="Departman" @bind-Value="_selectedDepartment" Clearable="true">
+                    <MudSelectItem Value="@("Tum")">Tum Departmanlar</MudSelectItem>
+                    <MudSelectItem Value="@("Muhasebe")">Muhasebe</MudSelectItem>
+                    <MudSelectItem Value="@("Uretim")">Uretim</MudSelectItem>
+                    <MudSelectItem Value="@("Satis")">Satis</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" md="3">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" 
+                           OnClick="GenerateBordro" FullWidth="true" Class="mt-2"
+                           StartIcon="@Icons.Material.Filled.PlayArrow">
+                    Bordro Olustur
+                </MudButton>
+            </MudItem>
+            <MudItem xs="12" md="3">
+                <MudButton Variant="Variant.Outlined" Color="Color.Success" 
+                           OnClick="ExportExcel" FullWidth="true" Class="mt-2"
+                           StartIcon="@Icons.Material.Filled.FileDownload"
+                           Disabled="@(!_bordroItems.Any())">
+                    Excel Indir
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+
+        @if (_bordroItems.Any())
+        {
+            <MudTable Items="_bordroItems" Hover="true" Striped="true" Dense="true" FixedHeader="true" Height="400px">
+                <HeaderContent>
+                    <MudTh>Sicil</MudTh>
+                    <MudTh>Ad Soyad</MudTh>
+                    <MudTh Style="text-align:right">Brut</MudTh>
+                    <MudTh Style="text-align:right">SGK Isci</MudTh>
+                    <MudTh Style="text-align:right">Issizlik</MudTh>
+                    <MudTh Style="text-align:right">G.Vergisi</MudTh>
+                    <MudTh Style="text-align:right">D.Vergisi</MudTh>
+                    <MudTh Style="text-align:right">AGI</MudTh>
+                    <MudTh Style="text-align:right">Kesinti</MudTh>
+                    <MudTh Style="text-align:right">Net</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>@context.SicilNo</MudTd>
+                    <MudTd>@context.AdSoyad</MudTd>
+                    <MudTd Style="text-align:right">@context.Brut.ToString("N2")</MudTd>
+                    <MudTd Style="text-align:right">@context.SgkIsci.ToString("N2")</MudTd>
+                    <MudTd Style="text-align:right">@context.IssizlikIsci.ToString("N2")</MudTd>
+                    <MudTd Style="text-align:right">@context.GelirVergisi.ToString("N2")</MudTd>
+                    <MudTd Style="text-align:right">@context.DamgaVergisi.ToString("N2")</MudTd>
+                    <MudTd Style="text-align:right">@context.Agi.ToString("N2")</MudTd>
+                    <MudTd Style="text-align:right">@context.Kesinti.ToString("N2")</MudTd>
+                    <MudTd Style="text-align:right"><strong>@context.Net.ToString("N2")</strong></MudTd>
+                </RowTemplate>
+                <FooterContent>
+                    <MudTd colspan="2"><strong>TOPLAM</strong></MudTd>
+                    <MudTd Style="text-align:right"><strong>@_bordroItems.Sum(b => b.Brut).ToString("N2")</strong></MudTd>
+                    <MudTd Style="text-align:right"><strong>@_bordroItems.Sum(b => b.SgkIsci).ToString("N2")</strong></MudTd>
+                    <MudTd Style="text-align:right"><strong>@_bordroItems.Sum(b => b.IssizlikIsci).ToString("N2")</strong></MudTd>
+                    <MudTd Style="text-align:right"><strong>@_bordroItems.Sum(b => b.GelirVergisi).ToString("N2")</strong></MudTd>
+                    <MudTd Style="text-align:right"><strong>@_bordroItems.Sum(b => b.DamgaVergisi).ToString("N2")</strong></MudTd>
+                    <MudTd Style="text-align:right"><strong>@_bordroItems.Sum(b => b.Agi).ToString("N2")</strong></MudTd>
+                    <MudTd Style="text-align:right"><strong>@_bordroItems.Sum(b => b.Kesinti).ToString("N2")</strong></MudTd>
+                    <MudTd Style="text-align:right"><strong>@_bordroItems.Sum(b => b.Net).ToString("N2")</strong></MudTd>
+                </FooterContent>
+            </MudTable>
+
+            <MudDivider Class="my-4" />
+
+            <MudGrid>
+                <MudItem xs="12" md="4">
+                    <MudPaper Class="pa-4" Elevation="2">
+                        <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Toplam Brut</MudText>
+                        <MudText Typo="Typo.h5">@_bordroItems.Sum(b => b.Brut).ToString("N2") TL</MudText>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" md="4">
+                    <MudPaper Class="pa-4" Elevation="2">
+                        <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Toplam Net</MudText>
+                        <MudText Typo="Typo.h5" Color="Color.Success">@_bordroItems.Sum(b => b.Net).ToString("N2") TL</MudText>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" md="4">
+                    <MudPaper Class="pa-4" Elevation="2">
+                        <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Isveren Maliyeti</MudText>
+                        <MudText Typo="Typo.h5" Color="Color.Warning">@(_bordroItems.Sum(b => b.Brut) * 1.225m).ToString("N2") TL</MudText>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Info">
+                Donem secin ve "Bordro Olustur" butonuna tiklayin.
+            </MudAlert>
+        }
+    </MudCardContent>
+</MudCard>
+
+@code {
+    private string _selectedPeriod = "2024-03";
+    private string _selectedDepartment = "Tum";
+    private List<BordroItem> _bordroItems = new();
+
+    private void GenerateBordro()
+    {
+        var employees = new[]
+        {
+            ("001", "Ahmet Yilmaz", 55000m),
+            ("002", "Ayse Kaya", 38000m),
+            ("003", "Mehmet Demir", 32000m),
+            ("004", "Fatma Ozturk", 35000m),
+            ("005", "Ali Celik", 42000m),
+            ("006", "Zeynep Arslan", 25000m),
+        };
+
+        _bordroItems = employees.Select(e => CalculateBordro(e.Item1, e.Item2, e.Item3)).ToList();
+        Snackbar.Add($"{_bordroItems.Count} personel icin bordro olusturuldu", Severity.Success);
+    }
+
+    private BordroItem CalculateBordro(string sicil, string adSoyad, decimal brut)
+    {
+        var sgkIsci = brut * 0.14m;
+        var issizlikIsci = brut * 0.01m;
+        var sgkMatrah = brut - sgkIsci - issizlikIsci;
+        var gelirVergisi = sgkMatrah * 0.15m;
+        var damgaVergisi = brut * 0.00759m;
+        var agi = 1500m;
+        var kesinti = 0m;
+        var net = sgkMatrah - gelirVergisi - damgaVergisi + agi - kesinti;
+
+        return new BordroItem
+        {
+            SicilNo = sicil,
+            AdSoyad = adSoyad,
+            Brut = brut,
+            SgkIsci = sgkIsci,
+            IssizlikIsci = issizlikIsci,
+            GelirVergisi = gelirVergisi,
+            DamgaVergisi = damgaVergisi,
+            Agi = agi,
+            Kesinti = kesinti,
+            Net = net
+        };
+    }
+
+    private void ExportExcel()
+    {
+        Snackbar.Add("Bordro Excel olarak indiriliyor...", Severity.Info);
+    }
+
+    public class BordroItem
+    {
+        public string SicilNo { get; set; } = "";
+        public string AdSoyad { get; set; } = "";
+        public decimal Brut { get; set; }
+        public decimal SgkIsci { get; set; }
+        public decimal IssizlikIsci { get; set; }
+        public decimal GelirVergisi { get; set; }
+        public decimal DamgaVergisi { get; set; }
+        public decimal Agi { get; set; }
+        public decimal Kesinti { get; set; }
+        public decimal Net { get; set; }
+    }
+}

@@ -1,0 +1,156 @@
+@inject ISnackbar Snackbar
+
+<MudGrid>
+    <MudItem xs="12" md="6">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">SGK Bildirgeleri</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudList T="string">
+                    <MudListSubheader>Aylik Bildirge</MudListSubheader>
+                    <MudListItem Icon="@Icons.Material.Filled.Description" OnClick="@(() => GenerateBildirge("APHB"))">
+                        <MudStack Row="true" AlignItems="AlignItems.Center">
+                            <MudText>Aylik Prim ve Hizmet Belgesi (APHB)</MudText>
+                            <MudSpacer />
+                            <MudChip T="string" Size="Size.Small" Color="Color.Info">PDF</MudChip>
+                        </MudStack>
+                    </MudListItem>
+                    <MudListItem Icon="@Icons.Material.Filled.Description" OnClick="@(() => GenerateBildirge("MUHSGK"))">
+                        <MudStack Row="true" AlignItems="AlignItems.Center">
+                            <MudText>Muhtasar ve SGK Beyannamesi</MudText>
+                            <MudSpacer />
+                            <MudChip T="string" Size="Size.Small" Color="Color.Info">PDF</MudChip>
+                        </MudStack>
+                    </MudListItem>
+
+                    <MudDivider Class="my-2" />
+
+                    <MudListSubheader>Ise Giris/Cikis</MudListSubheader>
+                    <MudListItem Icon="@Icons.Material.Filled.PersonAdd" OnClick="@(() => GenerateBildirge("IseGiris"))">
+                        <MudStack Row="true" AlignItems="AlignItems.Center">
+                            <MudText>Ise Giris Bildirgesi</MudText>
+                            <MudSpacer />
+                            <MudChip T="string" Size="Size.Small" Color="Color.Success">XML</MudChip>
+                        </MudStack>
+                    </MudListItem>
+                    <MudListItem Icon="@Icons.Material.Filled.PersonRemove" OnClick="@(() => GenerateBildirge("IseCikis"))">
+                        <MudStack Row="true" AlignItems="AlignItems.Center">
+                            <MudText>Isten Ayrilma Bildirgesi</MudText>
+                            <MudSpacer />
+                            <MudChip T="string" Size="Size.Small" Color="Color.Error">XML</MudChip>
+                        </MudStack>
+                    </MudListItem>
+
+                    <MudDivider Class="my-2" />
+
+                    <MudListSubheader>Diger</MudListSubheader>
+                    <MudListItem Icon="@Icons.Material.Filled.LocalHospital" OnClick="@(() => GenerateBildirge("ViziteBelgesi"))">
+                        <MudStack Row="true" AlignItems="AlignItems.Center">
+                            <MudText>Vizite Kagidi</MudText>
+                            <MudSpacer />
+                            <MudChip T="string" Size="Size.Small" Color="Color.Warning">PDF</MudChip>
+                        </MudStack>
+                    </MudListItem>
+                    <MudListItem Icon="@Icons.Material.Filled.Assignment" OnClick="@(() => GenerateBildirge("EksikGun"))">
+                        <MudStack Row="true" AlignItems="AlignItems.Center">
+                            <MudText>Eksik Gun Bildirgesi</MudText>
+                            <MudSpacer />
+                            <MudChip T="string" Size="Size.Small" Color="Color.Info">PDF</MudChip>
+                        </MudStack>
+                    </MudListItem>
+                </MudList>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" md="6">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Son Olusturulan Belgeler</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTable Items="_recentDocuments" Hover="true" Dense="true">
+                    <HeaderContent>
+                        <MudTh>Belge</MudTh>
+                        <MudTh>Donem</MudTh>
+                        <MudTh>Tarih</MudTh>
+                        <MudTh></MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.BelgeAdi</MudTd>
+                        <MudTd>@context.Donem</MudTd>
+                        <MudTd>@context.Tarih.ToString("dd.MM.yyyy")</MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Filled.Download" Size="Size.Small" 
+                                           OnClick="@(() => DownloadDocument(context))" />
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudCardContent>
+        </MudCard>
+
+        <MudCard Class="mt-4">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Onemli Tarihler</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTimeline TimelinePosition="TimelinePosition.Start">
+                    <MudTimelineItem Color="Color.Success" Size="Size.Small">
+                        <MudText Typo="Typo.body2"><strong>Her Ayin 23'u</strong></MudText>
+                        <MudText Typo="Typo.caption">APHB Son Gonderim</MudText>
+                    </MudTimelineItem>
+                    <MudTimelineItem Color="Color.Warning" Size="Size.Small">
+                        <MudText Typo="Typo.body2"><strong>Her Ayin 26'si</strong></MudText>
+                        <MudText Typo="Typo.caption">Muhtasar Beyanname</MudText>
+                    </MudTimelineItem>
+                    <MudTimelineItem Color="Color.Error" Size="Size.Small">
+                        <MudText Typo="Typo.body2"><strong>Her Ayin Sonu</strong></MudText>
+                        <MudText Typo="Typo.caption">SGK Prim Odemesi</MudText>
+                    </MudTimelineItem>
+                    <MudTimelineItem Color="Color.Info" Size="Size.Small">
+                        <MudText Typo="Typo.body2"><strong>Ise Giriste</strong></MudText>
+                        <MudText Typo="Typo.caption">1 Gun Icinde Bildirge</MudText>
+                    </MudTimelineItem>
+                </MudTimeline>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private List<RecentDocument> _recentDocuments = new();
+
+    protected override void OnInitialized()
+    {
+        _recentDocuments = new List<RecentDocument>
+        {
+            new() { BelgeAdi = "APHB", Donem = "Subat 2024", Tarih = DateTime.Now.AddDays(-5) },
+            new() { BelgeAdi = "Muhtasar", Donem = "Subat 2024", Tarih = DateTime.Now.AddDays(-3) },
+            new() { BelgeAdi = "Ise Giris", Donem = "Mart 2024", Tarih = DateTime.Now.AddDays(-1) },
+        };
+    }
+
+    private void GenerateBildirge(string tip)
+    {
+        Snackbar.Add($"{tip} bildirgesi olusturuluyor...", Severity.Info);
+    }
+
+    private void DownloadDocument(RecentDocument doc)
+    {
+        Snackbar.Add($"{doc.BelgeAdi} indiriliyor...", Severity.Info);
+    }
+
+    public class RecentDocument
+    {
+        public string BelgeAdi { get; set; } = "";
+        public string Donem { get; set; } = "";
+        public DateTime Tarih { get; set; }
+    }
+}
