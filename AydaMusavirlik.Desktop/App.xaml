@@ -5,10 +5,9 @@
              StartupUri="Views/LoginWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
-            <SolidColorBrush x:Key="PrimaryBrush" Color="#1976D2"/>
-            <SolidColorBrush x:Key="SecondaryBrush" Color="#424242"/>
-            <SolidColorBrush x:Key="AccentBrush" Color="#FF4081"/>
-            <SolidColorBrush x:Key="BackgroundBrush" Color="#F5F5F5"/>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/LightTheme.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

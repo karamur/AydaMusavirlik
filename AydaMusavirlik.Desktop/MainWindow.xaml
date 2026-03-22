@@ -8,7 +8,8 @@
         Title="Ayda Müşavirlik - Muhasebe ve Danışmanlık Yönetim Sistemi" 
         Height="700" Width="1200"
         WindowStartupLocation="CenterScreen"
-        WindowState="Maximized">
+        WindowState="Maximized"
+        Background="{DynamicResource BackgroundBrush}">
     
     <Grid>
         <Grid.RowDefinitions>
@@ -19,7 +20,7 @@
         </Grid.RowDefinitions>
 
         <!-- Ana Menü -->
-        <Menu Grid.Row="0" Background="#2D2D30" Foreground="White" FontSize="14">
+        <Menu Grid.Row="0" Background="{DynamicResource PrimaryBrush}" Foreground="White" FontSize="14">
             <Menu.ItemsPanel>
                 <ItemsPanelTemplate>
                     <DockPanel HorizontalAlignment="Stretch"/>
@@ -177,77 +178,91 @@
         </Menu>
 
         <!-- Toolbar -->
-        <ToolBar Grid.Row="1" Background="#3E3E42">
-            <Button Content="📁 Yeni Firma" Click="YeniFirma_Click" Margin="2" Padding="8,4"/>
-            <Button Content="🔍 Firma Seç" Click="FirmaSec_Click" Margin="2" Padding="8,4"/>
+        <ToolBar Grid.Row="1" Background="{DynamicResource SurfaceBrush}">
+            <Button Content="📁 Yeni Firma" Click="YeniFirma_Click" Margin="2" Padding="8,4" 
+                    Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPrimaryBrush}"/>
+            <Button Content="🔍 Firma Seç" Click="FirmaSec_Click" Margin="2" Padding="8,4"
+                    Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPrimaryBrush}"/>
             <Separator/>
-            <Button Content="📝 Fiş Girişi" Click="FisGirisi_Click" Margin="2" Padding="8,4"/>
-            <Button Content="📋 Hesap Planı" Click="HesapPlani_Click" Margin="2" Padding="8,4"/>
-            <Button Content="📊 Mizan" Click="Mizan_Click" Margin="2" Padding="8,4"/>
+            <Button Content="📝 Fiş Girişi" Click="FisGirisi_Click" Margin="2" Padding="8,4"
+                    Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPrimaryBrush}"/>
+            <Button Content="📋 Hesap Planı" Click="HesapPlani_Click" Margin="2" Padding="8,4"
+                    Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPrimaryBrush}"/>
+            <Button Content="📊 Mizan" Click="Mizan_Click" Margin="2" Padding="8,4"
+                    Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPrimaryBrush}"/>
             <Separator/>
-            <Button Content="👥 Personel" Click="PersonelKartlari_Click" Margin="2" Padding="8,4"/>
-            <Button Content="💰 Bordro" Click="BordroHesaplama_Click" Margin="2" Padding="8,4"/>
+            <Button Content="👥 Personel" Click="PersonelKartlari_Click" Margin="2" Padding="8,4"
+                    Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPrimaryBrush}"/>
+            <Button Content="💰 Bordro" Click="BordroHesaplama_Click" Margin="2" Padding="8,4"
+                    Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPrimaryBrush}"/>
             <Separator/>
-            <Button Content="📊 Dashboard" Click="Dashboard_Click" Margin="2" Padding="8,4" Background="#007ACC" Foreground="White"/>
-            <Button Content="📈 Mali Analiz" Click="FinansalAnaliz_Click" Margin="2" Padding="8,4" Background="#4CAF50" Foreground="White"/>
-            <Button Content="📋 Raporlar" Click="Bilanco_Click" Margin="2" Padding="8,4" Background="#FF9800" Foreground="White"/>
+            <Button Content="📊 Dashboard" Click="Dashboard_Click" Margin="2" Padding="8,4" 
+                    Background="{DynamicResource PrimaryBrush}" Foreground="White"/>
+            <Button Content="📈 Mali Analiz" Click="FinansalAnaliz_Click" Margin="2" Padding="8,4" 
+                    Background="{DynamicResource SuccessBrush}" Foreground="White"/>
+            <Button Content="📋 Raporlar" Click="Bilanco_Click" Margin="2" Padding="8,4" 
+                    Background="{DynamicResource WarningBrush}" Foreground="White"/>
             <Separator/>
-            <TextBlock Text="Aktif Firma: " VerticalAlignment="Center" Foreground="White" Margin="10,0,5,0"/>
-            <TextBlock x:Name="txtAktifFirma" Text="Seçili Değil" VerticalAlignment="Center" Foreground="Yellow" FontWeight="Bold"/>
+            <TextBlock Text="Aktif Firma: " VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}" Margin="10,0,5,0"/>
+            <TextBlock x:Name="txtAktifFirma" Text="Seçili Değil" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryBrush}" FontWeight="Bold"/>
         </ToolBar>
 
         <!-- Ana İçerik Alanı -->
-        <Grid Grid.Row="2" Background="#1E1E1E">
-            <TabControl x:Name="tabControl" Background="#2D2D30" BorderThickness="0">
+        <Grid Grid.Row="2" Background="{DynamicResource SurfaceBrush}">
+            <TabControl x:Name="tabControl" Background="{DynamicResource SurfaceBrush}" BorderThickness="0">
                 <TabControl.Resources>
                     <Style TargetType="TabItem">
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="TabItem">
-                                    <Border x:Name="Border" Background="#3E3E42" BorderThickness="1,1,1,0" BorderBrush="#555" Margin="0,0,2,0">
-                                        <StackPanel Orientation="Horizontal" Margin="10,5">
+                                    <Border x:Name="Border" Background="{DynamicResource CardBrush}" 
+                                            BorderThickness="1,1,1,0" BorderBrush="{DynamicResource BorderBrush}" Margin="0,0,2,0"
+                                            CornerRadius="4,4,0,0">
+                                        <StackPanel Orientation="Horizontal" Margin="12,6">
                                             <ContentPresenter ContentSource="Header" Margin="0,0,10,0"/>
                                             <Button Content="✕" FontSize="10" Background="Transparent" BorderThickness="0" 
-                                                    Foreground="Gray" Click="TabClose_Click" Tag="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+                                                    Foreground="{DynamicResource TextSecondaryBrush}" Click="TabClose_Click" 
+                                                    Tag="{Binding RelativeSource={RelativeSource TemplatedParent}}"
                                                     Cursor="Hand"/>
                                         </StackPanel>
                                     </Border>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsSelected" Value="True">
-                                            <Setter TargetName="Border" Property="Background" Value="#007ACC"/>
+                                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource PrimaryBrush}"/>
                                         </Trigger>
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
                             </Setter.Value>
                         </Setter>
-                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
                     </Style>
                 </TabControl.Resources>
             </TabControl>
 
             <!-- Hoş Geldiniz Paneli (Tab yokken görünür) -->
-            <Border x:Name="pnlWelcome" Background="#252526" Visibility="Visible">
+            <Border x:Name="pnlWelcome" Background="{DynamicResource BackgroundBrush}" Visibility="Visible">
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <TextBlock Text="🏢 Ayda Müşavirlik" FontSize="48" Foreground="#007ACC" HorizontalAlignment="Center" Margin="0,0,0,20"/>
-                    <TextBlock Text="Muhasebe ve Danışmanlık Yönetim Sistemi" FontSize="24" Foreground="Gray" HorizontalAlignment="Center" Margin="0,0,0,40"/>
+                    <TextBlock Text="🏢 Ayda Müşavirlik" FontSize="48" Foreground="{DynamicResource PrimaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+                    <TextBlock Text="Muhasebe ve Danışmanlık Yönetim Sistemi" FontSize="24" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,40"/>
                     
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <Button Content="📁 Yeni Firma Oluştur" Width="180" Height="50" Margin="10" 
-                                Background="#007ACC" Foreground="White" FontSize="14"
+                                Background="{DynamicResource PrimaryBrush}" Foreground="White" FontSize="14"
                                 Click="YeniFirma_Click"/>
                         <Button Content="🔍 Firma Seç" Width="180" Height="50" Margin="10"
-                                Background="#3E3E42" Foreground="White" FontSize="14"
+                                Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="14"
+                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                                 Click="FirmaSec_Click"/>
                     </StackPanel>
                     
                     <TextBlock Text="Başlamak için bir firma seçin veya yeni firma oluşturun" 
-                               FontSize="14" Foreground="Gray" HorizontalAlignment="Center" Margin="0,30,0,0"/>
+                               FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,30,0,0"/>
                 </StackPanel>
             </Border>
         </Grid>
 
         <!-- Durum Çubuğu -->
-        <StatusBar Grid.Row="3" Background="#007ACC">
+        <StatusBar Grid.Row="3" Background="{DynamicResource PrimaryBrush}">
             <StatusBarItem>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="👤 " Foreground="White"/>
