@@ -1,0 +1,149 @@
+<UserControl x:Class="AydaMusavirlik.Desktop.Views.Accounting.FisListesiView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="750" d:DesignWidth="1400"
+             Background="#1E1E1E">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Baslik -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,15">
+            <TextBlock Text="Muhasebe Fisleri" FontSize="26" Foreground="White" FontWeight="Bold"/>
+            <TextBlock Text="Mahsup, tahsilat, odeme ve fatura fislerini yonetin" Foreground="Gray" Margin="0,5,0,0"/>
+        </StackPanel>
+
+        <!-- Filtreler ve Butonlar -->
+        <Border Grid.Row="1" Background="#2D2D30" CornerRadius="8" Padding="15" Margin="0,0,0,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="Firma:" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <ComboBox x:Name="cmbFirma" Width="200" DisplayMemberPath="Name" Margin="0,0,15,0"/>
+
+                    <TextBlock Text="Donem:" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <DatePicker x:Name="dpBaslangic" Width="120" Margin="0,0,5,0"/>
+                    <TextBlock Text="-" Foreground="White" VerticalAlignment="Center" Margin="5,0"/>
+                    <DatePicker x:Name="dpBitis" Width="120" Margin="0,0,15,0"/>
+
+                    <TextBlock Text="Fis Turu:" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <ComboBox x:Name="cmbFisTuru" Width="150" Margin="0,0,15,0"/>
+
+                    <TextBlock Text="Durum:" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <ComboBox x:Name="cmbDurum" Width="120" Margin="0,0,15,0"/>
+
+                    <Button x:Name="btnFiltrele" Content="?? Filtrele" Width="100" Click="BtnFiltrele_Click"
+                            Background="#007ACC" Foreground="White"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button x:Name="btnYeniFis" Content="? Yeni Fis" Width="110" Click="BtnYeniFis_Click"
+                            Background="#4CAF50" Foreground="White" Margin="0,0,10,0"/>
+                    <Button x:Name="btnExcel" Content="?? Excel" Width="90" Click="BtnExcel_Click"
+                            Background="#FF9800" Foreground="White"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Fis Listesi -->
+        <DataGrid x:Name="dgFisler" Grid.Row="2" 
+                  AutoGenerateColumns="False" 
+                  CanUserAddRows="False"
+                  IsReadOnly="True"
+                  Background="#252526" 
+                  Foreground="White"
+                  GridLinesVisibility="Horizontal"
+                  BorderThickness="1"
+                  BorderBrush="#3E3E42"
+                  RowBackground="#2D2D30"
+                  AlternatingRowBackground="#252526"
+                  HeadersVisibility="Column"
+                  SelectionMode="Single"
+                  MouseDoubleClick="DgFisler_MouseDoubleClick">
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="#007ACC"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="Padding" Value="10,8"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Fis No" Binding="{Binding DocumentNumber}" Width="120"/>
+                <DataGridTextColumn Header="Tarih" Binding="{Binding DocumentDate, StringFormat=dd.MM.yyyy}" Width="100"/>
+                <DataGridTextColumn Header="Fis Turu" Binding="{Binding RecordTypeText}" Width="130"/>
+                <DataGridTextColumn Header="Aciklama" Binding="{Binding Description}" Width="*"/>
+                <DataGridTextColumn Header="Borc" Binding="{Binding TotalDebit, StringFormat=N2}" Width="120">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="TextAlignment" Value="Right"/>
+                            <Setter Property="Foreground" Value="#4CAF50"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Alacak" Binding="{Binding TotalCredit, StringFormat=N2}" Width="120">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="TextAlignment" Value="Right"/>
+                            <Setter Property="Foreground" Value="#F44336"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Durum" Binding="{Binding StatusText}" Width="100"/>
+                <DataGridTemplateColumn Header="Islemler" Width="120">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button Content="??" Width="30" Height="28" Click="BtnDuzenle_Click" 
+                                        Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                        ToolTip="Duzenle"/>
+                                <Button Content="???" Width="30" Height="28" Click="BtnSil_Click" 
+                                        Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                        ToolTip="Sil" Margin="5,0,0,0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Alt Ozet -->
+        <Border Grid.Row="3" Background="#2D2D30" CornerRadius="8" Padding="15" Margin="0,15,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock x:Name="txtKayitSayisi" Text="Toplam: 0 kayit" Foreground="White" VerticalAlignment="Center" Margin="0,0,30,0"/>
+                    <Border Background="#4CAF50" CornerRadius="4" Padding="10,5">
+                        <TextBlock x:Name="txtToplamBorc" Text="Toplam Borc: 0,00 TL" Foreground="White"/>
+                    </Border>
+                    <Border Background="#F44336" CornerRadius="4" Padding="10,5" Margin="15,0,0,0">
+                        <TextBlock x:Name="txtToplamAlacak" Text="Toplam Alacak: 0,00 TL" Foreground="White"/>
+                    </Border>
+                    <Border Background="#2196F3" CornerRadius="4" Padding="10,5" Margin="15,0,0,0">
+                        <TextBlock x:Name="txtFark" Text="Fark: 0,00 TL" Foreground="White"/>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button x:Name="btnYazdir" Content="??? Yazdir" Width="100" Click="BtnYazdir_Click"
+                            Background="#9C27B0" Foreground="White"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

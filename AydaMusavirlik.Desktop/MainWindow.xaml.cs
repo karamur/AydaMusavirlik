@@ -101,7 +101,7 @@ public partial class MainWindow : Window
 
     private void FisListesi_Click(object sender, RoutedEventArgs e)
     {
-        OpenTab("Fiş Listesi", "📋 Fiş listesi burada görünecek.");
+        OpenTabWithControl("Fiş Listesi", new FisListesiView());
     }
 
     private void Mizan_Click(object sender, RoutedEventArgs e)
