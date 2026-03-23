@@ -8,11 +8,9 @@
 </MudContainer>
 
 @code {
-    protected override void OnAfterRender(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if (firstRender)
-        {
-            Navigation.NavigateTo("/login");
-        }
+        await Task.Delay(100);
+        Navigation.NavigateTo("/login", forceLoad: true);
     }
 }
