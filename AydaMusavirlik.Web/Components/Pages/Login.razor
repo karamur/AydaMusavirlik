@@ -10,15 +10,15 @@
             <CardHeaderContent>
                 <div class="d-flex flex-column align-center mb-4">
                     <MudIcon Icon="@Icons.Material.Filled.AccountBalance" Size="Size.Large" Color="Color.Primary" Class="mb-2" />
-                    <MudText Typo="Typo.h4" Color="Color.Primary">AYDA Müþavirlik</MudText>
-                    <MudText Typo="Typo.subtitle1" Color="Color.Secondary">Profesyonel Mali Müþavirlik Sistemi</MudText>
+                    <MudText Typo="Typo.h4" Color="Color.Primary">AYDA Musavirlik</MudText>
+                    <MudText Typo="Typo.subtitle1" Color="Color.Secondary">Profesyonel Mali Musavirlik Sistemi</MudText>
                 </div>
             </CardHeaderContent>
         </MudCardHeader>
 
         <MudCardContent>
             <MudTextField @bind-Value="Username"
-                          Label="Kullanýcý Adý"
+                          Label="Kullanici Adi"
                           Variant="Variant.Outlined"
                           Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Filled.Person"
@@ -27,7 +27,7 @@
                           Disabled="@IsLoading" />
 
             <MudTextField @bind-Value="Password"
-                          Label="Þifre"
+                          Label="Sifre"
                           Variant="Variant.Outlined"
                           InputType="@PasswordInputType"
                           Adornment="Adornment.End"
@@ -47,7 +47,7 @@
             @if (LoginSuccess)
             {
                 <MudAlert Severity="Severity.Success" Class="mb-4" Dense="true">
-                    Giriþ baþarýlý! Yönlendiriliyorsunuz...
+                    Giris basarili! Yonlendiriliyorsunuz...
                 </MudAlert>
             }
 
@@ -60,12 +60,12 @@
                 @if (IsLoading)
                 {
                     <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
-                    <span>Giriþ yapýlýyor...</span>
+                    <span>Giris yapiliyor...</span>
                 }
                 else
                 {
                     <MudIcon Icon="@Icons.Material.Filled.Login" Class="mr-2" />
-                    <span>Giriþ Yap</span>
+                    <span>Giris Yap</span>
                 }
             </MudButton>
         </MudCardContent>
@@ -74,7 +74,7 @@
             <MudDivider Class="mb-4" />
             
             <MudText Typo="Typo.caption" Color="Color.Secondary" Align="Align.Center" Class="mb-2">
-                <strong>Test Kullanýcýlarý:</strong>
+                <strong>Test Kullanicilari:</strong>
             </MudText>
             
             <MudStack Row="true" Justify="Justify.Center" Spacing="2" Class="mb-3">
@@ -88,15 +88,15 @@
                 </MudButton>
                 <MudButton Variant="Variant.Outlined" Color="Color.Warning" Size="Size.Small"
                            OnClick="@(() => SetCredentials("yonetici", "yonetici123"))">
-                    Yönetici
+                    Yonetici
                 </MudButton>
             </MudStack>
 
             <MudSimpleTable Dense="true" Hover="true" Style="font-size: 0.75rem;">
                 <thead>
                     <tr>
-                        <th>Kullanýcý</th>
-                        <th>Þifre</th>
+                        <th>Kullanici</th>
+                        <th>Sifre</th>
                         <th>Yetki</th>
                     </tr>
                 </thead>
@@ -104,7 +104,7 @@
                     <tr>
                         <td><code>admin</code></td>
                         <td><code>admin</code></td>
-                        <td>Tam Eriþim</td>
+                        <td>Tam Erisim</td>
                     </tr>
                     <tr>
                         <td><code>muhasebe</code></td>
@@ -137,7 +137,7 @@
     {
         if (AuthService.IsAuthenticated)
         {
-            Navigation.NavigateTo("/");
+            Navigation.NavigateTo("/", forceLoad: true);
         }
     }
 
@@ -158,7 +158,7 @@
     {
         if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
         {
-            ErrorMessage = "Kullanýcý adý ve þifre gerekli";
+            ErrorMessage = "Kullanici adi ve sifre gerekli";
             return;
         }
 
@@ -176,18 +176,19 @@
             if (result.Success)
             {
                 LoginSuccess = true;
+                Snackbar.Add($"Hosgeldiniz, {result.User?.FullName ?? Username}!", Severity.Success);
                 StateHasChanged();
                 await Task.Delay(500);
-                Navigation.NavigateTo("/");
+                Navigation.NavigateTo("/", forceLoad: true);
             }
             else
             {
-                ErrorMessage = result.ErrorMessage;
+                ErrorMessage = result.ErrorMessage ?? "Giris basarisiz";
             }
         }
         catch (Exception ex)
         {
-            ErrorMessage = "Giriþ hatasý: " + ex.Message;
+            ErrorMessage = "Giris hatasi: " + ex.Message;
         }
         finally
         {

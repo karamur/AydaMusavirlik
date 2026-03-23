@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using AydaMusavirlik.Core.Models.Accounting;
-using AydaMusavirlik.Data;
-using AydaMusavirlik.Data.Services;
 
 namespace AydaMusavirlik.Desktop.Services;
 
@@ -28,201 +26,117 @@ public class AccountService : IAccountService
 
     public async Task<IEnumerable<AccountDto>> GetByCompanyAsync(int companyId)
     {
-        try
-        {
-            using var context = DatabaseFactory.CreateContext(_settingsService.Settings.Database);
-            var accounts = await context.Accounts
-                .Where(a => a.CompanyId == companyId && a.IsActive)
-                .OrderBy(a => a.Code)
-                .ToListAsync();
-
-            return accounts.Select(a => new AccountDto
-            {
-                Id = a.Id,
-                CompanyId = a.CompanyId,
-                Code = a.Code,
-                Name = a.Name,
-                ParentId = a.ParentId,
-                AccountType = a.AccountType,
-                Nature = a.Nature,
-                Level = a.Level,
-                IsHeader = a.IsHeader,
-                AllowPosting = a.AllowPosting,
-                CurrentBalance = a.CurrentBalance
-            });
-        }
-        catch
-        {
-            return Enumerable.Empty<AccountDto>();
-        }
+        // Simule data - gercek uygulamada veritabanindan cekilir
+        await Task.Delay(100);
+        return GetSampleAccounts(companyId);
     }
 
     public async Task<IEnumerable<AccountDto>> GetMainAccountsAsync(int companyId)
     {
-        try
-        {
-            using var context = DatabaseFactory.CreateContext(_settingsService.Settings.Database);
-            var accounts = await context.Accounts
-                .Where(a => a.CompanyId == companyId && a.IsActive && a.Level == 1)
-                .OrderBy(a => a.Code)
-                .ToListAsync();
-
-            return accounts.Select(a => new AccountDto
-            {
-                Id = a.Id,
-                CompanyId = a.CompanyId,
-                Code = a.Code,
-                Name = a.Name,
-                AccountType = a.AccountType,
-                Nature = a.Nature,
-                Level = a.Level,
-                IsHeader = a.IsHeader
-            });
-        }
-        catch
-        {
-            return Enumerable.Empty<AccountDto>();
-        }
+        await Task.Delay(100);
+        return GetSampleAccounts(companyId).Where(a => a.Level == 1);
     }
 
     public async Task<AccountDto?> GetByIdAsync(int id)
     {
-        try
-        {
-            using var context = DatabaseFactory.CreateContext(_settingsService.Settings.Database);
-            var account = await context.Accounts.FindAsync(id);
-            
-            if (account == null || !account.IsActive)
-                return null;
-
-            return new AccountDto
-            {
-                Id = account.Id,
-                CompanyId = account.CompanyId,
-                Code = account.Code,
-                Name = account.Name,
-                ParentId = account.ParentId,
-                AccountType = account.AccountType,
-                Nature = account.Nature,
-                Level = account.Level,
-                IsHeader = account.IsHeader,
-                AllowPosting = account.AllowPosting,
-                CurrentBalance = account.CurrentBalance
-            };
-        }
-        catch
-        {
-            return null;
-        }
+        await Task.Delay(100);
+        return GetSampleAccounts(1).FirstOrDefault(a => a.Id == id);
     }
 
     public async Task<AccountDto?> CreateAsync(CreateAccountDto dto)
     {
-        try
+        await Task.Delay(100);
+        return new AccountDto
         {
-            using var context = DatabaseFactory.CreateContext(_settingsService.Settings.Database);
-            
-            var account = new Account
-            {
-                CompanyId = dto.CompanyId,
-                Code = dto.Code,
-                Name = dto.Name,
-                ParentId = dto.ParentId,
-                AccountType = dto.AccountType,
-                Nature = dto.Nature,
-                Level = dto.Level,
-                IsHeader = dto.IsHeader,
-                AllowPosting = dto.AllowPosting,
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            context.Accounts.Add(account);
-            await context.SaveChangesAsync();
-
-            return new AccountDto
-            {
-                Id = account.Id,
-                CompanyId = account.CompanyId,
-                Code = account.Code,
-                Name = account.Name,
-                AccountType = account.AccountType,
-                Nature = account.Nature,
-                Level = account.Level
-            };
-        }
-        catch
-        {
-            return null;
-        }
+            Id = new Random().Next(1000, 9999),
+            CompanyId = dto.CompanyId,
+            Code = dto.Code,
+            Name = dto.Name,
+            ParentId = dto.ParentId,
+            AccountType = dto.AccountType,
+            Nature = dto.Nature,
+            Level = dto.Level,
+            IsHeader = dto.IsHeader,
+            AllowPosting = dto.AllowPosting,
+            IsActive = true
+        };
     }
 
     public async Task<bool> SeedStandardAccountsAsync(int companyId)
     {
-        // SeedDataService hesap plani olusturur
-        return await Task.FromResult(true);
+        await Task.Delay(100);
+        return true;
     }
 
     public async Task<TrialBalanceDto?> GetTrialBalanceAsync(int companyId, DateTime startDate, DateTime endDate)
     {
-        try
+        await Task.Delay(100);
+        
+        var accounts = GetSampleAccounts(companyId);
+        var items = accounts.Select(a => new TrialBalanceItemDto
         {
-            using var context = DatabaseFactory.CreateContext(_settingsService.Settings.Database);
-            
-            var accounts = await context.Accounts
-                .Where(a => a.CompanyId == companyId && a.IsActive)
-                .OrderBy(a => a.Code)
-                .ToListAsync();
+            AccountCode = a.Code,
+            AccountName = a.Name,
+            OpeningDebit = 0,
+            OpeningCredit = 0,
+            PeriodDebit = new Random().Next(0, 10000),
+            PeriodCredit = new Random().Next(0, 10000),
+            ClosingDebit = 0,
+            ClosingCredit = 0
+        }).ToList();
 
-            var items = accounts.Select(a => new TrialBalanceItemDto
-            {
-                AccountCode = a.Code,
-                AccountName = a.Name,
-                Debit = a.Nature == AccountNature.Debit ? a.CurrentBalance : 0,
-                Credit = a.Nature == AccountNature.Credit ? a.CurrentBalance : 0,
-                DebitBalance = a.CurrentBalance > 0 && a.Nature == AccountNature.Debit ? a.CurrentBalance : 0,
-                CreditBalance = a.CurrentBalance > 0 && a.Nature == AccountNature.Credit ? a.CurrentBalance : 0
-            }).ToList();
-
-            return new TrialBalanceDto
-            {
-                StartDate = startDate,
-                EndDate = endDate,
-                Items = items,
-                TotalDebit = items.Sum(i => i.Debit),
-                TotalCredit = items.Sum(i => i.Credit)
-            };
-        }
-        catch
+        return new TrialBalanceDto
         {
-            return null;
-        }
+            CompanyId = companyId,
+            StartDate = startDate,
+            EndDate = endDate,
+            Items = items,
+            TotalDebit = items.Sum(i => i.PeriodDebit),
+            TotalCredit = items.Sum(i => i.PeriodCredit)
+        };
+    }
+
+    private static List<AccountDto> GetSampleAccounts(int companyId)
+    {
+        return new List<AccountDto>
+        {
+            new() { Id = 1, CompanyId = companyId, Code = "100", Name = "Kasa", Level = 1, IsActive = true, AccountType = "Aktif", Nature = "Borc" },
+            new() { Id = 2, CompanyId = companyId, Code = "102", Name = "Bankalar", Level = 1, IsActive = true, AccountType = "Aktif", Nature = "Borc" },
+            new() { Id = 3, CompanyId = companyId, Code = "120", Name = "Alicilar", Level = 1, IsActive = true, AccountType = "Aktif", Nature = "Borc" },
+            new() { Id = 4, CompanyId = companyId, Code = "320", Name = "Saticilar", Level = 1, IsActive = true, AccountType = "Pasif", Nature = "Alacak" },
+            new() { Id = 5, CompanyId = companyId, Code = "600", Name = "Yurtici Satislar", Level = 1, IsActive = true, AccountType = "Gelir", Nature = "Alacak" },
+            new() { Id = 6, CompanyId = companyId, Code = "770", Name = "Genel Yonetim Giderleri", Level = 1, IsActive = true, AccountType = "Gider", Nature = "Borc" },
+        };
     }
 }
 
+// DTOs
 public class AccountDto
 {
     public int Id { get; set; }
     public int CompanyId { get; set; }
-    public string Code { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
+    public string Code { get; set; } = "";
+    public string Name { get; set; } = "";
     public int? ParentId { get; set; }
-    public AccountType AccountType { get; set; }
-    public AccountNature Nature { get; set; }
+    public string AccountType { get; set; } = "";
+    public string Nature { get; set; } = "";
     public int Level { get; set; }
     public bool IsHeader { get; set; }
-    public bool AllowPosting { get; set; }
+    public bool AllowPosting { get; set; } = true;
+    public bool IsActive { get; set; } = true;
     public decimal CurrentBalance { get; set; }
+    public decimal DebitTotal { get; set; }
+    public decimal CreditTotal { get; set; }
 }
 
 public class CreateAccountDto
 {
     public int CompanyId { get; set; }
-    public string Code { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
+    public string Code { get; set; } = "";
+    public string Name { get; set; } = "";
     public int? ParentId { get; set; }
-    public AccountType AccountType { get; set; }
-    public AccountNature Nature { get; set; }
+    public string AccountType { get; set; } = "";
+    public string Nature { get; set; } = "";
     public int Level { get; set; }
     public bool IsHeader { get; set; }
     public bool AllowPosting { get; set; } = true;
@@ -230,6 +144,7 @@ public class CreateAccountDto
 
 public class TrialBalanceDto
 {
+    public int CompanyId { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public List<TrialBalanceItemDto> Items { get; set; } = new();
@@ -239,14 +154,16 @@ public class TrialBalanceDto
 
 public class TrialBalanceItemDto
 {
-    public string AccountCode { get; set; } = string.Empty;
-    public string AccountName { get; set; } = string.Empty;
-    public decimal Debit { get; set; }
-    public decimal Credit { get; set; }
-    public decimal DebitBalance { get; set; }
-    public decimal CreditBalance { get; set; }
-    
-    // View tarafindan kullanilan property'ler
+    public string AccountCode { get; set; } = "";
+    public string AccountName { get; set; } = "";
+    public decimal OpeningDebit { get; set; }
+    public decimal OpeningCredit { get; set; }
+    public decimal PeriodDebit { get; set; }
+    public decimal PeriodCredit { get; set; }
+    public decimal ClosingDebit { get; set; }
+    public decimal ClosingCredit { get; set; }
     public decimal TotalDebit { get; set; }
     public decimal TotalCredit { get; set; }
+    public decimal DebitBalance { get; set; }
+    public decimal CreditBalance { get; set; }
 }

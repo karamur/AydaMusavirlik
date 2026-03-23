@@ -41,6 +41,7 @@ public partial class App : System.Windows.Application
 
         // Services
         services.AddSingleton<IAuthService, AuthService>();
+        services.AddSingleton<ISettingsService, SettingsService>();
         services.AddTransient<ICompanyService, CompanyService>();
         services.AddTransient<IEmployeeService, EmployeeService>();
     }

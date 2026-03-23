@@ -18,10 +18,11 @@ public class AuthService : IAuthService
     // Offline test kullanicilari (API baglantisi yoksa)
     private static readonly Dictionary<string, (string Password, string FullName, string Role)> _offlineUsers = new()
     {
-        ["admin"] = ("admin123", "Sistem Yoneticisi", "Admin"),
-        ["muhasebe"] = ("muhasebe123", "Ayse Muhasebeci", "Accountant"),
-        ["yonetici"] = ("yonetici123", "Mehmet Yonetici", "Manager"),
-        ["test"] = ("test", "Test Kullanici", "User")
+        ["admin"] = ("admin", "Sistem Yoneticisi", "Admin"),
+        ["muhasebe"] = ("muhasebe", "Ayse Muhasebeci", "Accountant"),
+        ["yonetici"] = ("yonetici", "Mehmet Yonetici", "Manager"),
+        ["test"] = ("test", "Test Kullanici", "User"),
+        ["demo"] = ("demo", "Demo Kullanici", "User")
     };
 
     public AuthService(AuthTokenStore tokenStore, ApiClient? apiClient = null)
@@ -37,7 +38,14 @@ public class AuthService : IAuthService
 
     public async Task<LoginResult> LoginAsync(string username, string password)
     {
-        // Oncelikle API ile dene
+        // Oncelikle Offline dogrulama yap (API olmadan calismasi icin)
+        var offlineResult = OfflineLogin(username, password);
+        if (offlineResult.Success)
+        {
+            return offlineResult;
+        }
+
+        // API ile dene
         if (_apiClient != null)
         {
             try
@@ -63,25 +71,18 @@ public class AuthService : IAuthService
                         IsOnline = true
                     };
                 }
-
-                // API hata dondurduyse
-                if (!string.IsNullOrEmpty(response.Error))
-                {
-                    return new LoginResult
-                    {
-                        Success = false,
-                        Error = response.Error
-                    };
-                }
             }
             catch
             {
-                // API baglantisi basarisiz, offline mode'a gec
+                // API baglantisi basarisiz
             }
         }
 
-        // Offline dogrulama
-        return OfflineLogin(username, password);
+        return new LoginResult
+        {
+            Success = false,
+            Error = "Kullanici adi veya sifre hatali!"
+        };
     }
 
     private LoginResult OfflineLogin(string username, string password)

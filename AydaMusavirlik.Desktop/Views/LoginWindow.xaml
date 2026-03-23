@@ -63,10 +63,11 @@
 
                 <Border Background="#E3F2FD" Margin="0,20,0,0" Padding="10" CornerRadius="4">
                     <StackPanel>
-                        <TextBlock Text="Test Kullanicilari:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                        <TextBlock Text="admin / admin" FontSize="11"/>
-                        <TextBlock Text="muhasebe / muhasebe123" FontSize="11"/>
-                        <TextBlock Text="yonetici / yonetici123" FontSize="11"/>
+                        <TextBlock Text="Test Kullanicilari:" FontWeight="SemiBold" Foreground="#212121" Margin="0,0,0,5"/>
+                        <TextBlock Text="admin / admin" FontSize="11" Foreground="#424242"/>
+                        <TextBlock Text="muhasebe / muhasebe" FontSize="11" Foreground="#424242"/>
+                        <TextBlock Text="yonetici / yonetici" FontSize="11" Foreground="#424242"/>
+                        <TextBlock Text="test / test" FontSize="11" Foreground="#424242"/>
                     </StackPanel>
                 </Border>
 

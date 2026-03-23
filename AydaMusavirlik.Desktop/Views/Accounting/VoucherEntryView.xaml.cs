@@ -46,21 +46,21 @@ public partial class VoucherEntryView : UserControl
     {
         try
         {
-            var type = GetSelectedRecordType();
+            var type = GetSelectedRecordTypeString();
             var number = await _recordService.GenerateDocumentNumberAsync(_currentCompanyId, type);
             txtVoucherNo.Text = number;
         }
         catch { }
     }
 
-    private RecordType GetSelectedRecordType()
+    private string GetSelectedRecordTypeString()
     {
         var selectedIndex = cmbVoucherType.SelectedIndex;
         return selectedIndex switch
         {
-            1 => RecordType.TahsilatFisi,
-            2 => RecordType.OdemeFisi,
-            _ => RecordType.MahsupFisi
+            1 => "Tahsil",
+            2 => "Tediye",
+            _ => "Mahsup"
         };
     }
 
@@ -166,7 +166,7 @@ public partial class VoucherEntryView : UserControl
             {
                 CompanyId = _currentCompanyId,
                 Date = dpDate.SelectedDate ?? DateTime.Today,
-                RecordType = GetSelectedRecordType(),
+                RecordType = GetSelectedRecordTypeString(),
                 Description = txtDescription.Text,
                 Entries = validEntries.Select(e => new CreateAccountingEntryDto
                 {
