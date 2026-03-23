@@ -137,7 +137,7 @@
     {
         if (AuthService.IsAuthenticated)
         {
-            Navigation.NavigateTo("/", forceLoad: true);
+            Navigation.NavigateTo("/dashboard", forceLoad: true);
         }
     }
 
@@ -169,8 +169,6 @@
 
         try
         {
-            await Task.Delay(300);
-            
             var result = await AuthService.LoginAsync(Username, Password);
 
             if (result.Success)
@@ -178,8 +176,8 @@
                 LoginSuccess = true;
                 Snackbar.Add($"Hosgeldiniz, {result.User?.FullName ?? Username}!", Severity.Success);
                 StateHasChanged();
-                await Task.Delay(500);
-                Navigation.NavigateTo("/", forceLoad: true);
+                await Task.Delay(300);
+                Navigation.NavigateTo("/dashboard", forceLoad: true);
             }
             else
             {
