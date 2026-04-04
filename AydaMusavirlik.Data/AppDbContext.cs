@@ -35,6 +35,7 @@ public class AppDbContext : DbContext
     public DbSet<KanuniKesinti> KanuniKesintiler => Set<KanuniKesinti>();
     public DbSet<Puantaj> Puantajlar => Set<Puantaj>();
     public DbSet<TahakkukDetay> TahakkukDetaylari => Set<TahakkukDetay>();
+    public DbSet<PayrollParameter> PayrollParameters => Set<PayrollParameter>();
 
     // ArGe
     public DbSet<ArGeProject> ArGeProjects => Set<ArGeProject>();

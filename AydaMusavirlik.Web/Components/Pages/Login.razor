@@ -79,15 +79,15 @@
             
             <MudStack Row="true" Justify="Justify.Center" Spacing="2" Class="mb-3">
                 <MudButton Variant="Variant.Outlined" Color="Color.Error" Size="Size.Small"
-                           OnClick="@(() => SetCredentials("admin", "admin"))">
+                           OnClick="() => SetCredentialsAdmin()">
                     Admin
                 </MudButton>
                 <MudButton Variant="Variant.Outlined" Color="Color.Info" Size="Size.Small"
-                           OnClick="@(() => SetCredentials("muhasebe", "muhasebe123"))">
+                           OnClick="() => SetCredentialsMuhasebe()">
                     Muhasebeci
                 </MudButton>
                 <MudButton Variant="Variant.Outlined" Color="Color.Warning" Size="Size.Small"
-                           OnClick="@(() => SetCredentials("yonetici", "yonetici123"))">
+                           OnClick="() => SetCredentialsYonetici()">
                     Yonetici
                 </MudButton>
             </MudStack>
@@ -128,7 +128,7 @@
     private string? ErrorMessage { get; set; }
     private bool IsLoading { get; set; }
     private bool LoginSuccess { get; set; }
-    
+
     private bool PasswordVisible { get; set; }
     private InputType PasswordInputType => PasswordVisible ? InputType.Text : InputType.Password;
     private string PasswordIcon => PasswordVisible ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff;
@@ -137,7 +137,7 @@
     {
         if (AuthService.IsAuthenticated)
         {
-            Navigation.NavigateTo("/dashboard", forceLoad: true);
+            Navigation.NavigateTo("/dashboard");
         }
     }
 
@@ -146,12 +146,25 @@
         PasswordVisible = !PasswordVisible;
     }
 
-    private void SetCredentials(string username, string password)
+    private void SetCredentialsAdmin()
     {
-        Username = username;
-        Password = password;
+        Username = "admin";
+        Password = "admin";
         ErrorMessage = null;
-        StateHasChanged();
+    }
+
+    private void SetCredentialsMuhasebe()
+    {
+        Username = "muhasebe";
+        Password = "muhasebe123";
+        ErrorMessage = null;
+    }
+
+    private void SetCredentialsYonetici()
+    {
+        Username = "yonetici";
+        Password = "yonetici123";
+        ErrorMessage = null;
     }
 
     private async Task HandleLogin()
@@ -177,7 +190,7 @@
                 Snackbar.Add($"Hosgeldiniz, {result.User?.FullName ?? Username}!", Severity.Success);
                 StateHasChanged();
                 await Task.Delay(300);
-                Navigation.NavigateTo("/dashboard", forceLoad: true);
+                Navigation.NavigateTo("/dashboard");
             }
             else
             {
