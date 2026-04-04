@@ -133,8 +133,10 @@
     private InputType PasswordInputType => PasswordVisible ? InputType.Text : InputType.Password;
     private string PasswordIcon => PasswordVisible ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        await AuthService.InitializeAsync();
+
         if (AuthService.IsAuthenticated)
         {
             Navigation.NavigateTo("/dashboard");

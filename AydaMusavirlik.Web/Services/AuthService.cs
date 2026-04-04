@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using AydaMusavirlik.Models.Common;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 namespace AydaMusavirlik.Services;
 
@@ -9,20 +10,54 @@ namespace AydaMusavirlik.Services;
 /// </summary>
 public class AuthService
 {
+    private const string SessionKey = "auth.username";
+
     private readonly ILogger<AuthService> _logger;
     private readonly UserService _userService;
+    private readonly ProtectedSessionStorage _protectedSessionStorage;
 
     private User? _currentUser;
+    private bool _isInitialized;
 
-    public AuthService(ILogger<AuthService> logger, UserService userService)
+    public AuthService(
+        ILogger<AuthService> logger,
+        UserService userService,
+        ProtectedSessionStorage protectedSessionStorage)
     {
         _logger = logger;
         _userService = userService;
+        _protectedSessionStorage = protectedSessionStorage;
     }
 
     public User? CurrentUser => _currentUser;
     public bool IsAuthenticated => _currentUser != null;
     public bool IsAdmin => _currentUser?.Role == UserRole.Admin;
+
+    public async Task InitializeAsync()
+    {
+        if (_isInitialized)
+        {
+            return;
+        }
+
+        try
+        {
+            var result = await _protectedSessionStorage.GetAsync<string>(SessionKey);
+
+            if (result.Success && !string.IsNullOrWhiteSpace(result.Value))
+            {
+                _currentUser = await _userService.GetByUsernameAsync(result.Value);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Oturum bilgisi yuklenemedi");
+        }
+        finally
+        {
+            _isInitialized = true;
+        }
+    }
 
     public async Task<LoginResult> LoginAsync(string username, string password)
     {
@@ -60,6 +95,8 @@ public class AuthService
             await _userService.UpdateAsync(user);
 
             _currentUser = user;
+            await _protectedSessionStorage.SetAsync(SessionKey, user.Username);
+            _isInitialized = true;
 
             _logger.LogInformation("Giriþ baþarýlý: {Username}", username);
 
@@ -77,14 +114,16 @@ public class AuthService
         }
     }
 
-    public Task LogoutAsync()
+    public async Task LogoutAsync()
     {
         if (_currentUser != null)
         {
             _logger.LogInformation("Çýkýþ yapýldý: {Username}", _currentUser.Username);
             _currentUser = null;
         }
-        return Task.CompletedTask;
+
+        await _protectedSessionStorage.DeleteAsync(SessionKey);
+        _isInitialized = true;
     }
 
     public static string HashPassword(string password)

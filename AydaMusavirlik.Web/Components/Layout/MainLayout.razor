@@ -7,7 +7,16 @@
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-@if (!AuthService.IsAuthenticated)
+@if (!_isReady)
+{
+    <MudContainer Class="d-flex align-center justify-center" Style="height: 100vh;">
+        <MudStack AlignItems="AlignItems.Center" Spacing="4">
+            <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" />
+            <MudText>Oturum yukleniyor...</MudText>
+        </MudStack>
+    </MudContainer>
+}
+else if (!AuthService.IsAuthenticated)
 {
     <RedirectToLogin />
 }
@@ -120,6 +129,7 @@ else
 }
 
 @code {
+    private bool _isReady;
     private bool _drawerOpen = true;
 
     private readonly MudTheme _theme = new()
@@ -132,9 +142,15 @@ else
         }
     };
 
-    private void HandleLogout()
+    protected override async Task OnInitializedAsync()
     {
-        AuthService.LogoutAsync();
+        await AuthService.InitializeAsync();
+        _isReady = true;
+    }
+
+    private async Task HandleLogout()
+    {
+        await AuthService.LogoutAsync();
         Navigation.NavigateTo("/login");
     }
 
